@@ -1,0 +1,12 @@
+"""States for the session select screen"""
+STATE_INITIAL = 'initial'
+STATE_SHOW_CREATE_SESSION_DIALOG = 'create_session_dialog'
+STATE_SHOW_EDIT_SESSION_FORM = 'show_edit_session_form'
+STATE_SHOW_SESSIONS_LIST = 'show_sessions_list'
+STATE_SAVE_SESSION = 'save_session'
+STATE_DELETE_SESSION = 'delete_session'
+STATE_TEST_CONNECTION = 'test_connection'
+STATE_CONNECT = 'connect'
+STATE_CANCEL_EDIT_SESSION = 'cancel_edit_session'
+STATE_SHOW_CONNECT_ERROR = 'connection_error'
+STATE_QUIT = 'quit'

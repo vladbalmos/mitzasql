@@ -1,0 +1,16 @@
+# Test the localhost connection
+sleep:0.5
+key:n
+key_sequence:localhost
+key:tab
+key_sequence:tcp://localhost
+key:tab
+key_sequence:3306
+key:tab
+key_sequence:user
+key:tab
+key_sequence:password
+key:f2
+sleep:1
+key:esc
+key:q

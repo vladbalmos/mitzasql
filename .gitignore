@@ -1,0 +1,6 @@
+mitzasql.egg-info
+__pycache__
+.tox
+tests/db_fixtures
+.coverage
+htmlcov

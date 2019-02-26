@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+import sys
+import argparse
+import time
+
+from mitzasql.app import App
+from mitzasql.sessions_registry import SessionsRegistry
+
+def print_saved_sessions(sessions_file=None):
+    """Show the sessions in the registry file """
+    sessions = SessionsRegistry.get_instance(sessions_file).sessions
+    print('\n'.join(sessions))
+
+def connect_to(session_name, sessions_file=None):
+    """Connect to the session specified by `session_name` and jump directly to
+    the server screen
+    """
+    if not SessionsRegistry.get_instance(sessions_file).has_session(session_name):
+        print('Unknown session "{0}"'.format(session_name), file=sys.stderr)
+        sys.exit(1)
+
+    App.run(session_name=session_name)
+
+def create_new_session(args, error_callback):
+    """Create a new unnamed connection and jump directly to the server screen """
+    if not args.host.startswith('tcp://') and not args.host.startswith('unix://'):
+        error_callback(u'--host must start with "tcp://" or "unix://"')
+        sys.exit(1)
+
+    if len(args.host.split('://').pop()) is 0:
+        error_callback(u'--host must not be empty')
+        sys.exit(1)
+
+    if args.user is None:
+        error_callback(u'--user is required')
+        sys.exit(1)
+
+    connection_settings = {
+            'host': args.host,
+            'port': args.port,
+            'user': args.user,
+            'password': args.password or '',
+            'database': args.database or ''
+            }
+    session_name = 'session_at_{0}'.format(str(time.time()).split('.')[0])
+    SessionsRegistry.get_instance().create_session(session_name, connection_settings)
+    App.run(session=session_name)
+
+if __name__  == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--session', help='Open a previously saved session')
+    parser.add_argument('--list', help='Show saved sessions',
+            action='store_true')
+    parser.add_argument('--host', help='MySQL hostname. Example: tcp://localhost, unix://path/to/unix_socket')
+    parser.add_argument('--port', help='MySQL port (only for tcp:// hosts). Defaults to 3306',
+            default=3306)
+    parser.add_argument('--user', help='MySQL username')
+    parser.add_argument('--password', help='MySQL password')
+    parser.add_argument('--database', help='MySQL database to select')
+    parser.add_argument('--macro', metavar='/path/to/macrofile', help='Path to \
+            a macro file which contains commands to simulate user input. Used \
+            for testing')
+    parser.add_argument('--sessions_file', metavar='/path/to/sessions.ini', help='Path to \
+            the sessions list registry file')
+
+    args = parser.parse_args()
+    if args.list:
+        print_saved_sessions(args.sessions_file)
+    elif args.session is not None:
+        connect_to(args.session, sessions_file=args.sessions_file)
+    elif args.host is not None:
+        create_new_session(args, parser.error)
+    else:
+        kwargs = {}
+        if args.macro is not None:
+            kwargs['macro'] = args.macro
+        if args.sessions_file is not None:
+            kwargs['sessions_file'] = args.sessions_file
+        App.run(**kwargs)
+
+

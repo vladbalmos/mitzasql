@@ -1,0 +1,4 @@
+# Connect to localhost from the saved sessions screen
+# Make sure the localhost connection is the first one in the list
+sleep:0.5
+key:C

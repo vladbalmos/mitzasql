@@ -1,0 +1,10 @@
+# this is a comment
+sleep:0.5
+key:e
+sleep:0.5
+key:home
+key:delete:32
+key_sequence:localhost
+key:f2
+sleep:1
+key:f1

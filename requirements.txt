@@ -1,0 +1,2 @@
+# Editable Git install with no remote (mitzasql==0.1.dev0)
+-e .

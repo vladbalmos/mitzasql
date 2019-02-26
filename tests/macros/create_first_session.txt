@@ -1,0 +1,15 @@
+# Create the first session
+sleep:2
+key:y
+key_sequence:localhost
+key:tab
+key_sequence:tcp://localhost
+key:tab
+key_sequence:3306
+key:tab
+key_sequence:root
+key:tab
+key_sequence:password
+key:f1
+sleep:1
+key:q
