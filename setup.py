@@ -25,7 +25,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
         name='mitzasql',
-        version='0.1dev',
+        version='0.9',
         author='Vlad Balmos',
         author_email='vladbalmos@yahoo.com',
         description='Ncurses MySQL client',
