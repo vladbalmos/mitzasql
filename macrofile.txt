@@ -1,9 +1,18 @@
-# this is a comment
+# This is a sample macro file
+# Lines starting with # are treated as comments and are not executed
+
+# Sleep for 0.5 seconds
 sleep:0.5
+
+# Send the 'e' key
 key:e
 sleep:0.5
 key:home
+
+# Send the 'delete' key, 32 times
 key:delete:32
+
+# Type 'localhost' into the focused input
 key_sequence:localhost
 key:f2
 sleep:1
