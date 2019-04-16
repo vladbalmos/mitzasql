@@ -1,13 +1,13 @@
 # About
-MitzaSQL is a Python3 TUI MySQL client which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features implemented are:
+MitzaSQL is a Python3 TUI MySQL client which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
 
 * Manage multiple sessions
 * View databases
 * View list of tables, sql views & stored procedures in a database
 * View rows in a table or sql view:
-    * Easy sorting of data
-    * Resize columns
-* SQL Query editor & view
+* Easily sort table data
+* Filter table data using VIM like commands (`:like`, `:gt`, `:lt`, `:in`...)
+* SQL Query editor
 * VIM style keyboard shortcuts (see the Help section in the program)
 * VIM style commands with autocomplete support
 * Macros support
