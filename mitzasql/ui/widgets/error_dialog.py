@@ -34,7 +34,7 @@ class ErrorDialog(Dialog):
         super().__init__(message, title=title)
 
     def keypress(self, size, key):
-        if key == 'enter':
+        if key == 'enter' or key == 'esc':
             urwid.emit_signal(self, self.SIGNAL_OK, self, 'Ok')
             return
 
