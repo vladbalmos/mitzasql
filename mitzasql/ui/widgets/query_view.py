@@ -23,7 +23,7 @@ import urwid
 from mitzasql.ui.widgets.base_db_view import BaseDBView
 from mitzasql.ui.widgets.table import Table
 
-from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, SearchCmdProcessor)
+from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, SearchCmdProcessor, CommandError)
 
 class CommandProcessor(BaseCmdProcessor):
     def __init__(self, query_view):
@@ -72,7 +72,8 @@ class QueryView(BaseDBView):
         try:
             value = int(value)
             col_index = self._model.col_index(column.lower())
+        except IndexError as e:
+            raise CommandError(u'Column not found!')
         except ValueError as e:
-            # TODO: show column not found, or invalid col size
-            return
+            raise CommandError(u'Invalid column width!')
         self._table.resize_col(col_index, value)

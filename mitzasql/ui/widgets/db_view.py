@@ -30,8 +30,7 @@ class CommandProcessor(BaseCmdProcessor, SearchCmdProcessor):
         BaseCmdProcessor.__init__(self)
         SearchCmdProcessor.__init__(self, self._dbview.search_db)
         self._cmd_strings = {
-                '/': self.search,
-                ':': self.colon_handler
+                '/': self.search
                 }
         self._cmd_keys = {
                 'n': self.search_next,

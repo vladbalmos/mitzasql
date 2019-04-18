@@ -23,7 +23,8 @@ import urwid
 from mitzasql.ui.widgets.base_db_view import BaseDBView
 from mitzasql.ui.widgets.table import Table
 
-from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, SearchCmdProcessor)
+from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, SearchCmdProcessor,
+        CommandError)
 
 class CommandProcessor(BaseCmdProcessor, SearchCmdProcessor):
     def __init__(self, db_tables_view):
@@ -52,7 +53,10 @@ class CommandProcessor(BaseCmdProcessor, SearchCmdProcessor):
             value = 1
         else:
             column, value = args
-        self._db_tables_view.resize_tbl_col(column, value)
+        try:
+            self._db_tables_view.resize_tbl_col(column, value)
+        except CommandError as e:
+            self._emit_error(str(e))
 
 class DBTablesView(BaseDBView):
     SIGNAL_ACTION_SELECT_TABLE = 'select_table'
@@ -88,8 +92,9 @@ class DBTablesView(BaseDBView):
             value = int(value)
             col_index = self._model.col_index(column)
         except IndexError as e:
-            # TODO: show column not found, or invalid col size
-            return
+            raise CommandError(u'Column does not exist!')
+        except ValueError as e:
+            raise CommandError(u'Invalid column width!')
         self._table.resize_col(col_index, value)
 
     def select_table(self, emitter, row):

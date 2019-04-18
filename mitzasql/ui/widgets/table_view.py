@@ -23,7 +23,7 @@ import urwid
 from mitzasql.ui.widgets.base_db_view import BaseDBView
 from mitzasql.ui.widgets.mysql_table import MysqlTable
 
-from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor)
+from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, CommandError)
 
 class CommandProcessor(BaseCmdProcessor):
     def __init__(self, table_view):
@@ -100,18 +100,18 @@ class TableView(BaseDBView):
         try:
             value = int(value)
             col_index = self._model.col_index(column.lower())
+        except IndexError as e:
+            raise CommandError(u'Column not found!')
         except ValueError as e:
-            # TODO: show column not found, or invalid col size
-            return
+            raise CommandError(u'Invalid column width!')
         self._table.resize_col(col_index, value)
 
     def sort(self, column, direction):
         if column not in [c['name'] for c in self._model.columns]:
-            # TODO: show column not found
-            return
+            raise CommandError(u'Column not found!')
 
         if direction.lower() != 'asc' and direction.lower() != 'desc':
-            # TODO: show invalid sort dir
-            return
+            raise CommandError(u'Invalid sort direction!')
+
         self._model.sort(column, direction)
 

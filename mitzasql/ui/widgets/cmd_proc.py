@@ -22,6 +22,9 @@ import urwid
 
 from mitzasql.history import History
 
+class CommandError(Exception):
+    pass
+
 class Autocomplete:
     def __init__(self, suggestions, word):
         self._suggestions = suggestions
@@ -73,6 +76,7 @@ class Autocomplete:
         return match
 
 class BaseCmdProcessor:
+    SIGNAL_ERROR = 'error'
     '''Support basic VIM style commands'''
     def __init__(self):
         self.history = History()
@@ -83,6 +87,7 @@ class BaseCmdProcessor:
                 ]
         self._cmd_keys = {}
         self._autocomplete = None
+        urwid.register_signal(self.__class__, self.SIGNAL_ERROR)
 
     def is_string_comand(self, key):
         return key in self._cmd_strings
@@ -102,6 +107,8 @@ class BaseCmdProcessor:
             handler = colon_cmd[-1]
             return handler(*args)
 
+        self._emit_error(u'Command not found!')
+
     def execute(self, cmd_key=None, str_cmd_marker=None, cmd=None):
         if cmd_key in self._cmd_keys:
             handler = self._cmd_keys[cmd_key]
@@ -109,13 +116,16 @@ class BaseCmdProcessor:
 
         if str_cmd_marker in self._cmd_strings:
             handler = self._cmd_strings[str_cmd_marker]
-            handler(cmd)
+            return handler(cmd)
 
     def _quit(self):
         raise urwid.ExitMainLoop()
 
     def reset_autocomplete(self):
         self._autocomplete = None
+
+    def _emit_error(self, error):
+        urwid.emit_signal(self, self.SIGNAL_ERROR, self, error)
 
     def autocomplete(self, word, command=False, argument=False,
             command_name=None, direction='forward'):
@@ -150,7 +160,8 @@ class SearchCmdProcessor:
         self._last_search_result = self._search_callback(keyword)
         if self._last_search_result is not None:
             self._max_search_pos = self._last_search_result[0]
-        # TODO: show "not found" message
+            return
+        self._emit_error(u'Nothing found')
 
     def search_next(self):
         if self._last_keyword is None:
