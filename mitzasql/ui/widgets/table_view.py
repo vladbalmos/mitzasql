@@ -47,7 +47,11 @@ class CommandProcessor(BaseCmdProcessor):
             value = 1
         else:
             column, value = args
-        self._table_view.resize_tbl_col(column, value)
+        try:
+            self._table_view.resize_tbl_col(column, value)
+        except CommandError as e:
+            self._emit_error(str(e))
+
 
     def _sort_table(self, *args):
         if not len(args):
@@ -58,7 +62,10 @@ class CommandProcessor(BaseCmdProcessor):
             direction = 'asc'
         else:
             column, direction = args
-        self._table_view.sort(column, direction)
+        try:
+            self._table_view.sort(column, direction)
+        except CommandError as e:
+            self._emit_error(str(e))
 
 class TableView(BaseDBView):
     def __init__(self, model, connection):
