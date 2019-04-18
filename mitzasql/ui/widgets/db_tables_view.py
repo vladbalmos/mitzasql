@@ -98,8 +98,7 @@ class DBTablesView(BaseDBView):
         self._table.resize_col(col_index, value)
 
     def select_table(self, emitter, row):
-        table = row[0]
-        urwid.emit_signal(self, self.SIGNAL_ACTION_SELECT_TABLE, self, table)
+        urwid.emit_signal(self, self.SIGNAL_ACTION_SELECT_TABLE, self, row)
 
     def search_tables(self, table, pos=0, reverse=False):
         result = self._model.search(table, col_index=0, pos=pos, reverse=reverse)

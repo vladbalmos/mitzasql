@@ -214,6 +214,18 @@ class Session(Screen):
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
+        if hasattr(self.focused_widget, 'select_handler_bound'):
+            return
+
+        non_table_types = ('PROCEDURE', 'TRIGGER', 'FUNCTION')
+        def on_select(emitter, row):
+            object_type = row[-1]
+            if object_type not in non_table_types:
+                self._state_machine.change_state('select', emitter, row[0])
+
+        urwid.connect_signal(self.focused_widget, self.focused_widget.SIGNAL_ACTION_SELECT_TABLE, on_select)
+        self.focused_widget.select_handler_bound = True
+
     def show_table(self, emitter, table):
         self.focused_widget = self._widgets_factory.create('table_view', table, self._connection)
         self.view.original_widget = self.focused_widget

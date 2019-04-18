@@ -55,8 +55,6 @@ class WidgetsFactory(BaseWidgetsFactory):
                 self.change_fsm_state, user_args=['quit'])
         self._connect_signal(view, view.SIGNAL_ACTION_EXIT,
                 self.change_fsm_state, user_args=['back'])
-        self._connect_signal(view, view.SIGNAL_ACTION_SELECT_TABLE,
-                self.change_fsm_state, user_args=['select'])
         self._connect_signal(view, view.SIGNAL_ACTION_RUN_QUERY,
                 self.change_fsm_state, user_args=['run_query'])
         return view
