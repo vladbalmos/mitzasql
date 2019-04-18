@@ -60,7 +60,7 @@ def test_db_tables_view_searches_for_table(sakila_connection):
 
     index, row = result
     assert index > 0
-    assert 'film' in row
+    assert 'del_film' in row
 
     result = view.search_tables('non existent table')
     assert result is None

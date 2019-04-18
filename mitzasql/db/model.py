@@ -152,8 +152,57 @@ class DBTablesModel(MysqlModel):
             urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
             return
 
-        # TODO: show view & procedure status
-        query = 'SHOW TABLE STATUS FROM `{0}`'.format(self.database)
+        query = []
+
+        # Get tables
+        query.append('''
+        SELECT
+            TABLE_NAME AS Name,
+            TABLE_ROWS AS Rows,
+            DATA_LENGTH AS Size,
+            CREATE_TIME AS Created,
+            UPDATE_TIME AS Updated,
+            ENGINE AS Engine,
+            TABLE_COMMENT AS Comment,
+            TABLE_TYPE AS Type
+        FROM
+            INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = '{0}'
+        '''.format(self.database))
+
+        # Get triggers
+        query.append('''
+            SELECT
+                TRIGGER_NAME AS Name,
+                NULL AS Rows,
+                NULL AS Size,
+                CREATED AS Created,
+                NULL AS Updated,
+                NULL AS Engine,
+                CONCAT_WS(' ', ACTION_TIMING, EVENT_MANIPULATION, 'in',
+                EVENT_OBJECT_TABLE) AS Comment,
+                'TRIGGER' AS Type
+            FROM INFORMATION_SCHEMA.TRIGGERS
+            WHERE TRIGGER_SCHEMA = '{0}'
+        '''.format(self.database))
+
+        # Get functions & procedures
+        query.append('''
+            SELECT
+                name AS Name,
+                NULL AS Rows,
+                NULL AS Size,
+                created AS Created,
+                modified AS Updated,
+                NULL AS Engine,
+                CONVERT(comment USING utf8) AS Comment,
+                `type` AS Type
+            FROM
+                mysql.proc
+            WHERE db = '{0}'
+        '''.format(self.database))
+        query = '(' + '\n) UNION (\n'.join(query) + ')'
+        query = 'SELECT * FROM ({0}) AS info ORDER BY Name'.format(query)
         cursor = self.execute_query(query)
         return cursor
 
