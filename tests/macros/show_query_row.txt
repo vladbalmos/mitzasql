@@ -1,0 +1,11 @@
+# Show trigger info
+key:enter
+key:/
+key_sequence:sakila
+key:enter:2
+key_sequence:address
+key:enter:1
+key:f2
+key_sequence:select * from address limit 1
+key:f9
+key:enter

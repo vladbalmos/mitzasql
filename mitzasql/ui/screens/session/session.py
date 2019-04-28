@@ -32,6 +32,7 @@ from mitzasql.ui.widgets.query_view import QueryView
 from mitzasql.ui.widgets.session_popup_launcher import SessionPopupLauncher
 from mitzasql.ui.widgets.trigger_widget import TriggerWidget
 from mitzasql.ui.widgets.procedure_widget import ProcedureWidget
+from mitzasql.ui.widgets.row_widget import RowWidget
 from mitzasql.logger import logger
 from .widgets_factory import WidgetsFactory
 from . import states
@@ -157,6 +158,19 @@ class Session(Screen):
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
+        if hasattr(self.focused_widget, 'select_handler_bound'):
+            return
+
+        def on_select(emitter, row):
+            columns = self.focused_widget.model.columns
+            widget = RowWidget(row, columns)
+            self.view.show_big_popup(widget)
+            return
+
+        urwid.connect_signal(self.focused_widget,
+                self.focused_widget.SIGNAL_ACTION_SELECT_ROW, on_select)
+        self.focused_widget.select_handler_bound = True
+
     def show_query_table(self, emitter, query):
         if not isinstance(emitter, QueryView):
             self.view.show_loading_dialog()
@@ -165,6 +179,19 @@ class Session(Screen):
         if not isinstance(emitter, QueryView):
             self.view.close_pop_up()
         self.focused_widget.set_model_error_handler(self.handle_model_error)
+
+        if hasattr(self.focused_widget, 'select_handler_bound'):
+            return
+
+        def on_select(emitter, row):
+            columns = self.focused_widget.model.columns
+            widget = RowWidget(row, columns)
+            self.view.show_big_popup(widget)
+            return
+
+        urwid.connect_signal(self.focused_widget,
+                self.focused_widget.SIGNAL_ACTION_SELECT_ROW, on_select)
+        self.focused_widget.select_handler_bound = True
 
     def goto_prev_view(self, *args, **kwargs):
         if isinstance(self._last_primary_view, DBView):

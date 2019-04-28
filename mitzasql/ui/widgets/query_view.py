@@ -49,6 +49,8 @@ class CommandProcessor(BaseCmdProcessor):
         self._query_view.resize_tbl_col(column, value)
 
 class QueryView(BaseDBView):
+    SIGNAL_ACTION_SELECT_ROW = 'select_row'
+
     def __init__(self, model, connection):
         self._command_processor = CommandProcessor(self)
         self._table_widget_cls = Table
@@ -58,6 +60,19 @@ class QueryView(BaseDBView):
             database = ''
         else:
             database = connection.database
+        self.SIGNALS.append(self.SIGNAL_ACTION_SELECT_ROW)
+        self._connect_table_signals()
+
+    def _connect_table_signals(self):
+        urwid.connect_signal(self._table, self._table.SIGNAL_ROW_SELECTED,
+                self.select_row)
+
+    def _disconnect_table_signals(self):
+        urwid.disconnect_signal(self._table, self._table.SIGNAL_ROW_SELECTED,
+                self.select_row)
+
+    def select_row(self, emitter, row):
+        urwid.emit_signal(self, self.SIGNAL_ACTION_SELECT_ROW, self, row)
 
     def refresh(self, query, connection):
         if query == self._model.query:

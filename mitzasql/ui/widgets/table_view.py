@@ -68,12 +68,15 @@ class CommandProcessor(BaseCmdProcessor):
             self._emit_error(str(e))
 
 class TableView(BaseDBView):
+    SIGNAL_ACTION_SELECT_ROW = 'select_row'
+
     def __init__(self, model, connection):
         self._command_processor = CommandProcessor(self)
         self._table_widget_cls = MysqlTable
         super().__init__(model, connection)
         self._command_processor.cmd_args_suggestions['resize'] = [c['name'] for c in self._model.columns]
         self._command_processor.cmd_args_suggestions['sort'] = self._command_processor.cmd_args_suggestions['resize']
+        self.SIGNALS.append(self.SIGNAL_ACTION_SELECT_ROW)
         self._connect_table_signals()
 
     def refresh(self, table, connection):
@@ -94,10 +97,15 @@ class TableView(BaseDBView):
         super().__del__()
 
     def _connect_table_signals(self):
-        pass
+        urwid.connect_signal(self._table, self._table.SIGNAL_ROW_SELECTED,
+                self.select_row)
 
     def _disconnect_table_signals(self):
-        pass
+        urwid.disconnect_signal(self._table, self._table.SIGNAL_ROW_SELECTED,
+                self.select_row)
+
+    def select_row(self, emitter, row):
+        urwid.emit_signal(self, self.SIGNAL_ACTION_SELECT_ROW, self, row)
 
     @property
     def table(self):

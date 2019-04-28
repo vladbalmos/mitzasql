@@ -102,6 +102,10 @@ class BaseDBView(urwid.Frame):
         self._model = None
         self._connection = None
 
+    @property
+    def model(self):
+        return self._model
+
     def emit_model_error(self, model, error):
         urwid.emit_signal(self, self.SIGNAL_MODEL_ERROR, self, model, error)
 
