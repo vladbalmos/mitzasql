@@ -24,3 +24,21 @@ def orig_w(widget):
     if isinstance(widget, urwid.AttrMap):
         return widget.original_widget
     return widget
+
+def vim2emacs_translation(key):
+    if key == 'j' or key == 'J':
+        key = 'down'
+
+    if key == 'k' or key == 'K':
+        key = 'up'
+
+    if key == 'ctrl u':
+        key = 'page up'
+
+    if key == 'ctrl d':
+        key = 'page down'
+
+    if key == 'G':
+        key = 'end'
+
+    return key

@@ -1,0 +1,8 @@
+# Show trigger info
+key:enter
+key:/
+key_sequence:sakila
+key:enter:2
+key:/
+key_sequence:film_in_stock
+key:enter:2

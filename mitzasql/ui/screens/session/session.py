@@ -22,13 +22,16 @@ import urwid
 
 from mitzasql.state_machine import StateMachine
 from mitzasql.db.connection import Connection
-from mitzasql.db.model import (DatabasesModel, DBTablesModel, TableModel)
+from mitzasql.db.model import (DatabasesModel, DBTablesModel, TableModel,
+        TriggerModel, ProcedureModel)
 from mitzasql.ui.screens.screen import Screen
 from mitzasql.ui.widgets.db_view import DBView
 from mitzasql.ui.widgets.db_tables_view import DBTablesView
 from mitzasql.ui.widgets.table_view import TableView
 from mitzasql.ui.widgets.query_view import QueryView
 from mitzasql.ui.widgets.session_popup_launcher import SessionPopupLauncher
+from mitzasql.ui.widgets.trigger_widget import TriggerWidget
+from mitzasql.ui.widgets.procedure_widget import ProcedureWidget
 from mitzasql.logger import logger
 from .widgets_factory import WidgetsFactory
 from . import states
@@ -125,6 +128,24 @@ class Session(Screen):
             object_type = row[-1]
             if object_type not in non_table_types:
                 self._state_machine.change_state('select', emitter, row[0])
+                return
+
+            if object_type == 'TRIGGER':
+                model = TriggerModel(self._connection, database, row[0])
+                if model.last_error is not None:
+                    self.view.show_error(model.last_error)
+                    return
+                widget = TriggerWidget(model)
+                self.view.show_big_popup(widget)
+                return
+
+            if object_type == 'FUNCTION' or object_type == 'PROCEDURE':
+                model = ProcedureModel(self._connection, database, row[0])
+                if model.last_error is not None:
+                    self.view.show_error(model.last_error)
+                    return
+                widget = ProcedureWidget(model)
+                self.view.show_big_popup(widget)
                 return
 
         urwid.connect_signal(self.focused_widget, self.focused_widget.SIGNAL_ACTION_SELECT_TABLE, on_select)

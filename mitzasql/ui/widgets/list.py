@@ -20,6 +20,8 @@
 
 import urwid
 
+import mitzasql.ui.utils as utils
+
 class List(urwid.ListBox):
     """Custom list which emits a `selected` signal if an item is selected"""
 
@@ -45,12 +47,8 @@ class List(urwid.ListBox):
         self.body = self._create_focus_list_walker(data)
 
     def keypress(self, size, key):
+        key = utils.vim2emacs_translation(key)
         if key == 'enter':
             urwid.emit_signal(self, self.SIGNAL_SELECTED, self, self.focus.item_value)
             return
-        # vim style navigation
-        if key == 'j' or key == 'J':
-            key = 'down'
-        if key == 'k' or key == 'K':
-            key = 'up'
         return super().keypress(size, key)

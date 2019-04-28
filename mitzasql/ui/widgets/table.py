@@ -211,8 +211,12 @@ class TCellNull(TCell):
 class TCellBinary(TCell):
     def __init__(self, content, width, separator=True):
         if not isinstance(content, str):
-            content = content.hex();
-        else:
+            try:
+                content = content.decode(encoding='utf8')
+            except:
+                content = content.hex();
+
+        if isinstance(content, str):
             content = content.replace("\n", "\\n")
         super().__init__(content, width, separator)
 

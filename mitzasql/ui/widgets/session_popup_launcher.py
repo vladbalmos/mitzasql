@@ -25,12 +25,14 @@ from mitzasql.ui.widgets.error_dialog import ErrorDialog
 from mitzasql.ui.widgets.quit_dialog import QuitDialog
 
 class SessionPopupLauncher(urwid.PopUpLauncher):
+    DEFAULT_WR = 60
+    DEFAULT_HR = 30
     def __init__(self, widget):
         super().__init__(widget)
         self._max_width = None
         self._max_height = None
-        self._suggested_width = None
-        self._suggested_heigth = None
+        self._width_ratio = self.DEFAULT_WR
+        self._height_ratio = self.DEFAULT_HR
         self.showing_error_modal = False
 
         self._popup_factory_method = None
@@ -39,15 +41,8 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         return self._popup_factory_method()
 
     def get_pop_up_parameters(self):
-        if self._suggested_width is not None:
-            width = self._suggested_width
-        else:
-            width = int(60 * self._max_width / 100)
-
-        if self._suggested_heigth is not None:
-            height = self._suggested_heigth
-        else:
-            height = int(30 * self._max_height / 100)
+        width = int(self._width_ratio * self._max_width / 100)
+        height = int(self._height_ratio * self._max_height / 100)
 
         left = (self._max_width - width) / 2
         top = (self._max_height - height) / 2
@@ -57,6 +52,7 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
 
     def close_pop_up(self, *args, **kwargs):
         self.showing_error_modal = False
+        self._reset_popup_size_ratio()
         return super().close_pop_up()
 
     def quit(self, *args, **kwargs):
@@ -99,8 +95,8 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         return self.open_pop_up()
 
     def show_loading_dialog(self):
-        self._suggested_heigth = 5
-        self._suggested_width = 40
+        self._width_ratio = 40
+        self._height_ratio = 30
         def factory_method():
             dialog = urwid.Text(u'\nLoading...', align='center')
             dialog = urwid.Filler(dialog)
@@ -109,13 +105,23 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         self._popup_factory_method = factory_method
         result = self.open_pop_up()
         shared_main_loop.refresh()
-        self._suggested_heigth = None
-        self._suggested_width = None
         return result
 
-    def show_big_popup(self, widget, suggested_size=None):
-        pass
+    def show_big_popup(self, widget):
+        self._width_ratio = 90
+        self._height_ratio = 80
+        def factory_method():
+            dialog = urwid.AttrMap(urwid.LineBox(widget, title=widget.name), 'linebox')
+            urwid.connect_signal(widget, widget.SIGNAL_ESCAPE, self.close_pop_up)
+            return dialog
+        self._popup_factory_method = factory_method
+        result = self.open_pop_up()
+        shared_main_loop.refresh()
+        return result
 
+    def _reset_popup_size_ratio(self):
+        self._width_ratio = self.DEFAULT_WR
+        self._height_ratio = self.DEFAULT_HR
 
     def render(self, size, focus=False):
         self._max_width, self._max_height = size
