@@ -119,6 +119,18 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         shared_main_loop.refresh()
         return result
 
+    def show_table_changer(self, widget):
+        self._width_ratio = 25
+        self._height_ratio = 70
+        def factory_method():
+            dialog = urwid.AttrMap(urwid.LineBox(widget, title=u'Change table'), 'linebox')
+            urwid.connect_signal(widget, widget.SIGNAL_ESCAPE, self.close_pop_up)
+            return dialog
+        self._popup_factory_method = factory_method
+        result = self.open_pop_up()
+        shared_main_loop.refresh()
+        return result
+
     def _reset_popup_size_ratio(self):
         self._width_ratio = self.DEFAULT_WR
         self._height_ratio = self.DEFAULT_HR

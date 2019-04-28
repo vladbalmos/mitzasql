@@ -70,6 +70,7 @@ class CommandProcessor(BaseCmdProcessor):
 class TableView(BaseDBView):
     SIGNAL_ACTION_SELECT_ROW = 'select_row'
     SIGNAL_ACTION_INFO = 'info'
+    SIGNAL_ACTION_CHANGE_TABLE = 'change_table'
 
     def __init__(self, model, connection):
         self._command_processor = CommandProcessor(self)
@@ -80,8 +81,8 @@ class TableView(BaseDBView):
         super().__init__(model, connection, actions)
         self._command_processor.cmd_args_suggestions['resize'] = [c['name'] for c in self._model.columns]
         self._command_processor.cmd_args_suggestions['sort'] = self._command_processor.cmd_args_suggestions['resize']
-        self.SIGNALS.append(self.SIGNAL_ACTION_SELECT_ROW)
-        self.SIGNALS.append(self.SIGNAL_ACTION_INFO)
+        self.SIGNALS.extend([self.SIGNAL_ACTION_SELECT_ROW,
+            self.SIGNAL_ACTION_INFO, self.SIGNAL_ACTION_CHANGE_TABLE])
         self._connect_table_signals()
 
     def refresh(self, table, connection):
@@ -135,3 +136,8 @@ class TableView(BaseDBView):
 
         self._model.sort(column, direction)
 
+    def keypress(self, size, key):
+        if key == 'ctrl p':
+            urwid.emit_signal(self, self.SIGNAL_ACTION_CHANGE_TABLE, self)
+            return None
+        return super().keypress(size, key)

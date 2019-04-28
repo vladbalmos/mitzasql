@@ -34,7 +34,6 @@ class BaseDBView(urwid.Frame):
     SIGNAL_ACTION_RUN_QUERY = 'query_editor'
     SIGNAL_ACTION_QUERY_LOG = 'query_log'
     SIGNAL_ACTION_REFRESH = 'refresh'
-    SIGNAL_ACTION_CONNECTION_INFO = 'connection_info'
     SIGNAL_ACTION_QUIT = 'quit'
     SIGNAL_MODEL_ERROR = 'model_error'
     SIGNALS = [SIGNAL_ACTION_EXIT, SIGNAL_ACTION_RUN_QUERY, SIGNAL_MODEL_ERROR]

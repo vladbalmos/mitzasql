@@ -1,8 +1,8 @@
-# Show table info
+# Show trigger info
 key:enter
 key:/
 key_sequence:sakila
 key:enter:2
 key:j:2
 key:enter
-key:f3
+key:ctrl p

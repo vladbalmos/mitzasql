@@ -1,4 +1,4 @@
-# Show trigger info
+# Show view info
 key:enter
 key:/
 key_sequence:sakila
