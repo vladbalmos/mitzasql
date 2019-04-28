@@ -23,7 +23,7 @@ import urwid
 from mitzasql.state_machine import StateMachine
 from mitzasql.db.connection import Connection
 from mitzasql.db.model import (DatabasesModel, DBTablesModel, TableModel,
-        TriggerModel, ProcedureModel)
+        TriggerModel, ProcedureModel, TableInfoModel, ViewInfoModel)
 from mitzasql.ui.screens.screen import Screen
 from mitzasql.ui.widgets.db_view import DBView
 from mitzasql.ui.widgets.db_tables_view import DBTablesView
@@ -33,6 +33,8 @@ from mitzasql.ui.widgets.session_popup_launcher import SessionPopupLauncher
 from mitzasql.ui.widgets.trigger_widget import TriggerWidget
 from mitzasql.ui.widgets.procedure_widget import ProcedureWidget
 from mitzasql.ui.widgets.row_widget import RowWidget
+from mitzasql.ui.widgets.view_info_widget import ViewInfoWidget
+from mitzasql.ui.widgets.table_info_widget import TableInfoWidget
 from mitzasql.logger import logger
 from .widgets_factory import WidgetsFactory
 from . import states
@@ -158,18 +160,45 @@ class Session(Screen):
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
-        if hasattr(self.focused_widget, 'select_handler_bound'):
-            return
+        if not hasattr(self.focused_widget, 'select_handler_bound'):
+            def on_select(emitter, row):
+                columns = self.focused_widget.model.columns
+                widget = RowWidget(row, columns)
+                self.view.show_big_popup(widget)
+                return
 
-        def on_select(emitter, row):
-            columns = self.focused_widget.model.columns
-            widget = RowWidget(row, columns)
-            self.view.show_big_popup(widget)
-            return
+            urwid.connect_signal(self.focused_widget,
+                    self.focused_widget.SIGNAL_ACTION_SELECT_ROW, on_select)
+            self.focused_widget.select_handler_bound = True
 
-        urwid.connect_signal(self.focused_widget,
-                self.focused_widget.SIGNAL_ACTION_SELECT_ROW, on_select)
-        self.focused_widget.select_handler_bound = True
+        if not hasattr(self.focused_widget, 'info_handler_bound'):
+            def on_info(emitter, action):
+                table_name = emitter.model.table_name
+
+                result = TableInfoModel.is_view(self._connection,
+                        self._connection.database, table_name)
+
+                if result is not False:
+                    viewInfoModel = result
+                    if viewInfoModel.last_error is not None:
+                        self.view.show_error(viewInfoModel.last_error)
+                        return
+                    widget = ViewInfoWidget(viewInfoModel)
+                    self.view.show_big_popup(widget)
+                    return
+                else:
+                    model = TableInfoModel(self._connection,
+                            self._connection.database, table_name)
+                    if model.last_error is not None:
+                        self.view.show_error(model.last_error)
+                        return
+                    widget = TableInfoWidget(model)
+                    self.view.show_big_popup(widget)
+                    return
+
+            urwid.connect_signal(self.focused_widget,
+                    self.focused_widget.SIGNAL_ACTION_INFO, on_info)
+            self.focused_widget.info_handler_bound = True
 
     def show_query_table(self, emitter, query):
         if not isinstance(emitter, QueryView):

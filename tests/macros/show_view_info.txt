@@ -1,0 +1,9 @@
+# Show trigger info
+key:enter
+key:/
+key_sequence:sakila
+key:enter:2
+key:j
+key:enter
+sleep:1.0
+key:f3

@@ -69,14 +69,19 @@ class CommandProcessor(BaseCmdProcessor):
 
 class TableView(BaseDBView):
     SIGNAL_ACTION_SELECT_ROW = 'select_row'
+    SIGNAL_ACTION_INFO = 'info'
 
     def __init__(self, model, connection):
         self._command_processor = CommandProcessor(self)
         self._table_widget_cls = MysqlTable
-        super().__init__(model, connection)
+        actions = [
+                ('F3', u'F3 Info', self.SIGNAL_ACTION_INFO)
+                ]
+        super().__init__(model, connection, actions)
         self._command_processor.cmd_args_suggestions['resize'] = [c['name'] for c in self._model.columns]
         self._command_processor.cmd_args_suggestions['sort'] = self._command_processor.cmd_args_suggestions['resize']
         self.SIGNALS.append(self.SIGNAL_ACTION_SELECT_ROW)
+        self.SIGNALS.append(self.SIGNAL_ACTION_INFO)
         self._connect_table_signals()
 
     def refresh(self, table, connection):

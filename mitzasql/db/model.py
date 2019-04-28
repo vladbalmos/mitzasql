@@ -455,7 +455,7 @@ class ProcedureModel:
             self.last_error = e
             return {}
 
-class ViewModel:
+class ViewInfoModel:
     def __init__(self, connection, database, name):
         self._con = connection
         self._database = database
@@ -490,3 +490,79 @@ class ViewModel:
         except errors.Error as e:
             self.last_error = e
             return {}
+
+class TableInfoModel:
+    def __init__(self, connection, database, name):
+        self._con = connection
+        self._database = database
+        self._name = name
+        self.last_error = None
+        self.data = self._query()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def _query(self):
+        table_data = self._get_table_data()
+        if self.last_error is not None or not len(table_data):
+            return {}
+
+        create_code = self._get_create_code()
+        if self.last_error is not None:
+            return {}
+
+        data = {
+                'table': table_data,
+                'create_code': create_code
+                }
+        return data
+
+    def _get_table_data(self):
+        query = '''
+        SELECT
+            *
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE
+            TABLE_SCHEMA = '{0}'
+            AND
+            TABLE_NAME = '{1}'
+        '''.format(self._database, self._name)
+
+        try:
+            cursor = self._con.query(query, dictionary=True)
+            data = cursor.fetchall()
+            if data:
+                return data[0]
+            else:
+                return {}
+        except errors.Error as e:
+            self.last_error = e
+            return {}
+
+    def _get_create_code(self):
+        query = '''
+        SHOW CREATE TABLE `{0}`
+        '''.format(self._name)
+
+        try:
+            cursor = self._con.query(query, dictionary=True)
+            data = cursor.fetchall()
+            if data:
+                return data[0]['Create Table']
+            else:
+                return {}
+        except errors.Error as e:
+            self.last_error = e
+            return {}
+
+    @classmethod
+    def is_view(cls, connection, database, name):
+        viewInfoModel = ViewInfoModel(connection, database, name)
+        if len(viewInfoModel):
+            return viewInfoModel
+        return False
+
+
