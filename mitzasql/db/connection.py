@@ -110,18 +110,25 @@ class Connection(LoggerMixin):
     def cursor(self):
         return self.con.cursor(buffered=True)
 
-    def query(self, query, params=None):
+    @property
+    def dict_cursor(self):
+        return self.con.cursor(buffered=True, dictionary=True)
+
+    def query(self, query, params=None, dictionary=False):
         self.query_log.append((query, params))
         self.log_debug('Query: %s. Params: %s', str(query), str(params))
         try:
-            cursor = self.cursor
+            if dictionary is False:
+                cursor = self.cursor
+            else:
+                cursor = self.dict_cursor
             cursor.execute(query, params=params)
             return cursor
         except errors.OperationalError as e:
             # Retry connection if exception is "MySQL Connection not available"
             self.log_exception('Query exception: %s', e)
             if self._retry_connection():
-                return self.query(query, params=params)
+                return self.query(query, params=params, dictionary=dictionary)
             raise e
         except errors.Error as e:
             self.log_exception('Query exception: %s', e)

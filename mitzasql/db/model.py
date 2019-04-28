@@ -383,3 +383,110 @@ class QueryModel(MysqlModel):
             self.rowcount = cursor.rowcount
         return True
 
+class TriggerModel:
+    def __init__(self, connection, database, name):
+        self._con = connection
+        self._database = database
+        self._name = name
+        self.last_error = None
+        self.data = self._query()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def _query(self):
+        query = '''
+        SELECT
+            *
+        FROM INFORMATION_SCHEMA.TRIGGERS
+        WHERE
+            TRIGGER_SCHEMA = '{0}'
+            AND
+            TRIGGER_NAME = '{1}'
+        '''.format(self._database, self._name)
+
+        try:
+            cursor = self._con.query(query, dictionary=True)
+            data = cursor.fetchall()
+            if data:
+                return data[0]
+            else:
+                return {}
+        except errors.Error as e:
+            self.last_error = e
+            return {}
+
+class ProcedureModel:
+    def __init__(self, connection, database, name):
+        self._con = connection
+        self._database = database
+        self._name = name
+        self.last_error = None
+        self.data = self._query()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def _query(self):
+        query = '''
+        SELECT
+            *
+        FROM mysql.proc
+        WHERE
+            db = '{0}'
+            AND
+            name = '{1}'
+        '''.format(self._database, self._name)
+
+        try:
+            cursor = self._con.query(query, dictionary=True)
+            data = cursor.fetchall()
+            if data:
+                return data[0]
+            else:
+                return {}
+        except errors.Error as e:
+            self.last_error = e
+            return {}
+
+class ViewModel:
+    def __init__(self, connection, database, name):
+        self._con = connection
+        self._database = database
+        self._name = name
+        self.last_error = None
+        self.data = self._query()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def _query(self):
+        query = '''
+        SELECT
+            *
+        FROM INFORMATION_SCHEMA.VIEWS
+        WHERE
+            TABLE_SCHEMA = '{0}'
+            AND
+            TABLE_NAME = '{1}'
+        '''.format(self._database, self._name)
+
+        try:
+            cursor = self._con.query(query, dictionary=True)
+            data = cursor.fetchall()
+            if data:
+                return data[0]
+            else:
+                return {}
+        except errors.Error as e:
+            self.last_error = e
+            return {}
