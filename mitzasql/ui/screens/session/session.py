@@ -36,7 +36,6 @@ from mitzasql.ui.widgets.view_info_widget import ViewInfoWidget
 from mitzasql.ui.widgets.table_info_widget import TableInfoWidget
 from mitzasql.ui.widgets.table_changer_widget import TableChangerWidget
 from mitzasql.ui.widgets.help_widget import HelpWidget
-from mitzasql.logger import logger
 from .widgets_factory import WidgetsFactory
 from . import states
 
@@ -137,7 +136,7 @@ class Session(Screen):
                 return
 
             if object_type == 'TRIGGER':
-                model = TriggerModel(self._connection, database, row[0])
+                model = TriggerModel(self._connection, self._connection.database, row[0])
                 if model.last_error is not None:
                     self.view.show_error(model.last_error)
                     return
@@ -146,7 +145,7 @@ class Session(Screen):
                 return
 
             if object_type == 'FUNCTION' or object_type == 'PROCEDURE':
-                model = ProcedureModel(self._connection, database, row[0])
+                model = ProcedureModel(self._connection, self._connection.database, row[0])
                 if model.last_error is not None:
                     self.view.show_error(model.last_error)
                     return
