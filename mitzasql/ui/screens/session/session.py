@@ -226,7 +226,8 @@ class Session(Screen):
     def show_query_table(self, emitter, query):
         if not isinstance(emitter, QueryView):
             self.view.show_loading_dialog()
-        self.focused_widget = self._widgets_factory.create('query_view', query, self._connection)
+        self.focused_widget = self._widgets_factory.create('query_view', query,
+                self._connection.fresh)
         self._bind_help_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         if not isinstance(emitter, QueryView):

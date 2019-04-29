@@ -69,6 +69,14 @@ class Connection(LoggerMixin):
         self._retry_count = 0
         return con
 
+    @property
+    def fresh(self):
+        con_data = self._connection_data
+        if self.database:
+            con_data['database'] = self.database
+        con = self.__class__(con_data, self.session_name)
+        return con
+
     def _retry_connection(self):
         self.log_info("Disconnected. Retrying mysql connection...")
         if self._retry_count >= 5:
@@ -144,6 +152,10 @@ class Connection(LoggerMixin):
             return True
 
         if isinstance(error, errors.InterfaceError):
+            if error.msg == 'Use cmd_query_iter for statements with multiple queries.':
+                return False
+            if error.msg == 'Use multi=True when executing multiple statements':
+                return False
             return True
 
         if isinstance(errors, errors.NotSupportedError):

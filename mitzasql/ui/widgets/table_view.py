@@ -137,7 +137,7 @@ class TableView(BaseDBView):
         self._model.sort(column, direction)
 
     def keypress(self, size, key):
-        if key == 'ctrl p':
+        if key == 'ctrl p' and not self._focus_is('editor'):
             urwid.emit_signal(self, self.SIGNAL_ACTION_CHANGE_TABLE, self)
-            return None
+            return
         return super().keypress(size, key)
