@@ -63,7 +63,7 @@ class TableChangerWidget(urwid.Frame):
                 self.focus_position = 'body'
             return
 
-        if key == 'enter' and self.focus_position == 'header':
+        if key == 'enter' and self.focus_position == 'header' and len(self._tables_list.body):
             self.focus_position = 'body'
 
         return super().keypress(size, key)

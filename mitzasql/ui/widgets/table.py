@@ -18,6 +18,8 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import pickle
+import hashlib
 import urwid
 import time
 import sys
@@ -275,8 +277,16 @@ class TRow(urwid.Columns):
 class THeader(TRow):
     def __init__(self, columns):
         self.cell_sizes = []
+        self._cols_hash = self._get_cols_hash(columns)
         cols = self._create_cols(columns)
         super().__init__(cols, False)
+
+    def _get_cols_hash(self, columns):
+        serialized = pickle.dumps(columns)
+        m = hashlib.sha256()
+        m.update(serialized)
+        hsh = m.digest()
+        return hsh
 
     def _create_cols(self, columns):
         cols = []
@@ -304,12 +314,22 @@ class THeader(TRow):
         return cols
 
     def refresh(self, columns):
+        cols_hash = self._get_cols_hash(columns)
+        if cols_hash == self._cols_hash:
+            return
+        self._cols_hash = cols_hash
         self.cell_sizes = []
         self.contents.clear()
         cols = self._create_cols(columns)
         for width, widget in cols:
             col_size = self.options(width_type='given', width_amount=width)
             self.contents.append((widget, col_size))
+
+    def resize(self, col_index, increment):
+        width = super().resize(col_index, increment)
+        if width is not None:
+            self.cell_sizes[col_index] = width
+        return width
 
 class TBody(urwid.ListBox):
     KEYPRESS = 'keypress'

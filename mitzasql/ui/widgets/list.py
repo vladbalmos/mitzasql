@@ -58,7 +58,7 @@ class List(urwid.ListBox):
 
     def keypress(self, size, key):
         key = utils.vim2emacs_translation(key)
-        if key == 'enter':
+        if key == 'enter' and self.focus is not None:
             urwid.emit_signal(self, self.SIGNAL_SELECTED, self, self.focus.item_value)
             return
         return super().keypress(size, key)
