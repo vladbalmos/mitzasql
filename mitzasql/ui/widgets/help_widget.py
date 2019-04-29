@@ -18,23 +18,28 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import os
 import urwid
-
 import mitzasql.ui.utils as utils
 
-class RowWidget(urwid.ListBox):
+class HelpWidget(urwid.ListBox):
     SIGNAL_ESCAPE = 'escape'
 
-    def __init__(self, row, columns):
-        self._row = row;
-        self._columns = columns
-        contents = self._create_contents()
-        super().__init__([contents])
+    def __init__(self):
+        path = os.path.join(os.path.dirname(__file__), '..', '..', '..',
+                'docs', 'help.txt')
+        try:
+            with open(path) as file:
+                help = file.read()
+        except:
+            help = u'Error: Unable to open help file'
+        contents = [urwid.AttrMap(urwid.Text(help), 'default')]
+        super().__init__(contents)
         urwid.register_signal(self.__class__, [self.SIGNAL_ESCAPE])
 
     @property
     def name(self):
-        return u'Row data'
+        return u'Help'
 
     def keypress(self, size, key):
         key = utils.vim2emacs_translation(key)
@@ -43,31 +48,3 @@ class RowWidget(urwid.ListBox):
             return
 
         return super().keypress(size, key)
-
-    def _create_contents(self):
-        grid = []
-
-        index = 0
-        for item in self._row:
-            if item is None:
-                cell_data = u'NULL'
-            else:
-                if isinstance(item, bytearray):
-                    try:
-                        cell_data = item.decode(encoding='utf8')
-                    except:
-                        cell_data = item.hex()
-                else:
-                    cell_data = str(item)
-            cell_name = str(self._columns[index]['name'])
-
-            contents = []
-            contents.append((40, urwid.AttrMap(urwid.Text(cell_name), 'editbox:label')))
-            contents.append(urwid.AttrMap(urwid.Text(cell_data),
-                'editbox'))
-            grid.append(urwid.Columns(contents))
-            index += 1
-
-        grid = urwid.GridFlow(grid, cell_width=80, h_sep=1, v_sep=1,
-                align='left')
-        return grid

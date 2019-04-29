@@ -20,7 +20,6 @@
 
 import urwid
 
-from mitzasql.ui.widgets.emacs_edit import EmacsEdit
 import mitzasql.ui.utils as utils
 
 class TriggerWidget(urwid.ListBox):
