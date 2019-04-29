@@ -226,13 +226,21 @@ class Session(Screen):
     def show_query_table(self, emitter, query):
         if not isinstance(emitter, QueryView):
             self.view.show_loading_dialog()
+
         self.focused_widget = self._widgets_factory.create('query_view', query,
                 self._connection.fresh)
+
         self._bind_help_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         if not isinstance(emitter, QueryView):
             self.view.close_pop_up()
         self.focused_widget.set_model_error_handler(self.handle_model_error)
+
+        # If query cursor did not return rows, show info message
+        model = self.focused_widget.model
+        if not model.last_error and not model.has_rows:
+            self.view.show_info(u'Affected rows: {0}'.format(model.affected_rows))
+            return
 
         if hasattr(self.focused_widget, 'select_handler_bound'):
             return

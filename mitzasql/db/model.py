@@ -363,24 +363,36 @@ class TableModel(MysqlModel):
 class QueryModel(MysqlModel):
     def __init__(self, connection, query):
         self.query = query
+        self.affected_rows = 0
+        self.has_rows = False
         super().__init__(connection)
 
     def _query_db(self):
         cursor = self.execute_query(self.query)
+        if cursor is not None:
+            self.has_rows = cursor.with_rows
         return cursor
 
     def _fetch_data(self):
         cursor = self._query_db()
-        if cursor is None or cursor.with_rows is False:
+        if cursor is None:
             self.data = []
             self.columns = []
             self.rowcount = 0
+            self.affected_rows = 0
             return cursor is not None
 
         if cursor.with_rows:
             self.data = cursor.fetchall()
             self.columns = self._schema(cursor).columns
             self.rowcount = cursor.rowcount
+            self.affected_rows = 0
+        else:
+            self.data = []
+            self.columns = []
+            self.rowcount = 0
+            self.affected_rows = cursor.rowcount
+
         return True
 
 class TriggerModel:

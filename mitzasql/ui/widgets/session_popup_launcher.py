@@ -22,6 +22,7 @@ import urwid
 
 from mitzasql.ui import main_loop as shared_main_loop
 from mitzasql.ui.widgets.error_dialog import ErrorDialog
+from mitzasql.ui.widgets.info_dialog import InfoDialog
 from mitzasql.ui.widgets.quit_dialog import QuitDialog
 
 class SessionPopupLauncher(urwid.PopUpLauncher):
@@ -33,6 +34,7 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         self._max_height = None
         self._width_ratio = self.DEFAULT_WR
         self._height_ratio = self.DEFAULT_HR
+        # Used in testing
         self.showing_error_modal = False
 
         self._popup_factory_method = None
@@ -72,6 +74,14 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         self.showing_error_modal = True
         def factory_method():
             dialog = ErrorDialog(error)
+            urwid.connect_signal(dialog, dialog.SIGNAL_OK, self.close_pop_up)
+            return urwid.Filler(dialog)
+        self._popup_factory_method = factory_method
+        return self.open_pop_up()
+
+    def show_info(self, message):
+        def factory_method():
+            dialog = InfoDialog(message)
             urwid.connect_signal(dialog, dialog.SIGNAL_OK, self.close_pop_up)
             return urwid.Filler(dialog)
         self._popup_factory_method = factory_method
