@@ -222,9 +222,9 @@ class TableView(BaseDBView):
         elif op == 'gte':
             where = '`{0}` >= {1}'.format(column, filter_val)
         elif op == 'like':
-            where = '`{0}` LIKE {1}'.format(column, filter_val)
+            where = '`{0}` LIKE "{1}"'.format(column, filter_val)
         elif op == 'nlike':
-            where = '`{0}` NOT LIKE {1}'.format(column, filter_val)
+            where = '`{0}` NOT LIKE "{1}"'.format(column, filter_val)
         elif op == 'in':
             values = ','.join(map(str.strip, filter_val.split(',')))
             if not len(values):

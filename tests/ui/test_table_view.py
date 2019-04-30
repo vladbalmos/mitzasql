@@ -55,11 +55,11 @@ filters = [
         'count': 0
         },
         {
-        'filter': ['like', 'address', '"%hanoi%"'],
+        'filter': ['like', 'address', '%hanoi%'],
         'count': 2
         },
         {
-        'filter': ['nlike', 'address', '"%hanoi%"'],
+        'filter': ['nlike', 'address', '%hanoi%'],
         'count': 601
         },
         {
