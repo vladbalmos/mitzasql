@@ -51,7 +51,7 @@ During feature development Docker is not really necessary, I use it to run the t
 
 To run the tests during feature development run:
 
-    docker-compose up # necessary if the server is not installed on host
+    docker-compose up # necessary if the MySQL server is not installed on host
     tox # runs tests using Python3.6
 
 To generate code coverage:
