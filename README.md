@@ -32,12 +32,39 @@ Loading large datasets will slow down the rendering. By default, when opening a 
 # Development
 ## Dependencies
 * tox
+* Docker
+* docker-compose
 
-## Run development version
+Docker is only required for running the integration tests, testing during feature development can be done with tox alone (see below).
 
+## Run the development version
+
+    # If your currently installed Python version != 3.6 use TOXENV to specify it
     tox -e dev
     source .tox/dev/bin/activate
+    mitzasql
 
 ## Tests
+The testing process uses tox & Docker to automate running the tests against multiple versions of Python and MySQL servers.
 
-    tox
+During feature development Docker is not really necessary, I use it to run the test MySQL server but that can be installed directly on the host. If that is the case then new connection details have to be specified using environmental variables (see `tests/db/connection_fixture.py` for more details).
+
+To run the tests during feature development run:
+
+    docker-compose up # necessary if the server is not installed on host
+    tox # runs tests using Python3.6
+
+To generate code coverage:
+
+    ./coverage.sh
+
+Code coverage is generated in the `htmlcov` directory.
+
+### Integration testing
+See `test-mitzasql.sh` for more info.
+
+### UI testing
+See `test-mitzasql-ui.sh` for more info.
+
+#TODO
+Create .env & env.sample file to store ports for docker-compose

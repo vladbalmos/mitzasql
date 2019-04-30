@@ -1,4 +1,5 @@
 mitzasql.egg-info
+*.pyc
 __pycache__
 .tox
 tests/db_fixtures
