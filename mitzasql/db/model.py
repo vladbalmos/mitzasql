@@ -225,6 +225,7 @@ class TableModel(MysqlModel):
         self._offset = 0
         self._column_order = None
         self._order_dir = None
+        self._where = None
         super().__init__(connection)
 
         self.loaded_rowcount = len(self.data)
@@ -234,7 +235,7 @@ class TableModel(MysqlModel):
         result = super()._fetch_data()
         return result
 
-    def reload(self, reset_limit=True, reset_order=True):
+    def reload(self, reset_limit=True, reset_order=True, reset_where=True):
         urwid.emit_signal(self, self.SIGNAL_PRE_LOAD, self)
 
         try:
@@ -255,6 +256,9 @@ class TableModel(MysqlModel):
             self._column_order = None
             self._order_dir = None
 
+        if reset_where:
+            self._where = None
+
         if self._fetch_data() is False:
             self.loaded_rowcount = 0
             self.rowcount = 0
@@ -272,6 +276,9 @@ class TableModel(MysqlModel):
 
     def _count_rows(self):
         query = 'SELECT COUNT(*) AS total FROM {0}'.format(self.table_name)
+
+        if self._where:
+            query += ' WHERE {0}'.format(self._where)
         cursor = self.execute_query(query)
         if cursor is None:
             return 0
@@ -297,7 +304,14 @@ class TableModel(MysqlModel):
         self._page = 1
         self._offset = 0
 
-        self.reload(reset_limit=False, reset_order=False)
+        self.reload(reset_limit=False, reset_order=False, reset_where=False)
+
+    def filter(self, where):
+        if where is None:
+            self.reload(reset_limit=True, reset_order=False, reset_where=True)
+            return
+        self._where = where
+        self.reload(reset_limit=True, reset_order=False, reset_where=False)
 
     def load_more(self, count):
         offset = self.loaded_rowcount
@@ -352,6 +366,9 @@ class TableModel(MysqlModel):
 
         query = 'SELECT {0} FROM `{1}`'.format(','.join(select_columns),
                 self.table_name)
+
+        if self._where:
+            query += ' WHERE {0}'.format(self._where)
 
         if self._column_order is not None and self._order_dir is not None:
             query += ' ORDER BY `{0}` {1}'.format(self._column_order, self._order_dir)

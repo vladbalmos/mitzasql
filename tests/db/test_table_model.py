@@ -7,6 +7,30 @@ from .connection_fixture import sakila_connection
 
 table = 'actor'
 
+where_clauses = [
+        'address_id = 1',
+        'address_id = "1"',
+        'address_id != 1',
+        'address_id < 1',
+        'address_id <= 1',
+        'address_id > 1',
+        'address_id >= 1',
+        'address_id is null',
+        'address_id is not null',
+        'address_id = ""',
+        'address_id != ""',
+        'address_id in (1, 2)',
+        'address_id not in (1, 2)',
+        'address_id between 1 and 10',
+        'address_id not between 1 and 10',
+        'address like "%hanoi%"',
+        'address not like "%hanoi%"',
+        ]
+
+@pytest.fixture(params=where_clauses)
+def filter(request):
+    return request.param
+
 def test_model_fetches_data(sakila_connection):
     model = TableModel(sakila_connection, table)
     model_columns = [c['name'] for c in model.columns]
@@ -69,3 +93,9 @@ def test_model_emits_error_signal(sakila_connection):
     assert len(model.data) == 0
     assert model.loaded_rowcount == 0
     assert bool(model.columns) is False
+
+def test_model_filters_records(sakila_connection, filter):
+    model = TableModel(sakila_connection, 'address')
+    model.filter(filter)
+
+    assert model.last_error is None
