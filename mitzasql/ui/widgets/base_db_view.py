@@ -205,7 +205,7 @@ class BaseDBView(urwid.Frame):
             if self._focus_is('table'):
                 urwid.emit_signal(self, self.SIGNAL_ACTION_EXIT, self)
             else:
-                self._switch_focus('table')
+                self._toggle_query_editor()
             return
 
         if hasattr(self, '_command_processor'):
