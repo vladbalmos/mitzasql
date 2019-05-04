@@ -109,7 +109,10 @@ class ProcedureWidget(urwid.ListBox):
         body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text('Params'), 'default'))
 
-        param_list = self._model['param_list'].decode(encoding='utf8').split(',')
+        if not isinstance(self._model['param_list'], str):
+            param_list = self._model['param_list'].decode(encoding='utf8').split(',')
+        else:
+            param_list = self._model['param_list'].split(',')
         for param in param_list:
             body.append(urwid.AttrMap(urwid.Text(param.strip()), 'editbox'))
         body.append(urwid.Divider('-'))
