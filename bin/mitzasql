@@ -83,6 +83,8 @@ if __name__  == '__main__':
             for testing')
     parser.add_argument('--sessions_file', metavar='/path/to/sessions.ini', help='Path to \
             the sessions list registry file')
+    parser.add_argument('-v', '--version', help='Show current version',
+            action='store_true')
 
     args = parser.parse_args()
     if args.list:
@@ -91,6 +93,10 @@ if __name__  == '__main__':
         connect_to(args.session, sessions_file=args.sessions_file)
     elif args.host is not None:
         create_new_session(args, parser.error)
+    elif args.version is not None:
+        from mitzasql.version import __version__
+        print(__version__)
+        sys.exit(0)
     else:
         kwargs = {}
         if args.macro is not None:

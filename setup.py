@@ -23,9 +23,11 @@ import setuptools
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
+exec(open('mitzasql/version.py').read())
+
 setuptools.setup(
         name='mitzasql',
-        version='0.9',
+        version=__version__,
         author='Vlad Balmos',
         author_email='vladbalmos@yahoo.com',
         description='Ncurses MySQL client',

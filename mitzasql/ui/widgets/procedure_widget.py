@@ -119,8 +119,10 @@ class ProcedureWidget(urwid.ListBox):
         body.append(urwid.Divider('-'))
 
         if len(self._model['ROUTINE_COMMENT']):
-            body.append(urwid.AttrMap(urwid.Text(u'Comment: ' +
-                self._model['ROUTINE_COMMENT'].decode(encoding='utf8')),
+            comment = self._model['ROUTINE_COMMENT']
+            if not isinstance(comment, str):
+                comment = comment.decode(encoding='utf8')
+            body.append(urwid.AttrMap(urwid.Text(u'Comment: ' + comment),
                 'default'))
             body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['ROUTINE_DEFINITION']),
