@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Download database fixtures
+./download-db-fixtures.sh || exit 1
+
+echo 'Building images...'
 FILE=docker-compose-tests.yml
 docker-compose -f $FILE build
 docker-compose -f $FILE up -d
@@ -17,7 +21,7 @@ for version in mysql55 mysql56 mysql57 mysql8; do
     done
 done
 
-echo 'All servers are up, running the tests...'
+echo 'All done! Running the tests...'
 
 {
     echo "py35 - mysql55"
