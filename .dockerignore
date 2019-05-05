@@ -1,0 +1,6 @@
+.git
+.tox
+.pytest_cache
+tests/db_fixtures
+**/__pycache__
+**/*.pyc

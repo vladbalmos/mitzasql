@@ -1,16 +1,15 @@
 version: '3.5'
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:$MYSQL_DEFAULT_DEV_VERSION
     expose:
       - 3306
     ports:
-      - "3306:3306"
+      - "$MYSQL_DEFAULT_DEV_PORT:3306"
     environment:
       - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
-      - "MYSQL_DATABASE=mitzasql"
       - "MYSQL_USER=user"
       - "MYSQL_PASSWORD=password"
     volumes:
-      - ./tests/db-fixtures:/docker-entrypoint-initdb.d
+      - ./tests/db_fixtures/57-58:/docker-entrypoint-initdb.d
     command: --wait-timeout=2

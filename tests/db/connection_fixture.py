@@ -8,7 +8,6 @@ db_port = os.getenv('DB_PORT', '3306')
 db_username = os.getenv('DB_USER', 'root')
 db_password = os.getenv('DB_PASS', '')
 
-
 @pytest.fixture(scope='module')
 def connection():
     con_data = {

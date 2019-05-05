@@ -9,11 +9,10 @@ def test_model_fetches_data(sakila_connection):
     assert model.last_error is None
     assert isinstance(model.data, dict)
 
-    assert model['db'] == 'sakila'
-    assert model['name'] == 'rewards_report'
-    assert model['specific_name'] == 'rewards_report'
-    assert model['type'] == 'PROCEDURE'
-    assert len(model['body']) > 0
+    assert model['ROUTINE_SCHEMA'] == 'sakila'
+    assert model['SPECIFIC_NAME'] == 'rewards_report'
+    assert model['ROUTINE_TYPE'] == 'PROCEDURE'
+    assert len(model['ROUTINE_DEFINITION']) > 0
 
 def test_model_is_empty(sakila_connection):
     model = ProcedureModel(sakila_connection, 'sakila', 'unknown function')

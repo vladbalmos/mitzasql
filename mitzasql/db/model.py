@@ -158,7 +158,7 @@ class DBTablesModel(MysqlModel):
         query.append('''
         SELECT
             TABLE_NAME AS Name,
-            TABLE_ROWS AS Rows,
+            TABLE_ROWS AS `Rows`,
             DATA_LENGTH AS Size,
             CREATE_TIME AS Created,
             UPDATE_TIME AS Updated,
@@ -174,7 +174,7 @@ class DBTablesModel(MysqlModel):
         query.append('''
             SELECT
                 TRIGGER_NAME AS Name,
-                NULL AS Rows,
+                NULL AS `Rows`,
                 NULL AS Size,
                 CREATED AS Created,
                 NULL AS Updated,
@@ -189,17 +189,17 @@ class DBTablesModel(MysqlModel):
         # Get functions & procedures
         query.append('''
             SELECT
-                name AS Name,
-                NULL AS Rows,
+                SPECIFIC_NAME AS Name,
+                NULL AS `Rows`,
                 NULL AS Size,
-                created AS Created,
-                modified AS Updated,
+                CREATED AS Created,
+                LAST_ALTERED AS Updated,
                 NULL AS Engine,
-                CONVERT(comment USING utf8) AS Comment,
-                `type` AS Type
+                CONVERT(ROUTINE_COMMENT USING utf8) AS Comment,
+                ROUTINE_TYPE AS Type
             FROM
-                mysql.proc
-            WHERE db = '{0}'
+                INFORMATION_SCHEMA.ROUTINES
+            WHERE ROUTINE_SCHEMA = '{0}'
         '''.format(self.database))
         query = '(' + '\n) UNION (\n'.join(query) + ')'
         query = 'SELECT * FROM ({0}) AS info ORDER BY Name'.format(query)
@@ -465,12 +465,21 @@ class ProcedureModel:
     def _query(self):
         query = '''
         SELECT
-            *
-        FROM mysql.proc
+            *,
+            (
+                SELECT
+                    GROUP_CONCAT(PARAMETER_MODE, ' ', PARAMETER_NAME, ' ',
+                    DTD_IDENTIFIER)
+                FROM INFORMATION_SCHEMA.PARAMETERS AS p
+                WHERE p.SPECIFIC_NAME = ROUTINE_NAME
+                AND ORDINAL_POSITION > 0
+                ORDER BY ORDINAL_POSITION ASC
+            ) AS param_list
+        FROM INFORMATION_SCHEMA.ROUTINES
         WHERE
-            db = '{0}'
+            ROUTINE_SCHEMA = '{0}'
             AND
-            name = '{1}'
+            SPECIFIC_NAME = '{1}'
         '''.format(self._database, self._name)
 
         try:

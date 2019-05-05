@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import sys
+from collections import OrderedDict
 
 import mysql.connector.errors as errors
 from mysql.connector import (FieldType, FieldFlag)
@@ -197,7 +198,6 @@ class TableSchema(QuerySchema):
             character_maximum_length,
             numeric_precision,
             numeric_scale,
-            datetime_precision,
             character_set_name,
             collation_name,
             column_key,
@@ -207,16 +207,17 @@ class TableSchema(QuerySchema):
             table_schema = %(db_name)s
             AND
             table_name = %(table_name)s
+        ORDER BY ORDINAL_POSITION ASC
         '''
         cursor = self._con.query(query, {
             'db_name': self._con.database,
             'table_name': self._table_name
             })
         data = cursor.fetchall()
-        schema = {}
+        schema = OrderedDict()
         for row in data:
             column_name, default, nullable, _type, char_max_len, num_precision, \
-                    num_scale, dt_precision, charset, collation, key, extra = row
+                    num_scale, charset, collation, key, extra = row
 
             if nullable == 'YES':
                 nullable = True

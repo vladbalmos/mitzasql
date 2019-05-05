@@ -37,7 +37,8 @@ class ProcedureWidget(urwid.ListBox):
 
     @property
     def name(self):
-        return u'{0} {1}'.format(self._model['type'], self._model['name'])
+        return u'{0} {1}'.format(self._model['ROUTINE_TYPE'],
+                self._model['SPECIFIC_NAME'])
 
     def keypress(self, size, key):
         key = utils.vim2emacs_translation(key)
@@ -53,50 +54,50 @@ class ProcedureWidget(urwid.ListBox):
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'Name'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['name']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['SPECIFIC_NAME']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'Definer'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['definer']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['DEFINER']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'Type'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['type']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['ROUTINE_TYPE']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'Data access'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['sql_data_access']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['SQL_DATA_ACCESS']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
-        if (self._model['type'] == 'FUNCTION'):
+        if (self._model['ROUTINE_TYPE'] == 'FUNCTION'):
             contents = []
             contents.append((18, urwid.AttrMap(urwid.Text(u'Returns'),
                 'editbox:label')))
-            contents.append(urwid.AttrMap(urwid.Text(self._model['returns']),
+            contents.append(urwid.AttrMap(urwid.Text(self._model['DTD_IDENTIFIER']),
                 'editbox'))
             grid.append(urwid.Columns(contents))
 
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'SQL Security'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['security_type']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['SECURITY_TYPE']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
         contents = []
         contents.append((18, urwid.AttrMap(urwid.Text(u'Is deterministic?'),
             'editbox:label')))
-        contents.append(urwid.AttrMap(urwid.Text(self._model['is_deterministic']),
+        contents.append(urwid.AttrMap(urwid.Text(self._model['IS_DETERMINISTIC']),
             'editbox'))
         grid.append(urwid.Columns(contents))
 
@@ -117,11 +118,11 @@ class ProcedureWidget(urwid.ListBox):
             body.append(urwid.AttrMap(urwid.Text(param.strip()), 'editbox'))
         body.append(urwid.Divider('-'))
 
-        if len(self._model['comment']):
+        if len(self._model['ROUTINE_COMMENT']):
             body.append(urwid.AttrMap(urwid.Text(u'Comment: ' +
-                self._model['comment'].decode(encoding='utf8')),
+                self._model['ROUTINE_COMMENT'].decode(encoding='utf8')),
                 'default'))
             body.append(urwid.Divider('-'))
-        body.append(urwid.AttrMap(urwid.Text(self._model['body_utf8']),
+        body.append(urwid.AttrMap(urwid.Text(self._model['ROUTINE_DEFINITION']),
             'default'))
         return body

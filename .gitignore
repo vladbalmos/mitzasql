@@ -6,3 +6,5 @@ tests/db_fixtures
 tests/db-fixtures
 .coverage
 htmlcov
+tests.log
+.env
