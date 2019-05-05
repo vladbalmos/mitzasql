@@ -44,6 +44,14 @@ Docker is only required for running the integration tests, testing during featur
     source .tox/dev/bin/activate
     mitzasql
 
+To run the program using a different python version using Docker:
+
+    ./run-in-docker.sh [python version] [mysql version]
+    # ./run-in-docker.sh 36 mysql55
+    tox -e dev
+    source .tox/dev/bin/activate
+    mitzasql
+
 ## Tests
 The testing process uses tox & Docker to automate running the tests against multiple versions of Python and MySQL servers.
 
@@ -51,7 +59,8 @@ During feature development Docker is not really necessary, I use it to run the t
 
 To run the tests during feature development run:
 
-    docker-compose up # necessary if the MySQL server is not installed on host
+    cp env.template .env # necessary if using Docker
+    docker-compose up # necessary if using Docker
     tox
 
 To generate code coverage:
@@ -65,6 +74,3 @@ See `test-mitzasql.sh` for more info.
 
 ### UI testing
 See `test-mitzasql-ui.sh` for more info.
-
-#TODO
-Create .env & env.sample file to store ports for docker-compose
