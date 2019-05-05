@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [ -d tests/db_fixtures ]; then
     echo "Database fixtures exist."
     exit 0

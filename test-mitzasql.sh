@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -f .env ]; then
+    echo 'Missing .env file'
+    exit 1
+fi
+
 # Download database fixtures
 ./download-db-fixtures.sh || exit 1
 
@@ -21,7 +26,7 @@ for version in mysql55 mysql56 mysql57 mysql8; do
     done
 done
 
-echo 'All done! Running the tests...'
+echo 'All done! Running tests...'
 
 {
     echo "py35 - mysql55"

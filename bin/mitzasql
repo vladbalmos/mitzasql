@@ -93,7 +93,7 @@ if __name__  == '__main__':
         connect_to(args.session, sessions_file=args.sessions_file)
     elif args.host is not None:
         create_new_session(args, parser.error)
-    elif args.version is not None:
+    elif args.version:
         from mitzasql.version import __version__
         print(__version__)
         sys.exit(0)
