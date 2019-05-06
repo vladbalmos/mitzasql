@@ -27,18 +27,18 @@ def orig_w(widget):
 
 def vim2emacs_translation(key):
     if key == 'j' or key == 'J':
-        key = 'down'
+        return 'down'
 
     if key == 'k' or key == 'K':
-        key = 'up'
+        return 'up'
 
     if key == 'ctrl u':
-        key = 'page up'
+        return 'page up'
 
     if key == 'ctrl d':
-        key = 'page down'
+        return 'page down'
 
     if key == 'G':
-        key = 'end'
+        return 'end'
 
     return key

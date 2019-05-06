@@ -1,8 +1,0 @@
-# Show trigger info
-key:enter
-key:/
-key_sequence:sakila
-key:enter:2
-key:j:2
-key:enter
-key:ctrl p

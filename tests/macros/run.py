@@ -1,52 +1,79 @@
 #!/usr/bin/env python3
+
 import os
 import sys
-import argparse
+import tempfile
+import time
+from multiprocessing import Process
 
 import mitzasql.constants as const
 
-macros = [
-        'create_first_session',
-        'connect_to_localhost_from_sessions_list',
-        'test_localhost_connection'
-        ]
+test_sessions_file = os.path.join(tempfile.gettempdir(),
+        'mitzasql-ui-test-sessions' + str(time.time()) + '.ini')
 
 def get_macro_path(name):
     macro_path = os.path.dirname(os.path.realpath(__file__))
     macro_path = os.path.sep.join([macro_path, name + '.txt'])
     return macro_path
 
-def create_first_session_handler():
-    macro_path = get_macro_path('create_first_session')
-    return (const.APP_NAME, '--sessions_file', '/dev/null', '--macro', macro_path)
+tests = [
+        {
+            'name': 'Show version',
+            'arguments': ['--version']
+        },
+        {
+            'name': 'Exit without creating a session',
+            'arguments': ['--macro', get_macro_path('01-exit-without-session'),
+                '--sessions_file', '/dev/null']
+        },
+        {
+            'name': 'Create session and exit',
+            'arguments': ['--macro', get_macro_path('02-create-session-and-exit'),
+                '--sessions_file', '/dev/null']
+        },
+        {
+            'name': 'Create 3 sessions, edit the 2nd and delete the 3rd',
+            'arguments': ['--macro', get_macro_path('03-create-edit-delete'),
+                '--sessions_file', '/dev/null']
+        },
+        {
+            'name': 'Create session and connect',
+            'arguments': ['--macro', get_macro_path('04-create-and-connect'),
+                '--sessions_file', test_sessions_file]
+        },
+        {
+            'name': 'Navigate the databases view',
+            'arguments': ['--macro', get_macro_path('05-navigate-db-view'),
+                '--sessions_file', test_sessions_file]
+        },
+        {
+            'name': 'Navigate the sakila database view',
+            'arguments': ['--macro', get_macro_path('06-navigate-sakila-db-view'),
+                '--sessions_file', test_sessions_file]
+        },
+    ]
 
-def test_localhost_connection_handler():
-    macro_path = get_macro_path('test_localhost_connection')
-    return (const.APP_NAME, '--macro', macro_path)
+class MitzasqlProcess(Process):
 
-def run_macro(name):
-    try:
-        handler = getattr(sys.modules[__name__], name + '_handler')
-        process_arguments = handler()
-    except AttributeError:
-        process_arguments = (const.APP_NAME, '--macro', get_macro_path(name))
-    sys.stdout.flush()
-    os.execvp(const.APP_NAME, process_arguments)
+    def __init__(self, arguments):
+        self.arguments = arguments
+        self.arguments.insert(0, const.APP_NAME)
+        super().__init__()
+
+    def run(self):
+        sys.stdout.flush()
+        os.execvp(const.APP_NAME, self.arguments)
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('macro', help='Run specific macro', nargs='?')
-    parser.add_argument('--list', help='Show configured macros',
-            action='store_true')
+    for test in tests:
+        print('Running "{0}"...'.format(test['name']))
 
-    args = parser.parse_args()
-    if args.list is False and args.macro is None:
-        parser.print_help()
-        sys.exit(0)
+        proc = MitzasqlProcess(test['arguments'])
+        proc.start()
+        proc.join(None)
 
-    if args.list:
-        print('\n'.join(macros))
-        sys.exit(1)
-
-    if args.macro:
-        run_macro(args.macro)
+        if proc.exitcode > 0:
+            print('Failed to run test "{0}" with arguments\n {1}'.format(test['name'],
+                test['arguments']), file=sys.stderr)
+            sys.exit(1)

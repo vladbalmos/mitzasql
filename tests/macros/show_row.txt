@@ -1,5 +1,0 @@
-# Show row
-key:enter
-key:/
-key_sequence:sakila
-key:enter:4

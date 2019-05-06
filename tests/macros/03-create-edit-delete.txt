@@ -1,0 +1,61 @@
+sleep:1
+key:y
+key_sequence:localhost
+key:tab
+key_sequence:tcp://localhost
+key:tab
+key_sequence:3306
+key:tab
+key_sequence:root
+key:f1
+
+key:n
+key_sequence:localhost+unix
+key:tab
+key_sequence:unix://localhost
+key:tab:2
+key_sequence:root
+key:f1
+
+key:n
+key_sequence:remote
+key:tab
+key_sequence:tcp://remote.host
+key:tab
+key_sequence:3306
+key:tab
+key_sequence:root
+key:f1
+
+key:j:2
+key:k:2
+# line below requires 2 presses when running from `run.py` script
+key:G:2
+key:ctrl u
+key:j
+key:e
+key:ctrl a
+key:meta f
+key:meta d
+key:ctrl e
+key_sequence:_2
+key:tab
+key:ctrl a
+key:meta d
+key_sequence:tcp:/
+key:tab
+key_sequence:3306
+key:f1
+
+sleep:0.5
+
+key:j
+key:d
+sleep:0.5
+key:j
+sleep:0.5
+key:d
+sleep:0.5
+key:d
+sleep:0.5
+key:q

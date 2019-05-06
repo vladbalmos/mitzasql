@@ -1,5 +1,3 @@
-# Create the first session
-sleep:2
 key:y
 key_sequence:localhost
 key:tab
@@ -8,8 +6,12 @@ key:tab
 key_sequence:3306
 key:tab
 key_sequence:root
-key:tab
-key_sequence:password
 key:f1
-sleep:1
-key:q
+key:enter
+sleep:0.5
+key:f10
+sleep:0.3
+key:c
+key:f10
+sleep:0.3
+key:k

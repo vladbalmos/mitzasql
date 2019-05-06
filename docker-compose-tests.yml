@@ -161,3 +161,7 @@ services:
 
 networks:
   mitzasql-test-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.2.5/24

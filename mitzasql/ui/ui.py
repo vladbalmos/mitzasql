@@ -93,6 +93,8 @@ def simulate_input_thread(fd, macro_file):
                 continue
             if input_type == 'key':
                 key = segments[0]
+                if key == 'space':
+                    key = ' '
                 if len(segments) == 2:
                     repetitions = int(segments[1])
                 else:

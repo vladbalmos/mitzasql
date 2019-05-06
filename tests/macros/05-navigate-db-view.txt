@@ -1,0 +1,43 @@
+key:enter
+sleep:1
+key:G
+key:g:2
+key:ctrl d
+key:ctrl u
+key:j:5
+key:k:2
+key_sequence:/sakila
+key:enter
+key_sequence:/inform
+key:enter
+key_sequence:/_x
+key:enter
+sleep:0.3
+key:f5
+sleep:0.1
+key:f2
+key_sequence:show full processlist
+key:f9
+key:j
+key:enter
+sleep:0.3
+key:esc:3
+key:f2
+key:ctrl f9
+key_sequence:show databases
+key:f9
+sleep:0.2
+key:esc
+key:ctrl p:2
+sleep:0.2
+key:ctrl n
+sleep:0.2
+key:ctrl f9
+key_sequence:invalid sql syntax
+key:f9
+sleep:1
+key:enter
+key:esc
+sleep:0.2
+key:f10
+key:k

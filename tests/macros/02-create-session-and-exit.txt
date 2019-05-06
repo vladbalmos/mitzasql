@@ -1,0 +1,28 @@
+sleep:1
+key:y
+key:f2
+key_sequence:localhost
+key:tab
+key_sequence:localhost
+key:f2
+key:ctrl a
+key_sequence:tcp://
+key:tab
+key_sequence:3306
+key:tab
+key:f2
+key_sequence:root
+key:tab
+key:f2
+key:tab
+key_sequence:inexistent_database
+key:f2
+key:ctrl w
+key:f1
+sleep:1
+key:q
+
+
+
+
+
