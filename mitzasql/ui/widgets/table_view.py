@@ -43,8 +43,8 @@ class CommandProcessor(BaseCmdProcessor):
                 ('gte', 'gte', self._filter_table('gte')),
                 ('in', 'in', self._filter_table('in')),
                 ('nin', 'nin', self._filter_table('nin')),
-                ('bt', 'between', self._filter_table('between')),
-                ('nbt', 'nbetween', self._filter_table('nbetween')),
+                # ('bt', 'between', self._filter_table('between')),
+                # ('nbt', 'nbetween', self._filter_table('nbetween')),
                 ('n', 'null', self._filter_table('null')),
                 ('nn', 'nnull', self._filter_table('nnull')),
                 ('empty', 'empty', self._filter_table('empty')),
@@ -235,16 +235,18 @@ class TableView(BaseDBView):
             if not len(values):
                 raise CommandError("Filter requires value")
             where = '`{0}` NOT IN ({1})'.format(column, values)
-        elif op == 'between':
-            values = list(map(str.strip, filter_val.split(' ')))
-            if len(values) != 2:
-                raise CommandError("Filter requires 2 values")
-            where = '{0} BETWEEN {1} AND {2}'.format(column, values[0], values[1])
-        elif op == 'nbetween':
-            values = list(map(str.strip, filter_val.split(' ')))
-            if len(values) != 2:
-                raise CommandError("Filter requires 2 values")
-            where = '{0} NOT BETWEEN {1} AND {2}'.format(column, values[0], values[1])
+        # Fix this
+        # elif op == 'between':
+            # raise RuntimeError(filter_val)
+            # values = list(map(str.strip, filter_val.split(' ')))
+            # if len(values) != 2:
+                # raise CommandError("Filter requires 2 values")
+            # where = '{0} BETWEEN {1} AND {2}'.format(column, values[0], values[1])
+        # elif op == 'nbetween':
+            # values = list(map(str.strip, filter_val.split(' ')))
+            # if len(values) != 2:
+                # raise CommandError("Filter requires 2 values")
+            # where = '{0} NOT BETWEEN {1} AND {2}'.format(column, values[0], values[1])
 
         self._model.filter(where)
 

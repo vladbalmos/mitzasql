@@ -24,6 +24,7 @@ import signal
 import time
 import threading
 import urwid
+import re
 
 from mitzasql.ui import theme
 from mitzasql.ui import main_loop as shared_main_loop
@@ -104,6 +105,14 @@ def simulate_input_thread(fd, macro_file):
                     time.sleep(0.08)
             if input_type == 'key_sequence':
                 sequence = ':'.join(segments)
+
+                # Parse for environment variables placeholders
+                matches = re.findall('({{.*?}})', sequence)
+                for match in matches:
+                    var_name = match[2:-2]
+                    var_value = os.getenv(var_name, '')
+                    sequence = sequence.replace(match, var_value)
+
                 for char in sequence:
                     os.write(fd, char.encode('utf8'))
                     time.sleep(0.05)

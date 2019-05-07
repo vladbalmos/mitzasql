@@ -62,14 +62,14 @@ filters = [
         'filter': ['nlike', 'address', '%hanoi%'],
         'count': 601
         },
-        {
-        'filter': ['between', 'address_id', '1', '4'],
-        'count': 4
-        },
-        {
-        'filter': ['nbetween', 'address_id', '1', '4'],
-        'count': 599
-        },
+        # {
+        # 'filter': ['between', 'address_id', '1', '4'],
+        # 'count': 4
+        # },
+        # {
+        # 'filter': ['nbetween', 'address_id', '1', '4'],
+        # 'count': 599
+        # },
         ]
 
 @pytest.fixture(params=filters)

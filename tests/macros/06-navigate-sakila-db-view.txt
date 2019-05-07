@@ -30,5 +30,17 @@ key:enter
 sleep:0.2
 key_sequence::resize Name -30
 key:enter
+key:k
+key:enter
+sleep:1
+key:esc
+key:j:2
+key:enter
+sleep:1
+key:esc
+key:j
+key:enter
+sleep:1
+key:esc
 key:f10
 key:k

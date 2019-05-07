@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+DB_HOST=localhost DB_PORT=3306 ./run.py
+"""
 
 import os
 import sys
@@ -49,6 +52,11 @@ tests = [
         {
             'name': 'Navigate the sakila database view',
             'arguments': ['--macro', get_macro_path('06-navigate-sakila-db-view'),
+                '--sessions_file', test_sessions_file]
+        },
+        {
+            'name': 'Navigate the sakila tables',
+            'arguments': ['--macro', get_macro_path('07-navigate-sakila-tables'),
                 '--sessions_file', test_sessions_file]
         },
     ]

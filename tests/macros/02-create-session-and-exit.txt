@@ -3,7 +3,7 @@ key:y
 key:f2
 key_sequence:localhost
 key:tab
-key_sequence:localhost
+key_sequence:{{DB_HOST}}
 key:f2
 key:ctrl a
 key_sequence:tcp://

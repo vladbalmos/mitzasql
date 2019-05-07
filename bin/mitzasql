@@ -48,7 +48,7 @@ def create_new_session(args, error_callback):
         error_callback(u'--host must start with "tcp://" or "unix://"')
         sys.exit(1)
 
-    if len(args.host.split('://').pop()) is 0:
+    if len(args.host.split('://').pop()) == 0:
         error_callback(u'--host must not be empty')
         sys.exit(1)
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Run the unit tests against different versions of dockerized mysql servers
+# and python versions
+
 if [ ! -f .env ]; then
     echo 'Missing .env file'
     exit 1

@@ -1,0 +1,102 @@
+key:enter
+key_sequence:/sakila
+key:enter:2
+key_sequence:/address
+key:enter:2
+key:ctrl d:27
+sleep:0.5
+key:g:2
+key:$
+sleep:0.5
+key:0
+key:l:3
+key:h:3
+key:enter
+sleep:0.5
+key:esc
+key_sequence:21j
+key:enter
+sleep:0.5
+key:esc
+key:l
+key_sequence::sor
+key:tab
+key:space
+key_sequence:distri
+key:tab
+key:space
+key_sequence:asc
+key:enter
+key:G
+key:k:10
+key:enter
+sleep:0.5
+key:esc
+key_sequence::eq address_id 45
+key:enter
+key:$
+key:enter
+sleep:0.5
+key:esc
+key:ctrl o
+key_sequence:film
+key:tab
+key:G
+key:enter
+key:G
+key:enter
+sleep:0.5
+key:esc
+key:ctrl o
+key_sequence:addre
+key:enter
+key_sequence::neq address_id 1
+key:enter
+sleep:0.5
+key_sequence::empty postal_co
+key:tab
+key:enter
+key_sequence::lte city_id 4
+key:enter
+key_sequence::nempty district
+key:enter
+key_sequence::like address %manor%
+key:enter
+key_sequence::nlike district %haryana%
+key:enter
+key_sequence::null address2
+key:enter
+key_sequence::nnull address2
+key:enter
+key_sequence::clearfil
+key:tab
+key:enter
+key_sequence::in city_id 300,576,38
+key:enter
+sleep:1
+key:ctrl o
+key_sequence:staff
+key:enter
+key_sequence:10l
+key:enter
+sleep:1
+key:esc
+key:f2
+key_sequence:select * from address where district = 'Alberta'
+key:f9
+key:esc
+key:enter
+sleep:0.5
+key:esc
+key:f2
+key:ctrl f9
+key_sequence:select count(*) from address where city_id = 300
+key:f9
+key:esc:2
+key:ctrl o
+key_sequence:film
+key:enter:2
+sleep:1
+key:esc
+key:f10
+key:k
