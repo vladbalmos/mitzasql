@@ -1,0 +1,4 @@
+augroup HTMLLangSettings
+    autocmd!
+    autocmd Filetype html setlocal ts=2 sw=2 sts=0
+augroup END
