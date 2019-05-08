@@ -1,5 +1,5 @@
 # About
-MitzaSQL is a Python3 TUI MySQL client which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
+MitzaSQL is a Python3 TUI MySQL client for Linux which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
 
 * Manage multiple sessions
 * View databases
@@ -13,6 +13,14 @@ MitzaSQL is a Python3 TUI MySQL client which aims to provide an easy to use cons
 * Macros support
 
 MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL).
+
+### Demo
+[![asciicast](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl.svg)](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl)
+
+# System requirements
+* Linux
+* Python3 (3.5 - 3.8)
+* MySQL (5.5 - 8)
 
 # Security
 By default MitzaSQL stores connection credentials in plain text files in your home directory. If security is a concern you could store the file in an encrypted partition/directory and specify the path to the session file when the program starts using the `--sessions_file /path/to/sessions.ini` flag. Another option would be not to persist the connection credentials when creating a new session.
