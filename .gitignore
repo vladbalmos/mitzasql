@@ -8,3 +8,5 @@ tests/db-fixtures
 htmlcov
 tests.log
 .env
+build
+dist

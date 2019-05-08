@@ -64,10 +64,12 @@ class InputProcessor():
                 'left': 'left',
                 '0': 'left',
                 'h': 'left',
+                'ctrl left': 'left',
 
                 'right': 'right',
                 '$': 'right',
-                'l': 'right'
+                'l': 'right',
+                'ctrl right': 'right'
                 }
 
         self._single_offset_keys = ['up', 'down', 'left', 'right', 'j', 'k', 'h', 'l']

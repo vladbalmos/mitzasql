@@ -65,7 +65,8 @@ class CommandProcessor(BaseCmdProcessor):
             column = args[0]
             value = 1
         else:
-            column, value = args
+            column, *value = args
+            value = ' '.join(value)
         try:
             self._table_view.resize_tbl_col(column, value)
         except CommandError as e:
@@ -87,7 +88,8 @@ class CommandProcessor(BaseCmdProcessor):
             column = args[0]
             direction = 'asc'
         else:
-            column, direction = args
+            column, *direction = args
+            direction = ' '.join(direction)
         try:
             self._table_view.sort(column, direction)
         except CommandError as e:

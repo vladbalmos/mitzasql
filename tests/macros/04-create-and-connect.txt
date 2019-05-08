@@ -1,7 +1,7 @@
 key:y
 key_sequence:localhost
 key:tab
-key_sequence:tcp://{{DB_HOST}}
+key_sequence:{{DB_HOST}}
 key:tab
 key_sequence:3306
 key:tab

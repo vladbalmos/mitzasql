@@ -27,11 +27,12 @@ default_theme = [
         ('action_bar', 'black', 'light gray', '', 'h250', 'g20'),
         ('action_bar:action', 'white', 'dark blue', '', 'g80', 'g30'),
         ('action_bar:action_key', 'light red,bold', 'dark blue', '', 'h122,bold', 'g30'),
-        ('action_bar:content', 'light gray', '', '', 'light gray', 'g10'),
+        # ('action_bar:content', 'light gray', '', '', 'light gray', ''),
+        ('action_bar:content', '', '', '', '', ''),
 
         ('linebox', '', '', '', 'h186', ''),
 
-        ('session_header', 'black', 'light gray', '', 'h186,bold', 'g20'),
+        ('session_header', 'light red', '', '', 'h186,bold', 'g20'),
 
         ('command_bar', 'white', 'dark blue', '', 'h117', 'g20'),
 

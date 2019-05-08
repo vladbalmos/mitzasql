@@ -1,0 +1,17 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@import "minima";
+
+table, table code {
+    font-size: ($base-font-size - 2);
+}
+
+thead {
+    font-weight: bold;
+}
+
+sup {
+    font-size: ($base-font-size - 1);
+}

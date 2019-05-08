@@ -52,7 +52,8 @@ class CommandProcessor(BaseCmdProcessor, SearchCmdProcessor):
             column = args[0]
             value = 1
         else:
-            column, value = args
+            column, *value = args
+            value = ' '.join(value)
         try:
             self._db_tables_view.resize_tbl_col(column, value)
         except CommandError as e:

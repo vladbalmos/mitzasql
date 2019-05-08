@@ -1,0 +1,147 @@
+Keyboard shortcuts.
+
+The user interface supports the following methods for performing actions:
+
+- keyboard shortcuts
+- VIM-like keyboard shortcuts
+- VIM-like commands
+- action keys
+
+For more information please visit the user manual page at:
+https://vladbalmos.github.io/mitzasql/user-manual
+
+
+Keys(s)            | Action                             | VIM emulation | Context
+=============================================================================================================
+Arrow keys         | Scroll / move                      |               | all
+-------------------------------------------------------------------------------------------------------------
+home / end         | Scroll to top / bottom             |               | all
+-------------------------------------------------------------------------------------------------------------
+page up / down     | Scroll on page up / down           |               | all
+-------------------------------------------------------------------------------------------------------------
+ctrl left / right  | Go to first / last column          |               | tables
+-------------------------------------------------------------------------------------------------------------
+j / k / h / l      | Scroll / move down / up / left /   | yes           | all except
+                   | right                              |               | text inputs
+-------------------------------------------------------------------------------------------------------------
+ctrl u / d         | Scroll one page up / down          | yes           | all except text inputs
+-------------------------------------------------------------------------------------------------------------
+gg                 | Scroll to top                      | yes           | tables, lists
+-------------------------------------------------------------------------------------------------------------
+G                  | Scroll to bottom                   | yes           | tables
+-------------------------------------------------------------------------------------------------------------
+$                  | Go to last column                  | yes           | tables
+-------------------------------------------------------------------------------------------------------------
+enter              | Select / change context            |               | all
+-------------------------------------------------------------------------------------------------------------
+esc                | Exit context / go back             |               | all
+-------------------------------------------------------------------------------------------------------------
+:                  | Enter command mode                 | yes           | tables
+-------------------------------------------------------------------------------------------------------------
+q:                 | Enter command mode and show last   | yes           | tables
+                   | command                            |               |
+-------------------------------------------------------------------------------------------------------------
+ctrl p             | Go back in the command history     | yes           | command mode
+-------------------------------------------------------------------------------------------------------------
+ctrl n             | Go forward in the command history  | yes           | command mode
+-------------------------------------------------------------------------------------------------------------
+n / p              | Go to next or previous search      | yes           | search mode
+                   | result                             |               |
+-------------------------------------------------------------------------------------------------------------
+/                  | Enter search mode                  | yes           | server view, database view
+-------------------------------------------------------------------------------------------------------------
+tab                | Autocomplete command / argument    | yes           | all contexts which support commands
+-------------------------------------------------------------------------------------------------------------
+ctrl o             | Open the "change table" popup      |               | database table
+
+
+Actions keys are equivalent to regular buttons found in a conventional user interface. To perform an action press a specific key highlighted with a different color than the rest of the text.
+
+Some of the VIM-style keys support VIM motions:
+
+- 10l will scroll 10 columns to the right
+- 25j will scroll down 25 rows
+
+VIM-like commands
+=================
+Commands support autocompletion for the command name and the first argument. For example, typing `:res` and pressing `tab` will autocomplete the `:resize` command. Pressing `tab` again will autocomplete the column name.  
+To exit command mode press `esc`.
+
+Command                           | Action                                   | Context
+=============================================================================================================
+:q / :quit                        | Exit program                             | all except server view
+-------------------------------------------------------------------------------------------------------------
+/[keyword]                        | Search database or table. Press `n` or   | server view, database view
+                                  | `p` to go to the next or previous search |
+                                  | result                                   |
+-------------------------------------------------------------------------------------------------------------
+:resize [column name] [increment] | Resize [column name] by [increment].     | tables
+                                  | [increment] can be a positive or a       |
+                                  | negative value: Example:                 |
+                                  |   :resize date 30                        |
+                                  |   :resize date -10                       |
+-------------------------------------------------------------------------------------------------------------
+:sort [column name] [asc|desc]    | Sort [column name] asceding or descending| all except server view
+-------------------------------------------------------------------------------------------------------------
+
+The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted ('value').
+
+Command                           | Action                                   | SQL WHERE clause
+=============================================================================================================
+:eq [column] [value]              | Find row where [column] equals [value].  | column = value
+                                  | Example: :eq id 100                      |
+                                  | Will find the row with id 100. If the    |
+                                  | column is of type **string** make sure   |
+                                  | you quote the value.
+-------------------------------------------------------------------------------------------------------------
+:neq [column] [value]             | Find row where [column] doesn't equals   | column != value
+                                  | [value]                                  |
+-------------------------------------------------------------------------------------------------------------
+:lt [column] [value]              | Find the rows where [column] is lower    | column < value
+                                  | than [value]                             |
+-------------------------------------------------------------------------------------------------------------
+:lte [column] [value]             | Find the rows where [column] is lower or | column <= value
+                                  | equal than [value]                       |
+-------------------------------------------------------------------------------------------------------------
+:gt [column] [value]              | Find the rows where [column] is greater  | column > value
+                                  | than [value]                             |
+-------------------------------------------------------------------------------------------------------------
+:gte  [column] [value]            | Find the rows where [column] is greater  | column >= value
+                                  | or equal than [value]                    |
+-------------------------------------------------------------------------------------------------------------
+:in [column] [val1, val2, val3]   | Find the rows where [column] is in set   | column in (val1, val2, val3)
+-------------------------------------------------------------------------------------------------------------
+:nin [column] [val1, val2, val3]  | Find the rows where [column] is not in   | column not in (val1, val2, val3)
+                                  | set                                      |
+-------------------------------------------------------------------------------------------------------------
+:null [column]                    | Find the rows where [column] is null     | column is null
+-------------------------------------------------------------------------------------------------------------
+:nnull [column]                   | Find the rows where [column] is not null | column is not null
+-------------------------------------------------------------------------------------------------------------
+:empty [column]                   | Find the rows where [column] is empty    | column = ''
+-------------------------------------------------------------------------------------------------------------
+:nempty [column]                  | Find the rows where [column] is not empty| column != ''
+-------------------------------------------------------------------------------------------------------------
+:like [column] [value]           | Find the rows where [column] contains     | column LIKE 'value'
+                                 | [value]. **This command quotes the value  |
+                                 | automatically. Manually quoting the value |
+                                 | will most likely yield unwanted results**.|
+                                 | You can use %value% to search for         |
+                                 | substrings.                               |
+-------------------------------------------------------------------------------------------------------------
+:nlike [column] [value]          | Find the rows where [column] doesn't      | column NOT LIKE 'value'
+                                 | contains [value]                          |
+-------------------------------------------------------------------------------------------------------------
+:clearfilters                    | Clear the previously applied filter       |
+                                 | command.                                  |
+
+Query Editor
+============
+Pressing `F2` will open the SQL query editor.
+
+Text inputs
+===========
+All the text inputs support basic Emacs keyboard shortcuts.
+
+For more information please visit the user manual page at:
+https://vladbalmos.github.io/mitzasql/user-manual
