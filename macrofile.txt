@@ -17,3 +17,6 @@ key_sequence:localhost
 key:f2
 sleep:1
 key:f1
+
+# Type the value of the ENV_VARIABLE_PLACEHOLDER env variable
+key_sequence:{{ENV_VARIABLE_PLACEHOLDER}}

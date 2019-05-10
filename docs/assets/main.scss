@@ -3,3 +3,7 @@
 ---
 
 @import "minima";
+
+table, table code {
+    font-size: ($base-font-size - 4);
+}
