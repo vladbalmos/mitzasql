@@ -4,3 +4,29 @@
 
 layout: home
 ---
+
+Version v1
+
+Free mit license
+
+What is it (link to screenshots)
+
+Project goals
+
+Best served with tmux & vim
+
+Windows & MacOS ports
+
+Planned features
+
+Known issues
+
+Security
+
+Bugs
+
+Contributions
+
+Thanks heidisql
+
+Author

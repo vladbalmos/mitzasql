@@ -394,7 +394,7 @@ Pressing `F2` will open the SQL query editor.
 </table>
 
 ## Text inputs
-All the text inputs support basic EMACS keyboard shortcuts.
+All the text inputs support basic Emacs keyboard shortcuts.
 
 ## Macros
 The main use case for the macro functionality is testing the user interface but it can be used to script the interface. The functionality is basic and might be buggy. To create a macro use the [macrofile.txt](https://github.com/vladbalmos/mitzasql/blob/master/macrofile.txt) as template and run the program with the `--macro` option:

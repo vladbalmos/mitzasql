@@ -5,5 +5,9 @@
 @import "minima";
 
 table, table code {
-    font-size: ($base-font-size - 4);
+    font-size: ($base-font-size - 2);
+}
+
+thead {
+    font-weight: bold;
 }
