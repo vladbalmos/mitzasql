@@ -74,7 +74,7 @@ The user interface supports the following methods for performing actions:
         </tr>
         <tr>
             <td>page up / down</td>
-            <td colspan="2">Scroll one page up/down</td>
+            <td colspan="2">Scroll one page up / down</td>
             <td>all</td>
         </tr>
         <tr>
