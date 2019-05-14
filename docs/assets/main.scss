@@ -11,3 +11,7 @@ table, table code {
 thead {
     font-weight: bold;
 }
+
+sup {
+    font-size: ($base-font-size - 1);
+}
