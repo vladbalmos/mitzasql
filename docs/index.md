@@ -5,7 +5,7 @@
 layout: home
 ---
 
-## About ##
+## About
 
 MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
 
