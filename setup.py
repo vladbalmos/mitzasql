@@ -37,10 +37,10 @@ setuptools.setup(
         url='https://github.com/vladbalmos/mitzasql',
         project_urls={
             'Bug Tracker': 'https://github.com/vladbalmos/mitzasql/issues',
-            'Website': 'https://vladbalmos.github.io/mitzasql/user-manual'
+            'Website': 'https://vladbalmos.github.io/mitzasql'
         },
         packages=setuptools.find_packages(),
-        keywords='tui cli ncurses mysql client',
+        keywords='tui cli ncurses console mysql client',
         package_data={
             'mitzasql': ['ui/widgets/help.txt']
         },
