@@ -20,13 +20,7 @@ Supported MySQL versions:
 
 ## Instalation ##
 
-User installation:
-
     pip3 install --user mitzasql
-
-System wide installation:
-
-    sudo pip3 install mitzasql
 
 *On systems which have a default Python 3 installation replace `pip3` with `pip`.*
 
@@ -41,6 +35,45 @@ You can override the default location of the sessions file using the `--sessions
     mitzasql
 
 Run `mitzasql --help` to see all the available options.
+
+### Command line options
+
+<table>
+    <thead>
+        <tr>
+            <td width="40%">Option</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>--session=[session_name]</td>
+            <td>Skip the 'select session' screen and connect to the previously saved 'session_name'</td>
+        </tr>
+        <tr>
+            <td>--list</td>
+            <td>Show all the saved sessions</td>
+        </tr>
+        <tr>
+            <td>
+                --host=[host]<br />
+                --port=[port]<br />
+                --user=[user]<br />
+                --password=[password]<br />
+                --database=[database]
+            </td>
+            <td>Connect to new database server</td>
+        </tr>
+        <tr>
+            <td>--macro=[/path/to/macro/file]</td>
+            <td>Run macro</td>
+        </tr>
+        <tr>
+            <td>--sessions_file=[/path/to/sessions/file]</td>
+            <td>Store the saved sessions in this file</td>
+        </tr>
+    </tbody>
+</table>
 
 ## Keyboard shortcuts ##
 

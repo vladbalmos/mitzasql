@@ -7,6 +7,9 @@ build:
 publish-test-package: build
 	twine upload --repository testpypi dist/*
 
+publish: build
+	twine upload dist/*
+
 install-test-package:
 	pip3 install --upgrade --user --index-url https://test.pypi.org/simple \
 		--extra-index-url https://pypi.python.org/simple mitzasql
