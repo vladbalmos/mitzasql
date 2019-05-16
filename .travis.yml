@@ -1,0 +1,16 @@
+dist: xenial
+before_install:
+  - docker-compose --version
+  - docker --version
+language: python
+python:
+  - "3.6"
+install:
+  - echo 'Nothing to install'
+before_script:
+  - cp env.template .env
+script:
+  - ./test-mitzasql.sh
+  - ./test-mitzasql-ui.sh mysql57 py36
+after_failure:
+  - cat tests.log
