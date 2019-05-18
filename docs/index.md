@@ -9,20 +9,20 @@ layout: home
 
 ## About
 
-MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an easy to use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
+MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an easy-to-use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read-only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
 
 * Manage multiple sessions
 * View databases
 * View list of tables, sql views & stored procedures in a database
 * View rows in a table or sql view:
 * Easily sort table data
-* Filter table data using VIM like commands (`:like`, `:gt`, `:lt`, `:in`...)
+* Filter table data using VIM-like commands (`:like`, `:gt`, `:lt`, `:in`...)
 * SQL Query editor
 * VIM style keyboard shortcuts
 * VIM style commands with autocomplete support
 * Macros support
 
-MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL) and is licensed under [MIT](https://opensource.org/licenses/MIT).  
+MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL) and its licensed under [MIT](https://opensource.org/licenses/MIT).  
 Demo and screenshots are available [here]({{ "/screenshots" | relative_url }}).
 
 ## Project goals
