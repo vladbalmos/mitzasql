@@ -17,9 +17,22 @@ FILE=docker-compose-tests.yml
 docker-compose -f $FILE build
 docker-compose -f $FILE up -d
 
+if [ -z "$1" ]; then
+    mysql_versions='mysql55 mysql56 mysql57 mysql8'
+else
+    mysql_versions="$1"
+fi
+
+if [ -z "$2" ]; then
+    python_versions='py35 py36 py37 py38'
+else
+    python_versions="$2"
+fi
+
+
 # Wait for all mysql containers to finish initialization
 sleep 5
-for version in mysql55 mysql56 mysql57 mysql8; do
+for version in $mysql_versions; do
     name=$(docker-compose -f $FILE ps -q $version)
     status=$(docker inspect --format='{{.State.Health}}' $name | grep -o healthy)
 
@@ -32,88 +45,15 @@ done
 
 echo 'All done! Running tests...'
 
-echo "py35 - mysql55"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql55' python35 \
-    bash -c 'source .tox/py35/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py35 - mysql56"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql56' python35 \
-    bash -c 'source .tox/py35/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py35 - mysql57"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql57' python35 \
-    bash -c 'source .tox/py35/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py35 - mysql8"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql8' python35 \
-    bash -c 'source .tox/py35/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-
-echo "py36 - mysql55"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql55' python36 \
-    bash -c 'source .tox/py36/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py36 - mysql56"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql56' python36 \
-    bash -c 'source .tox/py36/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py36 - mysql57"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql57' python36 \
-    bash -c 'source .tox/py36/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py36 - mysql8"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql8' python36 \
-    bash -c 'source .tox/py36/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-
-echo "py37 - mysql55"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql55' python37 \
-    bash -c 'source .tox/py37/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py37 - mysql56"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql56' python37 \
-    bash -c 'source .tox/py37/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py37 - mysql57"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql57' python37 \
-    bash -c 'source .tox/py37/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py37 - mysql8"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql8' python37 \
-    bash -c 'source .tox/py37/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-
-echo "py38 - mysql55"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql55' python38 \
-    bash -c 'source .tox/py38/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py38 - mysql56"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql56' python38 \
-    bash -c 'source .tox/py38/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py38 - mysql57"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql57' python38 \
-    bash -c 'source .tox/py38/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
-echo "py38 - mysql8"
-docker-compose -f $FILE run --rm -e DB_HOST='mysql8' python38 \
-    bash -c 'source .tox/py38/bin/activate && \
-    cd tests/macros && \
-    ./run.py' || exit 1
+for py in $python_versions; do
+    for my in $mysql_versions; do
+        echo "$py - $my"
+        service_name="python${py/py/}"
+        docker-compose -f $FILE run --rm -e DB_HOST='tcp://'$my $service_name \
+            bash -c "source .tox/$py/bin/activate && \
+            cd tests/macros && \
+            ./run.py" || exit 1
+    done
+done
 
 docker-compose -f $FILE stop

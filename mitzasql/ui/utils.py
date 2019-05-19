@@ -18,7 +18,11 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import time
 import urwid
+
+last_key_press = None
+pending_vim_command = None
 
 def orig_w(widget):
     if isinstance(widget, urwid.AttrMap):
@@ -26,6 +30,9 @@ def orig_w(widget):
     return widget
 
 def vim2emacs_translation(key):
+    global last_key_press
+    global pending_vim_command
+
     if key == 'j' or key == 'J':
         return 'down'
 
@@ -40,5 +47,18 @@ def vim2emacs_translation(key):
 
     if key == 'G':
         return 'end'
+
+    if key == 'g' and not pending_vim_command:
+        last_key_press = time.time()
+        pending_vim_command = 'g'
+        return None
+
+    if key == 'g' and pending_vim_command:
+        diff = time.time() - last_key_press
+        last_key_press = None
+        pending_vim_command = None
+
+        if diff < 0.25:
+            return 'home'
 
     return key

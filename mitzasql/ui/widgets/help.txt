@@ -59,8 +59,8 @@ Actions keys are equivalent to regular buttons found in a conventional user inte
 
 Some of the VIM-style keys support VIM motions:
 
-- `10l` will scroll 10 columns to the right
-- `25j` will scroll down 25 rows
+- 10l will scroll 10 columns to the right
+- 25j will scroll down 25 rows
 
 VIM-like commands
 =================
@@ -84,7 +84,7 @@ Command                           | Action                                   | C
 :sort [column name] [asc|desc]    | Sort [column name] asceding or descending| all except server view
 -------------------------------------------------------------------------------------------------------------
 
-The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted (`'value'`).
+The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted ('value').
 
 Command                           | Action                                   | SQL WHERE clause
 =============================================================================================================

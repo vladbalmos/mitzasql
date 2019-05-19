@@ -30,20 +30,29 @@ setuptools.setup(
         version=__version__,
         author='Vlad Balmos',
         author_email='vladbalmos@yahoo.com',
-        description='Ncurses MySQL client',
-        long_description=long_description,
         long_description_content_type='text/markdown',
+        description='Text user interface MySQL client',
+        long_description=long_description,
+        license="MIT",
         url='https://github.com/vladbalmos/mitzasql',
+        project_urls={
+            'Bug Tracker': 'https://github.com/vladbalmos/mitzasql/issues',
+            'Website': 'https://vladbalmos.github.io/mitzasql'
+        },
         packages=setuptools.find_packages(),
+        keywords='tui cli ncurses console mysql client',
+        package_data={
+            'mitzasql': ['ui/widgets/help.txt']
+        },
         classifiers=[
             'Programming Language :: Python :: 3',
             'License :: OSI Approved :: MIT License',
             'Operating System :: POSIX :: Linux',
         ],
         install_requires=[
-            'urwid >=2.0.1, <3',
-            'mysql-connector-python >=8.0.15, <9',
-            'appdirs >=1.4.3, <1.5'
+            'urwid ==2.0.1',
+            'mysql-connector-python ==8.0.16',
+            'appdirs ==1.4.3'
         ],
         scripts=['bin/mitzasql']
 )

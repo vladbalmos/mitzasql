@@ -3,10 +3,10 @@ key:y
 key:f2
 key_sequence:localhost
 key:tab
-key_sequence:{{DB_HOST}}
+key_sequence:bad{{DB_HOST}}
 key:f2
 key:ctrl a
-key_sequence:tcp://
+key:delete:3
 key:tab
 key_sequence:3306
 key:tab
