@@ -18,25 +18,27 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import os
 import urwid
 
-from mitzasql.ui.widgets.info_widget import InfoWidget
+import mitzasql.ui.utils as utils
 
-class HelpWidget(InfoWidget):
+class InfoWidget(urwid.ListBox):
+    SIGNAL_ESCAPE = 'escape'
+    SIGNAL_QUIT = 'quit'
 
-    def __init__(self):
-        path = os.path.join(os.path.dirname(__file__), 'help.txt')
-        try:
-            with open(path) as file:
-                help = file.read()
-        except:
-            help = u'Error: Unable to open help file'
-        contents = [urwid.AttrMap(urwid.Text(help), 'default'),
-                # Empty line is required, or else the 'end' key won't work
-                urwid.AttrMap(urwid.Text(''), 'default')]
+    def __init__(self, contents):
         super().__init__(contents)
+        urwid.register_signal(self.__class__, [self.SIGNAL_ESCAPE, self.SIGNAL_QUIT])
 
-    @property
-    def name(self):
-        return u'Help'
+    def keypress(self, size, key):
+        key = utils.vim2emacs_translation(key)
+        if key == 'esc':
+            urwid.emit_signal(self, self.SIGNAL_ESCAPE, self)
+            return
+
+        if key == 'f10':
+            urwid.emit_signal(self, self.SIGNAL_QUIT, self)
+            return
+
+        return super().keypress(size, key)
+

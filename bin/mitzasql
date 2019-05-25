@@ -59,13 +59,13 @@ def create_new_session(args, error_callback):
     connection_settings = {
             'host': args.host,
             'port': args.port,
-            'user': args.user,
+            'username': args.user,
             'password': args.password or '',
             'database': args.database or ''
             }
     session_name = 'session_at_{0}'.format(str(time.time()).split('.')[0])
     SessionsRegistry.get_instance().create_session(session_name, connection_settings)
-    App.run(session=session_name)
+    App.run(session_name=session_name)
 
 if __name__  == '__main__':
     parser = argparse.ArgumentParser()

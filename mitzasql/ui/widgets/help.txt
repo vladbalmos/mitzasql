@@ -129,6 +129,20 @@ Command                           | Action                                   | S
                                  | You can use %value% to search for         |
                                  | substrings.                               |
 -------------------------------------------------------------------------------------------------------------
+:between [col] [v1] [v2]         | Find the rows where [column] value is     | column BETWEEN 'v1' 'v2'
+                                 | between [v1] and [v2]. **If you are       |
+                                 | filtering a date column make sure you are |
+                                 | quoting the values**. Ex:                 |
+                                 | :between last_update '2017-09-09 12:20'   |
+                                 | '2018-09-02 24:32'                        |
+-------------------------------------------------------------------------------------------------------------
+:nbetween [col] [v1] [v2]        | Find the rows where [column] value is not | column NOT BETWEEN 'v1' 'v2'
+                                 | between [v1] and [v2]. **If you are       |
+                                 | filtering a date column make sure you are |
+                                 | quoting the values**. Ex:                 |
+                                 | :nbetween last_update '2017-09-09 12:20'  |
+                                 | '2018-09-02 24:32'                        |
+-------------------------------------------------------------------------------------------------------------
 :nlike [column] [value]          | Find the rows where [column] doesn't      | column NOT LIKE 'value'
                                  | contains [value]                          |
 -------------------------------------------------------------------------------------------------------------
