@@ -94,12 +94,17 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
             callback()
         return fn
 
-    def show_quit_dialog(self, on_no):
+    def show_quit_dialog(self, on_no=None):
         def factory_method():
             dialog = QuitDialog()
             urwid.connect_signal(dialog, dialog.SIGNAL_OK, self.quit)
-            urwid.connect_signal(dialog, dialog.SIGNAL_CANCEL,
-                    self.close_pop_up_then(on_no))
+
+            if on_no is not None:
+                urwid.connect_signal(dialog, dialog.SIGNAL_CANCEL,
+                        self.close_pop_up_then(on_no))
+            else:
+                urwid.connect_signal(dialog, dialog.SIGNAL_CANCEL,
+                        self.close_pop_up)
             return urwid.Filler(dialog)
         self._popup_factory_method = factory_method
         return self.open_pop_up()
@@ -123,6 +128,8 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         def factory_method():
             dialog = urwid.AttrMap(urwid.LineBox(widget, title=widget.name), 'linebox')
             urwid.connect_signal(widget, widget.SIGNAL_ESCAPE, self.close_pop_up)
+            urwid.connect_signal(widget, widget.SIGNAL_QUIT,
+                    self.close_pop_up_then(self.show_quit_dialog))
             return dialog
         self._popup_factory_method = factory_method
         result = self.open_pop_up()

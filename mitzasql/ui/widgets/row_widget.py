@@ -20,29 +20,18 @@
 
 import urwid
 
-import mitzasql.ui.utils as utils
+from mitzasql.ui.widgets.info_widget import InfoWidget
 
-class RowWidget(urwid.ListBox):
-    SIGNAL_ESCAPE = 'escape'
-
+class RowWidget(InfoWidget):
     def __init__(self, row, columns):
         self._row = row;
         self._columns = columns
         contents = self._create_contents()
         super().__init__([contents])
-        urwid.register_signal(self.__class__, [self.SIGNAL_ESCAPE])
 
     @property
     def name(self):
         return u'Row data'
-
-    def keypress(self, size, key):
-        key = utils.vim2emacs_translation(key)
-        if key == 'esc':
-            urwid.emit_signal(self, self.SIGNAL_ESCAPE, self)
-            return
-
-        return super().keypress(size, key)
 
     def _create_contents(self):
         grid = []
