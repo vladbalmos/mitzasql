@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add :between, :nbetween filter command
+
 ### Changed
 - Add explicit dependencies to requirements.txt
+- Update user manual
 
 ### Fixed
 - Fix connect using command line arguments bug
