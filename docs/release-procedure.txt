@@ -8,7 +8,7 @@
 
 6. Test package using testpypi:
 
-    make publish-test-package
+    make publish-test-package && make install-test-package
 
 7. Publish package:
 
