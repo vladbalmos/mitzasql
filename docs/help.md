@@ -387,6 +387,20 @@ The following commands are available only when browsing a MySQL table or view an
             <td>column NOT LIKE 'value'</td>
         </tr>
         <tr>
+            <td>:between [column] [value1] [value2]</td>
+            <td>
+                Find the rows where [column] value is between [value1] and [value2]. <strong>If you are filtering a date column make sure you are quoting the values</strong>. Ex: :between last_update '2017-09-09 12:20' '2018-09-02 24:32'
+            </td>
+            <td>column BETWEEN 'value1' AND 'value2'</td>
+        </tr>
+        <tr>
+            <td>:nbetween [column] [value1] [value2]</td>
+            <td>
+                Find the rows where [column] value is not between [value1] and [value2]. <strong>If you are filtering a date column make sure you are quoting the values</strong>. Ex: :between last_update '2017-09-09 12:20' '2018-09-02 24:32'
+            </td>
+            <td>column NOT BETWEEN 'value1' AND 'value2'</td>
+        </tr>
+        <tr>
             <td>:clearfilters</td>
             <td>
                 Clear the previously applied filter command.

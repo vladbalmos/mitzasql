@@ -22,11 +22,12 @@ from mitzasql.logger import LoggerMixin
 
 class StateMachine(LoggerMixin):
     """Finite state machine implementation"""
-    def __init__(self, name):
+    def __init__(self, name, disable_logging=False):
         self._name = name
         self._handlers = {}
         self._transition_table = {}
         self._current_state = None
+        self._disable_logging = disable_logging
         self.set_log_prefix('FSM')
 
     def add_state(self, name, handler, transition_table=None):
@@ -67,5 +68,7 @@ class StateMachine(LoggerMixin):
         self.run(*args, **kwargs)
 
     def _log(self, message, *args):
+        if self._disable_logging:
+            return
         message = '"{0}": {1}'.format(self._name, message)
         self.log_debug(message, *args)

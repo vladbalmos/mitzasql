@@ -1,3 +1,5 @@
 urwid == 2.0.1
 mysql-connector-python == 8.0.16
 appdirs == 1.4.3
+pudb
+pytest-pudb
