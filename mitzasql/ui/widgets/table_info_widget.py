@@ -104,4 +104,5 @@ class TableInfoWidget(urwid.ListBox):
         body = []
         body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['create_code']), 'default'))
+        body.append(urwid.Text(''))
         return body

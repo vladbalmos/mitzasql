@@ -127,4 +127,5 @@ class ProcedureWidget(urwid.ListBox):
             body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['ROUTINE_DEFINITION']),
             'default'))
+        body.append(urwid.Text(''))
         return body

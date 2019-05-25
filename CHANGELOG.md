@@ -14,4 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update user manual
 
 ### Fixed
+- Fix `end` key scrolling issue (#75)
 - Fix connect using command line arguments bug

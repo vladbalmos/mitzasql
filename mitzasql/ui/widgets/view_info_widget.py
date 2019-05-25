@@ -80,4 +80,5 @@ class ViewInfoWidget(urwid.ListBox):
         body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['VIEW_DEFINITION']),
             'default'))
+        body.append(urwid.Text(''))
         return body

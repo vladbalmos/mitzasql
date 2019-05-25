@@ -94,4 +94,5 @@ class TriggerWidget(urwid.ListBox):
         body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['ACTION_STATEMENT']),
             'default'))
+        body.append(urwid.Text(''))
         return body
