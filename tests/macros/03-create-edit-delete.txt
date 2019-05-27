@@ -35,12 +35,6 @@ key:ctrl u
 key:j
 key:e
 key:ctrl a
-key:meta f
-key:meta d
-key:ctrl e
-key_sequence:_2
-key:tab
-key:ctrl a
 key:meta d
 key_sequence:tcp:/
 key:tab

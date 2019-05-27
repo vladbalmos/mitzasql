@@ -156,7 +156,7 @@ def test_screen_shows_form_validation_error_on_create_new_session(empty_registry
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
 
     form = sessions_select_screen._widgets_factory.create('create_session_form',
-            bad_connection_data['data'])
+            bad_connection_data['data'], True)
 
     sessions_select_screen._state_machine.change_state('save', form)
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
@@ -169,7 +169,7 @@ def test_screen_adds_new_session(empty_registry, good_connection_data):
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
 
     form = sessions_select_screen._widgets_factory.create('create_session_form',
-            good_connection_data)
+            good_connection_data, True)
 
     sessions_select_screen._state_machine.change_state('save', form)
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
@@ -189,7 +189,7 @@ def test_screen_edits_session(registry_with_a_session):
     form_data = registry_with_a_session['Test session']
     form_data['name'] = 'Test session'
     form = sessions_select_screen._widgets_factory.create('create_session_form',
-            form_data)
+            form_data, False)
 
     form._input_elements['name'].edit_text = 'Edited session'
 
@@ -221,7 +221,7 @@ def test_screen_shows_form_validation_error_on_edit(registry_with_a_session, bad
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
 
     form = sessions_select_screen._widgets_factory.create('create_session_form',
-            bad_connection_data['data'])
+            bad_connection_data['data'], False)
 
     sessions_select_screen._state_machine.change_state('save', form)
     assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM

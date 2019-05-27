@@ -48,6 +48,8 @@ class SessionSelect(Screen):
         self._widgets_factory = WidgetsFactory(self._state_machine)
         self._state_machine.set_initial_state(states.STATE_INITIAL)
         self._state_machine.run()
+        # Hack: will be fixed when I'll drop the FSM
+        self._editing_new_session = None
 
     def __del__(self):
         self.focused_widget = None
@@ -143,8 +145,8 @@ class SessionSelect(Screen):
         self._sessions_registry.save()
         self._state_machine.change_state('deleted')
 
-    def show_edit_session_form(self, *args, form_has_message=False, form_data={}):
-        new_session = True
+    def show_edit_session_form(self, *args, form_has_message=False,
+            form_data={}, new_session=True):
         if len(args) == 2:
             emitter, action = args
             if isinstance(emitter, SavedSessionsList) and action == 'Edit':
@@ -156,14 +158,17 @@ class SessionSelect(Screen):
                 if form_has_message is False:
                     form_data = {}
 
-        form = self._widgets_factory.create('create_session_form', form_data)
+        self._editing_new_session = new_session
 
-        if new_session is True:
+        if new_session == True:
             form_title = 'Create session'
         else:
             form_title = 'Edit session'
 
-        form.editing_new_session = new_session
+
+        form = self._widgets_factory.create('create_session_form', form_data,
+                new_session)
+
         form.title = form_title
 
         self.focused_widget = form
@@ -181,7 +186,8 @@ class SessionSelect(Screen):
         if validation_error is not None:
             form.set_status_message(validation_error, error=True)
             self._state_machine.change_state('invalid',
-                    form_has_message=True, form_data=form_data)
+                    form_has_message=True, form_data=form_data,
+                    new_session=form.editing_new_session)
             return
 
         form.clear_status_message()
@@ -201,7 +207,8 @@ class SessionSelect(Screen):
             if validation_error is not None:
                 widget.set_status_message(validation_error, error=True)
                 self._state_machine.change_state('error_goto_form',
-                        form_has_message=True, form_data=data)
+                        form_has_message=True, form_data=data,
+                        new_session=widget.editing_new_session)
                 return
             urwid.emit_signal(self, self.SIGNAL_CONNECT, self, None, data)
             return
@@ -214,7 +221,8 @@ class SessionSelect(Screen):
             self.focused_widget.set_status_message(error, error=True)
             if session_name is None:
                 self._state_machine.change_state('error_goto_form',
-                        form_has_message=True, form_data=connection_data)
+                        form_has_message=True, form_data=connection_data,
+                        new_session=self._editing_new_session)
             else:
                 self._state_machine.change_state('error_goto_list',
                         list_has_message=True)
@@ -231,11 +239,11 @@ class SessionSelect(Screen):
         if result is False:
             form.set_status_message(error, error=True)
             self._state_machine.change_state('error', form_has_message=True,
-                    form_data=form_data)
+                    form_data=form_data, new_session=self._editing_new_session)
             return
         form.set_status_message(u'Connection was successful')
         self._state_machine.change_state('success', form_data=form_data,
-                form_has_message=True)
+                form_has_message=True, new_session=self._editing_new_session)
 
     def save_connection(self, *args, **kwargs):
         form, *args = args
@@ -245,7 +253,8 @@ class SessionSelect(Screen):
         if validation_error is not None:
             form.set_status_message(validation_error, error=True)
             self._state_machine.change_state('invalid',
-                    form_has_message=True, form_data=form_data)
+                    form_has_message=True, form_data=form_data,
+                    new_session=self._editing_new_session)
             return
 
         if 'old_name' in form_data and form_data['old_name'] is not None:

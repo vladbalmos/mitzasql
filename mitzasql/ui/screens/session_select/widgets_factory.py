@@ -59,8 +59,8 @@ class WidgetsFactory(BaseWidgetsFactory):
                 self.change_fsm_state, user_args=['delete'])
         return list
 
-    def create_create_session_form(self, form_data):
-        form = EditSessionForm(form_data)
+    def create_create_session_form(self, form_data, editing_new_session):
+        form = EditSessionForm(form_data, editing_new_session)
         self._connect_signal(form, form.SIGNAL_SAVE, self.change_fsm_state,
                 user_args=['save'])
         self._connect_signal(form, form.SIGNAL_TEST, self.change_fsm_state,

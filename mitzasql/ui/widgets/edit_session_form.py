@@ -20,6 +20,7 @@
 
 import urwid
 
+from mitzasql.ui.utils import orig_w
 from .action_bar_pile_container import ActionBarPileContainer
 from .emacs_edit import EmacsEdit
 from .emacs_intedit import EmacsIntEdit
@@ -33,7 +34,7 @@ class EditSessionForm(ActionBarPileContainer):
     SIGNAL_CONNECT = 'connect'
     SIGNAL_CANCEL = 'cancel'
 
-    def __init__(self, data={}):
+    def __init__(self, data={}, editing_new_session=True):
 
         actions = [
             ('F1', u'F1 Save', self.SIGNAL_SAVE),
@@ -42,7 +43,7 @@ class EditSessionForm(ActionBarPileContainer):
             ('Esc', u'Esc Cancel', self.SIGNAL_CANCEL)
             ]
 
-        self.editing_new_session = True
+        self.editing_new_session = editing_new_session
         self._old_session_name = None
 
         if len(data) == 0:
@@ -56,6 +57,8 @@ class EditSessionForm(ActionBarPileContainer):
                     }
         self._data = data
         self._input_elements = {}
+        self._focus_position = 0
+        self._name_field_container = None
         self._form = self._create_form()
 
         super().__init__(self._form, actions, line_box=True,
@@ -70,12 +73,20 @@ class EditSessionForm(ActionBarPileContainer):
         self._container.set_title(title)
 
     def _create_form(self):
+        if not self.editing_new_session:
+            name_is_read_only = True
+            name_attr = 'editbox:label'
+        else:
+            name_is_read_only = False
+            name_attr = 'editbox'
+
         name_label = urwid.Text(u'Session name:')
-        name_edit = EmacsEdit(edit_text=self['name'])
+        name_edit = EmacsEdit(edit_text=self['name'],
+                read_only=name_is_read_only)
         name_edit.value_name = 'name'
         self._input_elements['name'] = name_edit
         urwid.connect_signal(name_edit, 'postchange', self.on_input_change)
-        name_edit = urwid.AttrMap(name_edit, 'editbox')
+        name_edit = urwid.AttrMap(name_edit, name_attr)
 
         host_label = urwid.Text(u'Host:')
         host_edit = EmacsEdit(edit_text=self['host'])
@@ -114,8 +125,12 @@ class EditSessionForm(ActionBarPileContainer):
 
         contents = []
 
-        row = urwid.Columns([(15, name_label), (32, name_edit),
-            urwid.Text(u'Required')], dividechars=1)
+        if not name_is_read_only:
+            row = urwid.Columns([(15, name_label), (32, name_edit),
+                urwid.Text(u'Required')], dividechars=1)
+        else:
+            row = urwid.Columns([(15, name_label), (32, name_edit)], dividechars=1)
+        self._name_field_container = row
         contents.append(row)
 
         contents.append(urwid.Divider())
@@ -123,6 +138,9 @@ class EditSessionForm(ActionBarPileContainer):
         row = urwid.Columns([(15, host_label), (32, host_edit),
             urwid.Text(u'Must start with tcp:// or unix://')], dividechars=1)
         contents.append(row)
+
+        if name_is_read_only:
+            self._focus_position = 2
 
         contents.append(urwid.Divider())
 
@@ -158,8 +176,9 @@ class EditSessionForm(ActionBarPileContainer):
             return self._data[name]
         return ''
 
-    def refresh(self, data):
+    def refresh(self, data, editing_new_session):
         self._data = data
+        self.editing_new_session = editing_new_session
         for name, widget in self._input_elements.items():
             if name not in data:
                 value = ''
@@ -168,8 +187,35 @@ class EditSessionForm(ActionBarPileContainer):
             widget.edit_text = value
         self._old_session_name = None
 
+        if not editing_new_session:
+            self._toggle_name_read_only(True)
+            return
+
+        self._toggle_name_read_only(False)
+
+    def _toggle_name_read_only(self, state):
+        name_field = self._name_field_container.contents[1][0]
+
+        if orig_w(name_field).read_only == state:
+            return
+
+        if state:
+            orig_w(name_field).read_only = True
+            name_field.set_attr_map({None: 'editbox:label'})
+            del self._name_field_container.contents[2]
+            self._focus_position = 2
+        else:
+            orig_w(name_field).read_only = False
+            name_field.set_attr_map({None: 'editbox'})
+
+            if len(self._name_field_container.contents) == 2:
+                options = self._name_field_container.options('pack')
+                self._name_field_container.contents.append((urwid.Text(u'Required'), options))
+                self._focus_position = 0
+        self._name_field_container.focus_position = 1
+
     def reset_focus(self):
-        self._form.focus_position = 0
+        self._form.focus_position = self._focus_position
 
     @property
     def data(self):
