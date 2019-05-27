@@ -59,6 +59,11 @@ tests = [
             'arguments': ['--macro', get_macro_path('07-navigate-sakila-tables'),
                 '--sessions_file', test_sessions_file]
         },
+        {
+            'name': 'Quit from info widgets',
+            'arguments': ['--macro', get_macro_path('08-quit-from-info-widget'),
+                '--sessions_file', test_sessions_file]
+        },
     ]
 
 class MitzasqlProcess(Process):

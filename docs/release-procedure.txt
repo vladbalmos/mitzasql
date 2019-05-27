@@ -4,7 +4,13 @@
 4. Create git tag & release
 5. Create pip package:
 
-    python3 setup.py sdist bdist_wheel
+    make build
 
-6. Test package using testpypi
-7. Publish package
+6. Test package using testpypi:
+
+    make publish-test-package && make install-test-package
+
+7. Publish package:
+
+    make publish
+

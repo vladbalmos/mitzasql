@@ -20,10 +20,9 @@
 
 import urwid
 
-import mitzasql.ui.utils as utils
+from mitzasql.ui.widgets.info_widget import InfoWidget
 
-class ViewInfoWidget(urwid.ListBox):
-    SIGNAL_ESCAPE = 'escape'
+class ViewInfoWidget(InfoWidget):
 
     def __init__(self, model):
         self._model = model;
@@ -33,19 +32,10 @@ class ViewInfoWidget(urwid.ListBox):
         contents = [head_section]
         contents.extend(body_section)
         super().__init__(contents)
-        urwid.register_signal(self.__class__, [self.SIGNAL_ESCAPE])
 
     @property
     def name(self):
         return u'View {0}'.format(self._model['TABLE_NAME'])
-
-    def keypress(self, size, key):
-        key = utils.vim2emacs_translation(key)
-        if key == 'esc':
-            urwid.emit_signal(self, self.SIGNAL_ESCAPE, self)
-            return
-
-        return super().keypress(size, key)
 
     def _create_head_section(self):
         grid = []
@@ -80,4 +70,5 @@ class ViewInfoWidget(urwid.ListBox):
         body.append(urwid.Divider('-'))
         body.append(urwid.AttrMap(urwid.Text(self._model['VIEW_DEFINITION']),
             'default'))
+        body.append(urwid.Text(''))
         return body
