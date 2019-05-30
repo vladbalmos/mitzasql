@@ -47,7 +47,7 @@ class EditSessionForm(ActionBarPileContainer):
         self._old_session_name = None
 
         if len(data) == 0:
-            data = {
+            self._data = {
                     'name': '',
                     'host': '',
                     'port': '',
@@ -55,7 +55,8 @@ class EditSessionForm(ActionBarPileContainer):
                     'password': '',
                     'database': ''
                     }
-        self._data = data
+        else:
+            self._data = data
         self._input_elements = {}
         self._focus_position = 0
         self._name_field_container = None
@@ -176,7 +177,7 @@ class EditSessionForm(ActionBarPileContainer):
             return self._data[name]
         return ''
 
-    def refresh(self, data, editing_new_session):
+    def refresh(self, data, editing_new_session=None):
         self._data = data
         self.editing_new_session = editing_new_session
         for name, widget in self._input_elements.items():
@@ -186,6 +187,9 @@ class EditSessionForm(ActionBarPileContainer):
                 value = data[name]
             widget.edit_text = value
         self._old_session_name = None
+
+        if editing_new_session == None:
+            return
 
         if not editing_new_session:
             self._toggle_name_read_only(True)
@@ -213,9 +217,7 @@ class EditSessionForm(ActionBarPileContainer):
                 self._name_field_container.contents.append((urwid.Text(u'Required'), options))
                 self._focus_position = 0
         self._name_field_container.focus_position = 1
-
-    def reset_focus(self):
-        self._form.focus_position = self._focus_position
+        self.reset_focus()
 
     @property
     def data(self):
@@ -238,3 +240,7 @@ class EditSessionForm(ActionBarPileContainer):
         elif key == 'shift tab':
             key = 'up'
         return super().keypress(size, key)
+
+    def reset_focus(self):
+        self._form.focus_position = self._focus_position
+

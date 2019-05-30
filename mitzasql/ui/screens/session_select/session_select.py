@@ -20,12 +20,10 @@
 
 import urwid
 
-from mitzasql.state_machine import StateMachine
 from mitzasql.ui.screens.screen import Screen
 from mitzasql.ui.widgets.saved_sessions_list import SavedSessionsList
 from mitzasql.ui.widgets.edit_session_form import EditSessionForm
-from .widgets_factory import WidgetsFactory
-from . import states
+from mitzasql.ui.widgets.create_new_session_dialog import CreateNewSessionDialog
 
 class SessionSelect(Screen):
     """The session select UI screen
@@ -34,8 +32,7 @@ class SessionSelect(Screen):
     session to connect to. When the user selects a session to connect to, the
     screen calls the main application instance with the session name or
     connection details.
-    Child widgets are created using a widget factory and their state is managed
-    with the help of a FSM"""
+    """
 
     # Signals handled by the main application instance
     SIGNAL_TEST_CONNECTION = 'test_connection'
@@ -44,217 +41,80 @@ class SessionSelect(Screen):
     def __init__(self, sessions_registry):
         super().__init__([self.SIGNAL_CONNECT, self.SIGNAL_TEST_CONNECTION])
         self._sessions_registry = sessions_registry
-        self._state_machine = self._init_state_machine()
-        self._widgets_factory = WidgetsFactory(self._state_machine)
-        self._state_machine.set_initial_state(states.STATE_INITIAL)
-        self._state_machine.run()
-        # Hack: will be fixed when I'll drop the FSM
-        self._editing_new_session = None
+        self._edit_form_widget = None
+        self._sessions_list = None
+        self.show_inital_widget()
 
     def __del__(self):
         self.focused_widget = None
+        self._edit_form_widget = None
         self.view = None
-        self._widgets_factory = None
 
-    def _init_state_machine(self):
-        state_machine = StateMachine('session_select')
-        state_machine.add_state(states.STATE_INITIAL, self.initial_state, {
-            'has_sessions': states.STATE_SHOW_SESSIONS_LIST,
-            'no_sessions': states.STATE_SHOW_CREATE_SESSION_DIALOG
-            })
-        state_machine.add_state(states.STATE_SHOW_CREATE_SESSION_DIALOG,
-                self.show_create_new_session_dialog, {
-                    'yes': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'quit': states.STATE_QUIT
-                    })
-        state_machine.add_state(states.STATE_SHOW_SESSIONS_LIST,
-                self.show_sessions_list, {
-                    'quit': states.STATE_QUIT,
-                    'create': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'edit': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'delete': states.STATE_DELETE_SESSION,
-                    'connect': states.STATE_CONNECT
-                    })
-        state_machine.add_state(states.STATE_QUIT, self.quit)
-        state_machine.add_state(states.STATE_CANCEL_EDIT_SESSION,
-                self.cancel_edit_session, {
-                    'quit': states.STATE_QUIT,
-                    'show_sessions': states.STATE_SHOW_SESSIONS_LIST
-                    })
-        state_machine.add_state(states.STATE_SHOW_EDIT_SESSION_FORM,
-                self.show_edit_session_form, {
-                    'save': states.STATE_SAVE_SESSION,
-                    'test': states.STATE_TEST_CONNECTION,
-                    'cancel': states.STATE_CANCEL_EDIT_SESSION,
-                    'connect': states.STATE_CONNECT
-                    })
-        state_machine.add_state(states.STATE_SAVE_SESSION,
-                self.save_connection, {
-                    'invalid': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'valid': states.STATE_SHOW_SESSIONS_LIST
-                    })
-        state_machine.add_state(states.STATE_DELETE_SESSION,
-                self.delete_session, {
-                    'deleted': states.STATE_INITIAL
-                    })
-        state_machine.add_state(states.STATE_TEST_CONNECTION,
-                self.test_connection, {
-                    'invalid': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'error': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'success': states.STATE_SHOW_EDIT_SESSION_FORM
-                    })
-        state_machine.add_state(states.STATE_CONNECT, self.connect, {
-                    'error_goto_form': states.STATE_SHOW_EDIT_SESSION_FORM,
-                    'error_goto_list': states.STATE_SHOW_SESSIONS_LIST
-                    })
-
-        return state_machine
-
-    def initial_state(self):
+    def show_inital_widget(self, *args):
         if self._sessions_registry.is_empty():
-            self._state_machine.change_state('no_sessions')
-            return
+            return self._show_create_new_session_dialog()
 
-        self._state_machine.change_state('has_sessions')
+        return self.show_sessions_list()
 
-    def cancel_edit_session(self, *args, **kwargs):
-        if self._sessions_registry.is_empty():
-            self._state_machine.change_state('quit')
-            return
-        self._state_machine.change_state('show_sessions')
+    def show_sessions_list(self, *args):
+        sessions = self._sessions_registry.sessions
+        if not self._sessions_list:
+            list_ = SavedSessionsList(sessions)
+            urwid.connect_signal(list_, SavedSessionsList.SIGNAL_QUIT, self.quit)
+            urwid.connect_signal(list_, SavedSessionsList.SIGNAL_CREATE_NEW, self.create_new_session)
+            urwid.connect_signal(list_, SavedSessionsList.SIGNAL_CONNECT, self.connect)
+            urwid.connect_signal(list_, SavedSessionsList.SIGNAL_EDIT, self.edit_session)
+            urwid.connect_signal(list_, SavedSessionsList.SIGNAL_DELETE, self.delete_session)
+            self._sessions_list = list_
+        else:
+            self._sessions_list.refresh(sessions)
 
-    def show_create_new_session_dialog(self, *args, **kwargs):
-        self.focused_widget = self._widgets_factory.create('create_session_dialog')
+        self.focused_widget = self._sessions_list
+        self.view.original_widget = urwid.Filler(self.focused_widget)
+
+    def _show_create_new_session_dialog(self, *args, **kwargs):
+        dialog = CreateNewSessionDialog()
+
+        urwid.connect_signal(dialog, CreateNewSessionDialog.SIGNAL_YES, self.show_edit_session_form)
+        urwid.connect_signal(dialog, CreateNewSessionDialog.SIGNAL_QUIT, self.quit)
+
+        self.focused_widget = dialog
         self.view.original_widget = urwid.Filler(urwid.Padding(self.focused_widget, align='center',
             width=('relative', 50)))
 
-    def show_connection_error(self, *args, **kwargs):
-        self.focused_widget = self._widgets_factory.create('dialog', u'Error', title=u'Connection error')
-        self.view.original_widget = urwid.Filler(urwid.Padding(self.focused_widget, align='center', width=('relative', 50)))
+    def show_edit_session_form(self, *args):
+        if not self._edit_form_widget:
+            form = EditSessionForm()
+            urwid.connect_signal(form, form.SIGNAL_SAVE, self.save_connection)
+            urwid.connect_signal(form, form.SIGNAL_TEST, self.test_connection)
+            urwid.connect_signal(form, form.SIGNAL_CONNECT, self.connect)
+            urwid.connect_signal(form, form.SIGNAL_CANCEL, self.show_inital_widget)
+            self._edit_form_widget = form
 
-    def show_sessions_list(self, *args, list_has_message=False):
-        sessions = self._sessions_registry.sessions
-        self.focused_widget = self._widgets_factory.create('sessions_list', sessions)
-        self.view.original_widget = urwid.Filler(self.focused_widget)
-        if list_has_message is False:
-            self.focused_widget.clear_status_message()
-
-    def delete_session(self, emitter, action):
-        session_name = emitter.session
-        del self._sessions_registry[session_name]
-        self._sessions_registry.save()
-        self._state_machine.change_state('deleted')
-
-    def show_edit_session_form(self, *args, form_has_message=False,
-            form_data={}, new_session=True):
-        if len(args) == 2:
-            emitter, action = args
-            if isinstance(emitter, SavedSessionsList) and action == 'Edit':
-                new_session = False
-                session_name = emitter.session
-                form_data = self._sessions_registry[session_name]
-                form_data['name'] = session_name
-            elif isinstance(emitter, SavedSessionsList) and action == 'New':
-                if form_has_message is False:
-                    form_data = {}
-
-        self._editing_new_session = new_session
-
-        if new_session == True:
-            form_title = 'Create session'
-        else:
-            form_title = 'Edit session'
-
-
-        form = self._widgets_factory.create('create_session_form', form_data,
-                new_session)
-
-        form.title = form_title
-
-        self.focused_widget = form
+        self._edit_form_widget.clear_status_message()
+        self._edit_form_widget.refresh({})
+        self._edit_form_widget.reset_focus()
+        self.focused_widget = self._edit_form_widget
         self.view.original_widget = urwid.Filler(self.focused_widget)
 
-        if form_has_message is False:
-            form.clear_status_message()
-            form.reset_focus()
+    def create_new_session(self, *args):
+        self.show_edit_session_form()
+        self._edit_form_widget.refresh({}, True)
 
-    def test_connection(self, *args, **kwargs):
-        form, *args = args
+    def edit_session(self, *args):
+        session_name = self._sessions_list.session
+        form_data = self._sessions_registry[session_name]
+        form_data['name'] = session_name
+        self.show_edit_session_form()
+        self._edit_form_widget.refresh(form_data, False)
+
+    def save_connection(self, *args):
+        form = self._edit_form_widget
         form_data = form.data
+        validation_error = self._validate_connection_data(form_data)
 
-        validation_error = self.validate_connection_data(form_data)
         if validation_error is not None:
             form.set_status_message(validation_error, error=True)
-            self._state_machine.change_state('invalid',
-                    form_has_message=True, form_data=form_data,
-                    new_session=form.editing_new_session)
-            return
-
-        form.clear_status_message()
-        urwid.emit_signal(self, self.SIGNAL_TEST_CONNECTION, self, form_data)
-
-    def connect(self, *args, **kwargs):
-        widget, *args = args
-
-        if isinstance(widget, SavedSessionsList):
-            session_name = widget.session
-            urwid.emit_signal(self, self.SIGNAL_CONNECT, self, session_name)
-            return
-
-        if isinstance(widget, EditSessionForm):
-            data = widget.data
-            validation_error = self.validate_connection_data(data)
-            if validation_error is not None:
-                widget.set_status_message(validation_error, error=True)
-                self._state_machine.change_state('error_goto_form',
-                        form_has_message=True, form_data=data,
-                        new_session=widget.editing_new_session)
-                return
-            urwid.emit_signal(self, self.SIGNAL_CONNECT, self, None, data)
-            return
-
-        raise RuntimeError('The current widget should not trigger a connect signal: {0}'.format(str(widget)))
-
-
-    def set_connection_result(self, result, error=None, session_name=None, connection_data=None):
-        if result is False:
-            self.focused_widget.set_status_message(error, error=True)
-            if session_name is None:
-                self._state_machine.change_state('error_goto_form',
-                        form_has_message=True, form_data=connection_data,
-                        new_session=self._editing_new_session)
-            else:
-                self._state_machine.change_state('error_goto_list',
-                        list_has_message=True)
-            return
-        # nothing to do if result is True, our job is done
-
-    def set_progress(self, message):
-        widget = self.focused_widget
-        widget.set_status_message(message)
-
-    def set_connection_test_result(self, result, error=None):
-        form = self.focused_widget
-        form_data = form.data
-        if result is False:
-            form.set_status_message(error, error=True)
-            self._state_machine.change_state('error', form_has_message=True,
-                    form_data=form_data, new_session=self._editing_new_session)
-            return
-        form.set_status_message(u'Connection was successful')
-        self._state_machine.change_state('success', form_data=form_data,
-                form_has_message=True, new_session=self._editing_new_session)
-
-    def save_connection(self, *args, **kwargs):
-        form, *args = args
-        form_data = form.data
-
-        validation_error = self.validate_connection_data(form_data)
-        if validation_error is not None:
-            form.set_status_message(validation_error, error=True)
-            self._state_machine.change_state('invalid',
-                    form_has_message=True, form_data=form_data,
-                    new_session=self._editing_new_session)
             return
 
         if 'old_name' in form_data and form_data['old_name'] is not None:
@@ -267,9 +127,63 @@ class SessionSelect(Screen):
                 del form_data['old_name']
             self._sessions_registry.add(form_data)
         self._sessions_registry.save()
-        self._state_machine.change_state('valid')
+        self.show_sessions_list()
 
-    def validate_connection_data(self, data):
+    def test_connection(self, *args):
+        form = self._edit_form_widget
+        form_data = form.data
+        validation_error = self._validate_connection_data(form_data)
+
+        if validation_error is not None:
+            form.set_status_message(validation_error, error=True)
+            return
+
+        form.clear_status_message()
+        urwid.emit_signal(self, self.SIGNAL_TEST_CONNECTION, self, form_data)
+
+    def connect(self, *args):
+        widget, *args = args
+
+        if isinstance(widget, SavedSessionsList):
+            session_name = widget.session
+            urwid.emit_signal(self, self.SIGNAL_CONNECT, self, session_name)
+            return
+
+        if isinstance(widget, EditSessionForm):
+            data = widget.data
+            validation_error = self._validate_connection_data(data)
+            if validation_error is not None:
+                widget.set_status_message(validation_error, error=True)
+                return
+            urwid.emit_signal(self, self.SIGNAL_CONNECT, self, None, data)
+            return
+
+        raise RuntimeError('The current widget should not trigger a connect signal: {0}'.format(str(widget)))
+
+    def delete_session(self, emitter, action):
+        session_name = emitter.session
+        del self._sessions_registry[session_name]
+        self._sessions_registry.save()
+        self.show_inital_widget()
+
+    def show_message(self, message):
+        widget = self.focused_widget
+        widget.set_status_message(message)
+
+    def set_connection_test_result(self, result, error=None):
+        form = self._edit_form_widget
+        if result is False:
+            form.set_status_message(error, error=True)
+            return
+
+        form.set_status_message(u'Connection was successful')
+
+    def set_connection_result(self, result, error=None, session_name=None, connection_data=None):
+        if result is False:
+            self.focused_widget.set_status_message(error, error=True)
+        # nothing to do if result is True, our job is done
+
+    def _validate_connection_data(self, data):
         if len(data['name']) == 0:
             return u'Session name is required'
 

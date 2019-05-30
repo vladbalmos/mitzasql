@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Fix for #54: Rewrite the "session select". Replace the FSM with a signal/callback approach
 - Fix for #63: Don't overwrite previous sessions while editing
 
 ## [1.0.1]

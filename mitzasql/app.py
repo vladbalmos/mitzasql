@@ -88,7 +88,7 @@ class App(LoggerMixin):
         connection_data:dict The connection details
 
         """
-        select_session_screen.set_progress(u'Connecting...')
+        select_session_screen.show_message(u'Connecting...')
         ui.refresh() # required because the next call will block the event loop
 
         if session_name is not None:
@@ -116,7 +116,7 @@ class App(LoggerMixin):
         connection_data:dict The connection details
         """
 
-        select_session_screen.set_progress(u'Connecting...')
+        select_session_screen.show_message(u'Connecting...')
         ui.refresh() # required because the next call will block the event loop
         result, error_message = Connection.test(connection_data)
 
