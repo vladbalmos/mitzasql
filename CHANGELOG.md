@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0]
 
 ### Added
-- Add query log widget
+- Add query log widget (#32)
 - Add keyboard shortcuts to resize the query editor (#40)
 
 ### Changed
