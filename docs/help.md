@@ -218,7 +218,7 @@ The user interface supports the following methods for performing actions:
 
 Actions keys are equivalent to regular buttons found in a conventional user interface. To perform an action press a specific key highlighted with a different color than the rest of the text. In the example below:
 
-- to quit press `q`
+- to quit press `k`
 - to show the help press `F1`
 - to refresh the current table press `F5`
 
@@ -437,6 +437,10 @@ Pressing `F2` will open the SQL query editor.
         <tr>
             <td>ctrl p / n</td>
             <td>Go back / forward in the query history</td>
+        </tr>
+        <tr>
+            <td>ctrl shift up / down</td>
+            <td>Resize the editor</td>
         </tr>
         <tr>
             <td>esc</td>
