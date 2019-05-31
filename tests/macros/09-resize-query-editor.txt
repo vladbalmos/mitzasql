@@ -1,0 +1,32 @@
+key:enter
+sleep:0.5
+key:f2
+key_sequence:show full processlist
+
+# Test resize up
+key:shift ctrl up:8
+key:f9
+sleep:1
+key:f2
+
+# Test resize down
+key:shift ctrl down:2
+sleep:0.5
+
+# Check that size is preserved across screens
+key:esc:3
+key_sequence:/sakila
+key:enter:3
+key:f2
+key_sequence:select count(*) from actor
+key:f9
+sleep:0.5
+key:f2
+key:shift ctrl up:5
+sleep:0.5
+key:esc:5
+key:f2
+key:ctrl f9
+key:esc
+key:f10
+key:k

@@ -18,15 +18,32 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""States for the session select screen"""
-STATE_INITIAL = 'initial'
-STATE_SHOW_CREATE_SESSION_DIALOG = 'create_session_dialog'
-STATE_SHOW_EDIT_SESSION_FORM = 'show_edit_session_form'
-STATE_SHOW_SESSIONS_LIST = 'show_sessions_list'
-STATE_SAVE_SESSION = 'save_session'
-STATE_DELETE_SESSION = 'delete_session'
-STATE_TEST_CONNECTION = 'test_connection'
-STATE_CONNECT = 'connect'
-STATE_CANCEL_EDIT_SESSION = 'cancel_edit_session'
-STATE_SHOW_CONNECT_ERROR = 'connection_error'
-STATE_QUIT = 'quit'
+
+import urwid
+
+from mitzasql.ui.widgets.info_widget import InfoWidget
+
+class QueryLogWidget(InfoWidget):
+    def __init__(self, connection):
+        contents = self._create_log(connection.QUERY_LOG)
+        super().__init__(contents)
+        self.focus_position = len(connection.QUERY_LOG) * 2
+
+    @property
+    def name(self):
+        return u'Query Log'
+
+    def _create_log(self, log):
+        contents = []
+        for entry in log:
+            date, query, params, duration = entry
+            date = date.strftime('%a %H:%M:%S')
+            duration = '{:.3f}'.format(duration)
+            log_entry = '{0}: {1}\nParams: {2}\nDuration: {3}s'.format(date,
+                    query, params, duration)
+
+            contents.append(urwid.AttrMap(urwid.Text(log_entry), 'default'))
+            contents.append(urwid.Divider('-'))
+
+        contents.append(urwid.Text(''))
+        return contents

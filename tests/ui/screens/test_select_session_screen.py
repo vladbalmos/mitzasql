@@ -2,12 +2,13 @@ import tempfile
 import os
 import pytest
 
-from mitzasql.ui.screens.session_select import (session_select, states)
+from mitzasql.ui.screens.session_select import session_select
 from mitzasql.ui.widgets.saved_sessions_list import SavedSessionsList
 from mitzasql.ui.widgets.create_new_session_dialog import CreateNewSessionDialog
 from mitzasql.ui.widgets.edit_session_form import EditSessionForm
 from mitzasql.sessions_registry import SessionsRegistry
 
+screen_size = (120, 30)
 bad_connection_data_set = [
         {
             'data': {},
@@ -132,97 +133,84 @@ def good_connection_data():
 
 def test_screen_displays_sessions_list(registry_with_a_session):
     sessions_select_screen = session_select.SessionSelect(registry_with_a_session)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
     assert isinstance(sessions_select_screen.view.original_widget.body,
             SavedSessionsList) is True
 
+def test_screen_displays_create_new_session_dialog(empty_registry):
+    sessions_select_screen = session_select.SessionSelect(empty_registry)
+    assert isinstance(sessions_select_screen.view.original_widget.body.original_widget,
+            CreateNewSessionDialog) is True
+
 def test_screen_shows_the_create_new_session_form(empty_registry):
     sessions_select_screen = session_select.SessionSelect(empty_registry)
-    sessions_select_screen._state_machine.change_state('yes')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    sessions_select_screen.view.keypress(screen_size, 'y')
     assert isinstance(sessions_select_screen.view.original_widget.body,
             EditSessionForm) is True
 
-def test_screen_displays_create_new_session_dialog(empty_registry):
-    sessions_select_screen = session_select.SessionSelect(empty_registry)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_CREATE_SESSION_DIALOG
-    assert isinstance(sessions_select_screen.view.original_widget.body.original_widget,
-            CreateNewSessionDialog) is True
 
 def test_screen_shows_form_validation_error_on_create_new_session(empty_registry, bad_connection_data):
     sessions_select_screen = session_select.SessionSelect(empty_registry)
 
-    sessions_select_screen._state_machine.change_state('yes')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    sessions_select_screen.view.keypress(screen_size, 'y')
 
-    form = sessions_select_screen._widgets_factory.create('create_session_form',
-            bad_connection_data['data'])
+    form = sessions_select_screen._edit_form_widget
+    form.refresh(bad_connection_data['data'])
+    form.keypress((screen_size[0],), 'f1')
 
-    sessions_select_screen._state_machine.change_state('save', form)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
     assert form._status_bar.text == bad_connection_data['expected_message']
 
 def test_screen_adds_new_session(empty_registry, good_connection_data):
     sessions_select_screen = session_select.SessionSelect(empty_registry)
 
-    sessions_select_screen._state_machine.change_state('yes')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    sessions_select_screen.view.keypress(screen_size, 'y')
 
-    form = sessions_select_screen._widgets_factory.create('create_session_form',
-            good_connection_data)
-
-    sessions_select_screen._state_machine.change_state('save', form)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
+    form = sessions_select_screen._edit_form_widget
+    form.refresh(good_connection_data)
+    form.keypress((screen_size[0],), 'f1')
 
     assert empty_registry.is_empty() is False
+    assert isinstance(sessions_select_screen.view.original_widget.body,
+            SavedSessionsList) is True
 
 def test_screen_edits_session(registry_with_a_session):
     sessions_select_screen = session_select.SessionSelect(registry_with_a_session)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
 
     sessions_list_widget = sessions_select_screen.view.original_widget.body
-
-    sessions_select_screen._state_machine.change_state('edit',
-            sessions_list_widget, 'Edit')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    sessions_list_widget.keypress((screen_size[0], ), 'e')
 
     form_data = registry_with_a_session['Test session']
     form_data['name'] = 'Test session'
-    form = sessions_select_screen._widgets_factory.create('create_session_form',
-            form_data)
+    form = sessions_select_screen._edit_form_widget
+    form.refresh(form_data, False)
 
     form._input_elements['name'].edit_text = 'Edited session'
 
-    sessions_select_screen._state_machine.change_state('save', form)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
+    form.keypress((screen_size[0],), 'f1')
     assert registry_with_a_session.has_session('Edited session')
     assert len(registry_with_a_session.sessions) == 1
 
 
 def test_screen_deletes_session(registry_with_a_session):
     sessions_select_screen = session_select.SessionSelect(registry_with_a_session)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
 
     sessions_list_widget = sessions_select_screen.view.original_widget.body
+    sessions_list_widget.keypress((screen_size[0], ), 'd')
 
-    sessions_select_screen._state_machine.change_state('delete',
-            sessions_list_widget, 'delete')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_CREATE_SESSION_DIALOG
+    assert isinstance(sessions_select_screen.view.original_widget.body.original_widget,
+            CreateNewSessionDialog) is True
     assert registry_with_a_session.is_empty() is True
 
 def test_screen_shows_form_validation_error_on_edit(registry_with_a_session, bad_connection_data):
     sessions_select_screen = session_select.SessionSelect(registry_with_a_session)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_SESSIONS_LIST
 
     sessions_list_widget = sessions_select_screen.view.original_widget.body
 
-    sessions_select_screen._state_machine.change_state('edit',
-            sessions_list_widget, 'Edit')
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    sessions_list_widget.keypress((screen_size[0], ), 'e')
 
-    form = sessions_select_screen._widgets_factory.create('create_session_form',
-            bad_connection_data['data'])
+    form = sessions_select_screen._edit_form_widget
+    form.refresh(bad_connection_data['data'], False)
 
-    sessions_select_screen._state_machine.change_state('save', form)
-    assert sessions_select_screen._state_machine.get_current_state() == states.STATE_SHOW_EDIT_SESSION_FORM
+    form.keypress((screen_size[0],), 'f1')
+    assert isinstance(sessions_select_screen.view.original_widget.body,
+            EditSessionForm) is True
     assert form._status_bar.text == bad_connection_data['expected_message']

@@ -1,3 +1,4 @@
+# Create first
 sleep:1
 key:y
 key_sequence:localhost
@@ -9,6 +10,7 @@ key:tab
 key_sequence:root
 key:f1
 
+# Create second
 key:n
 key_sequence:localhost+unix
 key:tab
@@ -17,6 +19,7 @@ key:tab:2
 key_sequence:root
 key:f1
 
+# Create third
 key:n
 key_sequence:remote
 key:tab
@@ -33,13 +36,9 @@ key:k:2
 key:G:2
 key:ctrl u
 key:j
+
+# Edit session
 key:e
-key:ctrl a
-key:meta f
-key:meta d
-key:ctrl e
-key_sequence:_2
-key:tab
 key:ctrl a
 key:meta d
 key_sequence:tcp:/
@@ -49,6 +48,7 @@ key:f1
 
 sleep:0.5
 
+# Delete all
 key:j
 key:d
 sleep:0.5

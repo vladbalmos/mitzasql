@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+
+### Added
+- Add query log widget (#32)
+- Add keyboard shortcuts to resize the query editor (#40)
+
+### Changed
+- Document test macros
+
+### Fixed
+- Prevent binding the "show help" signal handler multiple times
+- Fix for #54: Rewrite the "session select". Replace the FSM with a signal/callback approach
+- Fix for #63: Don't overwrite previous sessions while editing
+- Fix issue with docker-compose network subnets
+
 ## [1.0.1]
 
 ### Added

@@ -26,7 +26,7 @@ class QueryWidget(urwid.AttrMap):
     def __init__(self):
         editor = QueryEditor()
         container = urwid.Filler(urwid.AttrMap(editor, ''), valign='top')
-        title = u'[F9: Run. Ctrl-F9: Clear. Esc: Close. Ctrl-P/Ctrl-N: Query history]'
+        title = u'[F9: Run. Ctrl-F9: Clear. Esc: Close. Ctrl-P/Ctrl-N: Query history. Ctrl-Shift-Up/Down: Resize editor.]'
         line_box = urwid.LineBox(container, title=title,
                 title_align='right')
 

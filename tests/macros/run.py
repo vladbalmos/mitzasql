@@ -64,6 +64,11 @@ tests = [
             'arguments': ['--macro', get_macro_path('08-quit-from-info-widget'),
                 '--sessions_file', test_sessions_file]
         },
+        {
+            'name': 'Resize query editor',
+            'arguments': ['--macro', get_macro_path('09-resize-query-editor'),
+                '--sessions_file', test_sessions_file]
+        },
     ]
 
 class MitzasqlProcess(Process):

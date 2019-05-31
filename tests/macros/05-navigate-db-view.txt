@@ -1,11 +1,15 @@
 key:enter
 sleep:1
+
+# Navigate list
 key:G
 key:g:2
 key:ctrl d
 key:ctrl u
 key:j:5
 key:k:2
+
+# Search databases
 key_sequence:/sakila
 key:enter
 key_sequence:/inform
@@ -16,6 +20,8 @@ sleep:0.3
 key:f5
 sleep:0.1
 key:f2
+
+# Run query
 key_sequence:show full processlist
 key:f9
 key:j
@@ -33,11 +39,15 @@ sleep:0.2
 key:ctrl n
 sleep:0.2
 key:ctrl f9
+
+# Run invalid sql
 key_sequence:invalid sql syntax
 key:f9
 sleep:1
 key:enter
 key:esc
 sleep:0.2
+
+# Quit
 key:f10
 key:k
