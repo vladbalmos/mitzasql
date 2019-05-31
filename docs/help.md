@@ -208,6 +208,11 @@ The user interface supports the following methods for performing actions:
             <td colspan="2">Open the "change table" popup</td>
             <td>database table</td>
         </tr>
+        <tr>
+            <td>ctrl shift up / down</td>
+            <td colspan="2">Resize the query editor</td>
+            <td>query editor</td>
+        </tr>
     </tbody>
 </table>
 

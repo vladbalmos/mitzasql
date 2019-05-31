@@ -23,7 +23,6 @@ import time
 
 import mitzasql.ui.utils as utils
 from mitzasql.history import History
-from mitzasql.logger import logger
 from mitzasql.db.model import (TableModel, QueryModel)
 from .db_view_footer import DBViewFooter
 from .query_widget import QueryWidget
@@ -39,6 +38,9 @@ class BaseDBView(urwid.Frame):
     SIGNALS = [SIGNAL_ACTION_EXIT, SIGNAL_ACTION_RUN_QUERY, SIGNAL_MODEL_ERROR]
 
     QUERY_HISTORY = History()
+
+    TABLE_HEIGHT = 70
+    EDITOR_HEIGHT = 20
 
     def __init__(self, model, connection, actions=[]):
         self._model = model
@@ -167,7 +169,7 @@ class BaseDBView(urwid.Frame):
         self._table = table
         self._query_editor = QueryWidget()
 
-        pile = urwid.Pile([('weight', 70, table), ('weight', 0,
+        pile = urwid.Pile([('weight', BaseDBView.TABLE_HEIGHT, table), ('weight', 0,
             self._query_editor)])
         return pile
 
@@ -262,7 +264,44 @@ class BaseDBView(urwid.Frame):
             if self._focus_is('editor') and self._editor_is_visible():
                 self._query_editor.clear()
             return
+
+        if key == 'shift ctrl up':
+            self._resize_query_editor(True)
+            return
+
+        if key == 'shift ctrl down':
+            self._resize_query_editor(False)
+            return
+
         return key
+
+    def _resize_query_editor(self, bigger_size):
+        if not self._editor_is_visible():
+            return
+
+        table, tsize = self._body.contents[0]
+        editor, esize = self._body.contents[1]
+
+        if bigger_size:
+            increment = 5
+        else:
+            increment = -5
+
+        tsize_height = tsize[1] - increment
+        esize_height = esize[1] + increment
+        focus_position = self._body.focus_position
+
+        if bigger_size and tsize_height < 40:
+            return
+
+        if not bigger_size and tsize_height > 75:
+            return
+
+        BaseDBView.TABLE_HEIGHT = tsize_height
+        BaseDBView.EDITOR_HEIGHT = esize_height
+
+        self._body.contents[0] = (table, (tsize[0], tsize_height))
+        self._body.contents[1] = (editor, (esize[0], esize_height))
 
     def _editor_is_visible(self):
         widget, size = self._body.contents[1]
@@ -288,7 +327,7 @@ class BaseDBView(urwid.Frame):
     def _toggle_query_editor(self):
         widget, size = self._body.contents[1]
         if size[1] == 0:
-            new_size = ('weight', 20)
+            new_size = ('weight', BaseDBView.EDITOR_HEIGHT)
             focus_pos = 1
         else:
             new_size = ('weight', 0)

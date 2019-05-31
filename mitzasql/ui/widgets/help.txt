@@ -53,6 +53,9 @@ n / p              | Go to next or previous search      | yes           | search
 tab                | Autocomplete command / argument    | yes           | all contexts which support commands
 -------------------------------------------------------------------------------------------------------------
 ctrl o             | Open the "change table" popup      |               | database table
+-------------------------------------------------------------------------------------------------------------
+ctrl shift up /    | Resize the query editor            |               | query editor
+           down    |                                    |               |
 
 
 Actions keys are equivalent to regular buttons found in a conventional user interface. To perform an action press a specific key highlighted with a different color than the rest of the text.

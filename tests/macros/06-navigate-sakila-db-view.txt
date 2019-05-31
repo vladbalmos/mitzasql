@@ -1,6 +1,8 @@
 key:enter
 key_sequence:/sakila
 key:enter:2
+
+# Navigate tables list
 sleep:0.5
 key:G
 sleep:0.2
@@ -15,9 +17,13 @@ key:l:3
 sleep:0.3
 key:0
 sleep:0.3
+
+# Show trigger/function
 key_sequence:/rental
 key:enter
 sleep:0.4
+
+# Test :resize command
 key_sequence::res
 key:tab
 key:space
@@ -30,14 +36,20 @@ key:enter
 sleep:0.2
 key_sequence::resize Name -30
 key:enter
+
+# Show trigger
 key:k
 key:enter
 sleep:1
 key:esc
+
+# Show trigger
 key:j:2
 key:enter
 sleep:1
 key:esc
+
+# Show procedure
 key:j
 key:enter
 sleep:1

@@ -3,6 +3,8 @@ key_sequence:/sakila
 key:enter:2
 key_sequence:/address
 key:enter:2
+
+# Navigate table
 key:ctrl d:27
 sleep:0.5
 key:g:2
@@ -11,14 +13,20 @@ sleep:0.5
 key:0
 key:l:3
 key:h:3
+
+# View row
 key:enter
 sleep:0.5
 key:esc
+
+# View row
 key_sequence:21j
 key:enter
 sleep:0.5
 key:esc
 key:l
+
+# Test :sort command
 key_sequence::sor
 key:tab
 key:space
@@ -29,15 +37,21 @@ key_sequence:asc
 key:enter
 key:G
 key:k:10
+
+# View row
 key:enter
 sleep:0.5
 key:esc
+
+# Test :eq command
 key_sequence::eq address_id 45
 key:enter
 key:$
 key:enter
 sleep:0.5
 key:esc
+
+# Test change table popup
 key:ctrl o
 key_sequence:film
 key:tab
@@ -47,9 +61,13 @@ key:G
 key:enter
 sleep:0.5
 key:esc
+
+# Test change table popup
 key:ctrl o
 key_sequence:addre
 key:enter
+
+# Test filter commands
 key_sequence::neq address_id 1
 key:enter
 sleep:0.5
@@ -81,6 +99,8 @@ key_sequence:10l
 key:enter
 sleep:1
 key:esc
+
+# Run queries
 key:f2
 key_sequence:select * from address where district = 'Alberta'
 key:f9
@@ -93,6 +113,8 @@ key:ctrl f9
 key_sequence:select count(*) from address where city_id = 300
 key:f9
 key:esc:2
+
+# Change table
 key:ctrl o
 key_sequence:film
 key:enter:2

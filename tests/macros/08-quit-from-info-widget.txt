@@ -1,3 +1,4 @@
+# Test quiting from table info widget
 key:enter
 key_sequence:/sakila
 key:enter:3
@@ -10,6 +11,8 @@ key:f3
 key:f10
 sleep:0.3
 key:c
+
+# Test quiting from view info widget
 key:esc
 key:j
 key:enter
@@ -24,6 +27,8 @@ key:esc
 key:G
 sleep:0.3
 key:esc
+
+# Test quiting from trigger info widget
 key_sequence:/customer_create_date
 key:enter:2
 key:f10
@@ -32,6 +37,8 @@ key:c
 key:enter
 sleep:0.3
 key:esc
+
+# Test quiting from procedure info widget
 key_sequence:/film_in_stock
 key:enter:2
 key:f10
@@ -40,6 +47,8 @@ key:c
 key:enter
 sleep:0.3
 key:esc
+
+# Test quiting from help widget
 key:f1
 sleep:0.3
 key:f10
