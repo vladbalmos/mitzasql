@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Add query log widget
 - Add keyboard shortcuts to resize the query editor (#40)
 
 ### Changed
 - Document test macros
 
 ### Fixed
+- Prevent binding the "show help" signal handler multiple times
 - Fix for #54: Rewrite the "session select". Replace the FSM with a signal/callback approach
 - Fix for #63: Don't overwrite previous sessions while editing
 - Fix issue with docker-compose network subnets

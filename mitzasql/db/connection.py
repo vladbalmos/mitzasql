@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import time
+from datetime import datetime
 
 import urwid
 import mysql.connector
@@ -28,12 +29,13 @@ from mitzasql.logger import (LoggerMixin, logger)
 
 class Connection(LoggerMixin):
     SIGNAL_EXCEPTION = 'exception'
+    QUERY_LOG = []
+
     def __init__(self, connection_data, session_name=None):
         self.set_log_prefix('Connection')
         self.is_tcp = False
         self.database = None
         self._retry_count = 0
-        self.query_log = []
         self.con = self._create_mysql_connection(connection_data)
         self._connection_data = connection_data
         try:
@@ -123,7 +125,7 @@ class Connection(LoggerMixin):
         return self.con.cursor(buffered=True, dictionary=True)
 
     def query(self, query, params=None, dictionary=False):
-        self.query_log.append((query, params))
+        start = time.time()
         self.log_debug('Query: %s. Params: %s', str(query), str(params))
         try:
             if dictionary is False:
@@ -141,6 +143,10 @@ class Connection(LoggerMixin):
         except errors.Error as e:
             self.log_exception('Query exception: %s', e)
             raise e
+        finally:
+            now = time.time()
+            duration = now - start
+            Connection.QUERY_LOG.append((datetime.now(), query, params, duration))
 
     def change_db(self, name):
         query = 'USE {0}'.format(name);

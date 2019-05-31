@@ -54,6 +54,7 @@ class BaseDBView(urwid.Frame):
         default_actions = [
                ('F1', u'F1 Help', self.SIGNAL_ACTION_HELP),
                ('F2', u'F2 Query Editor'),
+               ('F4', u'F4 Log', self.SIGNAL_ACTION_QUERY_LOG),
                ('F5', u'F5 Refresh', self.SIGNAL_ACTION_REFRESH),
                ('F10', u'F10 Quit', self.SIGNAL_ACTION_QUIT)
                ]

@@ -28,6 +28,7 @@ from mitzasql.ui.widgets.db_view import DBView
 from mitzasql.ui.widgets.db_tables_view import DBTablesView
 from mitzasql.ui.widgets.table_view import TableView
 from mitzasql.ui.widgets.query_view import QueryView
+from mitzasql.ui.widgets.query_log_widget import QueryLogWidget
 from mitzasql.ui.widgets.session_popup_launcher import SessionPopupLauncher
 from mitzasql.ui.widgets.trigger_widget import TriggerWidget
 from mitzasql.ui.widgets.procedure_widget import ProcedureWidget
@@ -111,6 +112,7 @@ class Session(Screen):
     def show_databases(self, *args, **kwargs):
         self.focused_widget = self._widgets_factory.create('databases_view', self._connection)
         self._bind_help_handler(self.focused_widget)
+        self._bind_log_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
@@ -121,6 +123,7 @@ class Session(Screen):
         self._last_database = database
         self.focused_widget = self._widgets_factory.create('db_tables_view', database, self._connection)
         self._bind_help_handler(self.focused_widget)
+        self._bind_log_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
@@ -160,6 +163,7 @@ class Session(Screen):
         self.focused_widget = self._widgets_factory.create('table_view', table, self._connection)
         self.view.original_widget = self.focused_widget
         self._bind_help_handler(self.focused_widget)
+        self._bind_log_handler(self.focused_widget)
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
@@ -230,6 +234,7 @@ class Session(Screen):
                 self._connection.fresh)
 
         self._bind_help_handler(self.focused_widget)
+        self._bind_log_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         if not isinstance(emitter, QueryView):
             self.view.close_pop_up()
@@ -286,5 +291,17 @@ class Session(Screen):
             widget = HelpWidget()
             self.view.show_big_popup(widget)
 
+        view.help_handler_bound = True
         urwid.connect_signal(view, view.SIGNAL_ACTION_HELP, on_help)
+
+    def _bind_log_handler(self, view):
+        if hasattr(view, 'log_handler_bound'):
+            return
+
+        def on_show_log(emitter, action):
+            widget = QueryLogWidget(self._connection)
+            self.view.show_big_popup(widget)
+
+        view.log_handler_bound = True
+        urwid.connect_signal(view, view.SIGNAL_ACTION_QUERY_LOG, on_show_log)
 

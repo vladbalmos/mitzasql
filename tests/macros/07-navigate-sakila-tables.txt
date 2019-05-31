@@ -120,5 +120,20 @@ key_sequence:film
 key:enter:2
 sleep:1
 key:esc
+
+# Test query log
+key:f4
+sleep:0.5
+key:ctrl u
+sleep:0.3
+key:ctrl u
+sleep:0.3
+key:g:2
+sleep:1
+key:G
+sleep:0.3
+key:esc
+
+# Quit
 key:f10
 key:k
