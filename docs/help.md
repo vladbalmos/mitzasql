@@ -73,6 +73,10 @@ Run `mitzasql --help` to see all the available options.
             <td>--sessions_file=[/path/to/sessions/file]</td>
             <td>Store the saved sessions in this file</td>
         </tr>
+        <tr>
+            <td>--no-logging</td>
+            <td>Disable logging</td>
+        </tr>
     </tbody>
 </table>
 

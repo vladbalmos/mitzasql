@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Add command line option to disable logging (#80)
 - Persist column widths across restarts (#53)
 - Add :clearcache command to clear cache files
 
