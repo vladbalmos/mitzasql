@@ -24,6 +24,7 @@ import urwid
 import mysql.connector.errors as errors
 
 import mitzasql.db.schema as schema
+from mitzasql.db.schema_cache import schema_cache_instance
 
 MAX_ROWS_FOR_COLUMN_LENGTH_DETECTION = 100
 
@@ -37,9 +38,13 @@ class Model:
     ''' Base model '''
     def __init__(self, data = [], columns = {}):
         self.data = data
-        self.columns = columns
+        self._columns = columns
         self.rowcount = len(data)
         urwid.register_signal(self.__class__, self.SIGNALS)
+
+    @property
+    def columns(self):
+        return self._columns
 
     def __getitem__(self, key):
         return self.data[key]
@@ -52,7 +57,7 @@ class Model:
             yield row
 
     def col_index(self, name):
-        for index, item in enumerate(self.columns):
+        for index, item in enumerate(self._columns):
             if item['name'].lower() == name.lower():
                 return index
         raise IndexError()
@@ -92,15 +97,46 @@ class MysqlModel(Model):
         super().__init__()
         self._fetch_data()
 
+    @property
+    def columns(self):
+        # get cached widths
+        # iterate over columns, create column hash and check
+        # if it exsists in the json
+        cached_widths = schema_cache_instance.get_cached_widths(self)
+        if cached_widths is None:
+            return self._columns
+
+        columns = []
+        for col in self._columns:
+            col_hash = schema_cache_instance.get_column_hash(col)
+
+            if col_hash in cached_widths:
+                col['max_len'] = cached_widths[col_hash]
+
+            columns.append(col)
+        return columns
+
+    @property
+    def database(self):
+        return self._con.database
+
+    @database.setter
+    def database(self, db):
+        self._database = db
+
+    @property
+    def connection_name(self):
+        return self._con.session_name
+
     def _fetch_data(self):
         cursor = self._query_db()
         if cursor is None:
             self.data = []
-            self.columns = []
+            self._columns = []
             self.rowcount = 0
             return False
         self.data = cursor.fetchall()
-        self.columns = self._schema(cursor).columns
+        self._columns = self._schema(cursor).columns
         self.rowcount = cursor.rowcount
         return True
 
@@ -141,12 +177,12 @@ class DatabasesModel(MysqlModel):
 class DBTablesModel(MysqlModel):
     '''Model for all the tables in the current database'''
     def __init__(self, connection, database):
-        self.database = database
+        self._database = database
         super().__init__(connection)
 
     def _query_db(self):
         try:
-            self._con.change_db(self.database)
+            self._con.change_db(self._database)
         except errors.Error as e:
             self.last_error = e
             urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
@@ -168,7 +204,7 @@ class DBTablesModel(MysqlModel):
         FROM
             INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA = '{0}'
-        '''.format(self.database))
+        '''.format(self._database))
 
         # Get triggers
         query.append('''
@@ -184,7 +220,7 @@ class DBTablesModel(MysqlModel):
                 'TRIGGER' AS Type
             FROM INFORMATION_SCHEMA.TRIGGERS
             WHERE TRIGGER_SCHEMA = '{0}'
-        '''.format(self.database))
+        '''.format(self._database))
 
         # Get functions & procedures
         query.append('''
@@ -200,7 +236,7 @@ class DBTablesModel(MysqlModel):
             FROM
                 INFORMATION_SCHEMA.ROUTINES
             WHERE ROUTINE_SCHEMA = '{0}'
-        '''.format(self.database))
+        '''.format(self._database))
         query = '(' + '\n) UNION (\n'.join(query) + ')'
         query = 'SELECT * FROM ({0}) AS info ORDER BY Name'.format(query)
         cursor = self.execute_query(query)
@@ -394,19 +430,19 @@ class QueryModel(MysqlModel):
         cursor = self._query_db()
         if cursor is None:
             self.data = []
-            self.columns = []
+            self._columns = []
             self.rowcount = 0
             self.affected_rows = 0
             return cursor is not None
 
         if cursor.with_rows:
             self.data = cursor.fetchall()
-            self.columns = self._schema(cursor).columns
+            self._columns = self._schema(cursor).columns
             self.rowcount = cursor.rowcount
             self.affected_rows = 0
         else:
             self.data = []
-            self.columns = []
+            self._columns = []
             self.rowcount = 0
             self.affected_rows = cursor.rowcount
 

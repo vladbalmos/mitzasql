@@ -21,6 +21,7 @@
 import urwid
 
 from mitzasql.history import History
+from mitzasql.db.schema_cache import schema_cache_instance
 
 class CommandError(Exception):
     pass
@@ -83,7 +84,8 @@ class BaseCmdProcessor:
         self._cmd_strings = {}
         self.cmd_args_suggestions = {}
         self._colon_cmds = [
-                ('q', 'quit', self._quit)
+                ('q', 'quit', self._quit),
+                ('cc', 'clearcache', self._clear_cache)
                 ]
         self._cmd_keys = {}
         self._autocomplete = None
@@ -120,6 +122,9 @@ class BaseCmdProcessor:
 
     def _quit(self):
         raise urwid.ExitMainLoop()
+
+    def _clear_cache(self):
+        schema_cache_instance.clear()
 
     def reset_autocomplete(self):
         self._autocomplete = None

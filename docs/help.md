@@ -27,6 +27,7 @@ Supported MySQL versions:
 `MitzaSQL` creates by default the following files and folders in your home directory:
 - $HOME/.config/mitzasql/sessions.ini
 - $HOME/.cache/mitzasql/log/mitzasql.log
+- $HOME/.cache/mitzasql/schema/
 
 You can override the default location of the sessions file using the `--sessions_file` switch. See the [Command line options](#command-line-options) section
 
@@ -271,6 +272,13 @@ To exit command mode press `esc`.
             <td>:sort [column name] [asc|desc]</td>
             <td>
                 Sort [column name] asceding or descending.
+            </td>
+            <td>all except server view</td>
+        </tr>
+        <tr>
+            <td>:clearcache</td>
+            <td>
+                Clear the schema caches. When resizing a column the new width is cached in order to persist it across restarts. Calling this command will remove all cache files.
             </td>
             <td>all except server view</td>
         </tr>
