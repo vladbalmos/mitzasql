@@ -31,8 +31,7 @@ MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL)
 By default MitzaSQL stores connection credentials in plain text files in your home directory. If security is a concern you could store the file in an encrypted partition/directory and specify the path to the session file when the program starts using the `--sessions_file /path/to/sessions.ini` flag. Another option would be not to persist the connection credentials when creating a new session.
 
 # Performance & known issues
-Loading large datasets will slow down the rendering. By default, when opening a table screen only the first 100 records are loaded. The rest of the data is loaded automatically when scrolling down. When running queries with the SQL Query editor make sure you don't load a large number of records or else your user experience might suffer.  
-Columns resizing doesn't persist between sessions - will be fixed in the next version.
+Loading large datasets will slow down the rendering. By default, when opening a table screen only the first 100 records are loaded. The rest of the data is loaded automatically when scrolling down. When running queries with the SQL Query editor make sure you don't load a large number of records or else your user experience might suffer.
 
 # Dependencies
 * urwid
