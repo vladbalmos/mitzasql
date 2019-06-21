@@ -21,7 +21,22 @@
 import urwid
 
 from .emacs_edit import EmacsEdit
+from mitzasql.ui.syntax_highlight import highlight
 
 class QueryEditor(EmacsEdit):
     def __init__(self):
         super().__init__(multiline=True, allow_tab=True)
+
+    def render(self, size, focus=False):
+        (maxcol,) = size
+        self._shift_view_to_cursor = bool(focus)
+
+        text = highlight(self._edit_text)
+        if not len(text):
+            text = u''
+
+        canv = urwid.Text(text).render((maxcol,))
+        if focus:
+            canv = urwid.CompositeCanvas(canv)
+            canv.cursor = self.get_cursor_coords((maxcol,))
+        return canv
