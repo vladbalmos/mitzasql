@@ -38,7 +38,6 @@ file_handler.setFormatter(log_formatter)
 
 logger.addHandler(file_handler)
 
-
 class LoggerMixin:
     def set_log_prefix(self, prefix):
         self._prefix = prefix
@@ -73,3 +72,7 @@ class LoggerMixin:
     def log(self, level, msg, *args, **kwargs):
         msg = self._make_msg(msg)
         logger.log(level, msg, *args, **kwargs)
+
+def disable_logging():
+    logger.removeHandler(file_handler)
+    logger.addHandler(logging.NullHandler())

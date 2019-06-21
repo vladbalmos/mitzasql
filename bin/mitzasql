@@ -26,6 +26,7 @@ import time
 
 from mitzasql.app import App
 from mitzasql.sessions_registry import SessionsRegistry
+from mitzasql.logger import disable_logging
 
 def print_saved_sessions(sessions_file=None):
     """Show the sessions in the registry file """
@@ -83,10 +84,16 @@ if __name__  == '__main__':
             for testing')
     parser.add_argument('--sessions_file', metavar='/path/to/sessions.ini', help='Path to \
             the sessions list registry file')
+    parser.add_argument('-L', '--no-logging', help='Disable logging',
+            action='store_true')
     parser.add_argument('-v', '--version', help='Show current version',
             action='store_true')
 
     args = parser.parse_args()
+
+    if args.no_logging:
+        disable_logging()
+
     if args.list:
         print_saved_sessions(args.sessions_file)
     elif args.session is not None:

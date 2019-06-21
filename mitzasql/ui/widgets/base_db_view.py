@@ -24,6 +24,7 @@ import time
 import mitzasql.ui.utils as utils
 from mitzasql.history import History
 from mitzasql.db.model import (TableModel, QueryModel)
+from mitzasql.db.schema_cache import schema_cache_instance
 from .db_view_footer import DBViewFooter
 from .query_widget import QueryWidget
 
@@ -48,6 +49,7 @@ class BaseDBView(urwid.Frame):
         self._table = None
         self._query_editor = None
         self._connection = connection
+        self._schema_cache = schema_cache_instance
 
         self._actions = []
         self._actions_to_signals = {}
@@ -167,12 +169,22 @@ class BaseDBView(urwid.Frame):
 
     def _make_body(self):
         table = self._table_widget_cls(self._model)
+
+        urwid.connect_signal(table, table.SIGNAL_COLUMN_RESIZED,
+                self.on_resize_table_column)
+
         self._table = table
         self._query_editor = QueryWidget()
 
         pile = urwid.Pile([('weight', BaseDBView.TABLE_HEIGHT, table), ('weight', 0,
             self._query_editor)])
         return pile
+
+    def on_resize_table_column(self, emitter, col_index, new_width):
+        '''
+        Persist the new width to disk
+        '''
+        self._schema_cache.cache_col_width(emitter.model, col_index, new_width)
 
     def _prepare_actions_and_signals(self, actions):
         _actions = []
