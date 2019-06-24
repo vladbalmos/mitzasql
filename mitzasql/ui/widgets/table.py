@@ -415,7 +415,8 @@ class TBody(urwid.ListBox):
 
 class Table(urwid.Frame):
     SIGNAL_ROW_SELECTED = 'selected'
-    SIGNALS = [SIGNAL_ROW_SELECTED]
+    SIGNAL_COLUMN_RESIZED = 'column_resized'
+    SIGNALS = [SIGNAL_ROW_SELECTED, SIGNAL_COLUMN_RESIZED]
 
     def __init__(self, model):
         self._model = model
@@ -442,6 +443,10 @@ class Table(urwid.Frame):
         urwid.disconnect_signal(self._body, self._body.KEYPRESS, self.on_body_keypress)
         self._body.clear()
 
+    @property
+    def model(self):
+        return self._model
+
     def focus_row(self, row_index):
         self._focused_row_index = row_index
         self._scroll_rows()
@@ -462,12 +467,16 @@ class Table(urwid.Frame):
     def resize_col(self, col_index, increment=1):
         width = self._header.original_widget.resize(col_index, increment)
 
-        if width is not None:
-            self._body.update_col_width(col_index, width)
+        if width is None:
+            return
+
+        self._body.update_col_width(col_index, width)
 
         for row in self._body.body:
             trow = row.original_widget
             trow.resize(col_index, increment)
+
+        urwid.emit_signal(self, self.SIGNAL_COLUMN_RESIZED, self, col_index, width)
 
     def _increment_col_index(self, offset, absolute=False):
         if absolute is False:
