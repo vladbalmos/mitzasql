@@ -20,9 +20,11 @@
 
 from pygments.lexers import MySqlLexer
 from pygments.token import Punctuation, Whitespace, Error, Text, Comment, \
-        Operator, Keyword, Name, String, Number, Generic
+        Operator, Keyword, Name, String, Number, Generic, Literal
 from pygments.formatter import Formatter
 import pygments
+
+from mitzasql.logger import logger
 
 class UrwidSqlFormatter(Formatter):
     '''
@@ -48,6 +50,8 @@ class UrwidSqlFormatter(Formatter):
             Number.Float: 'sql:number',
             Number.Integer: 'sql:number',
             String.Single: 'sql:string',
+            String.Double: 'sql:string',
+            String.Symbol: 'sql:string',
             String.Affix: 'sql:string',
             String.Name: 'sql:string',
             Punctuation: 'sql:punctuation'
@@ -58,6 +62,7 @@ class UrwidSqlFormatter(Formatter):
             try:
                 style = self.colorscheme[ttype]
             except KeyError:
+                logger.debug(ttype)
                 style = 'sql:default'
 
             outfile.write((style, value))

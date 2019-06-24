@@ -55,15 +55,15 @@ default_theme = [
 
         # sql syntax highlighting
         ('sql:default', '', ''),
-        ('sql:keyword', 'dark cyan', ''),
-        ('sql:function', 'dark cyan', ''),
-        ('sql:name', 'light gray', ''),
-        ('sql:punctuation', 'yellow', ''),
-        ('sql:number', 'dark green', ''),
+        ('sql:keyword', 'dark cyan', '', '', 'h210,bold', ''),
+        ('sql:function', 'dark cyan', '', '', 'h117', ''),
+        ('sql:name', 'light gray', '', '', 'h186', ''),
+        ('sql:punctuation', 'yellow', '', '', 'h122', ''),
+        ('sql:number', 'dark green', '', '', 'h211', ''),
         ('sql:operator', '', ''),
-        ('sql:string', 'light cyan', ''),
-        ('sql:keyword.type', 'dark cyan', ''),
-        ('sql:builtin', 'dark cyan', '')
+        ('sql:string', 'light cyan', '', '', 'h202', ''),
+        ('sql:keyword.type', 'dark cyan', '', '', 'h210', ''),
+        ('sql:builtin', 'dark cyan', '', '', 'h186', '')
 
         ]
 
