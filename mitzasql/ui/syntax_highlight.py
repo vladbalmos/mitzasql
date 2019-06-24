@@ -24,8 +24,6 @@ from pygments.token import Punctuation, Whitespace, Error, Text, Comment, \
 from pygments.formatter import Formatter
 import pygments
 
-from mitzasql.logger import logger
-
 class UrwidSqlFormatter(Formatter):
     '''
     Provides syntax highligting for SQL using urwid display attributes
@@ -62,7 +60,6 @@ class UrwidSqlFormatter(Formatter):
             try:
                 style = self.colorscheme[ttype]
             except KeyError:
-                logger.debug(ttype)
                 style = 'sql:default'
 
             outfile.write((style, value))
