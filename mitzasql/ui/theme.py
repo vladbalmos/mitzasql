@@ -51,7 +51,19 @@ default_theme = [
         ('tcell_null_unfocused', 'dark red', ''),
         ('tcell_null_focused', 'dark red', 'light gray'),
 
-        ('tfooter', 'light red', '', '', 'h186', 'g10')
+        ('tfooter', 'light red', '', '', 'h186', 'g10'),
+
+        # sql syntax highlighting
+        ('sql:default', '', ''),
+        ('sql:keyword', 'dark cyan', '', '', 'h210,bold', ''),
+        ('sql:function', 'dark cyan', '', '', 'h117', ''),
+        ('sql:name', 'light gray', '', '', 'h186', ''),
+        ('sql:punctuation', 'yellow', '', '', 'h122', ''),
+        ('sql:number', 'dark green', '', '', 'h211', ''),
+        ('sql:operator', '', ''),
+        ('sql:string', 'light cyan', '', '', 'h202', ''),
+        ('sql:keyword.type', 'dark cyan', '', '', 'h210', ''),
+        ('sql:builtin', 'dark cyan', '', '', 'h186', '')
 
         ]
 

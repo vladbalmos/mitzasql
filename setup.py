@@ -52,7 +52,8 @@ setuptools.setup(
         install_requires=[
             'urwid ==2.0.1',
             'mysql-connector-python ==8.0.16',
-            'appdirs ==1.4.3'
+            'appdirs ==1.4.3',
+            'pygments ==2.4.2'
         ],
         scripts=['bin/mitzasql']
 )
