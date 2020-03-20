@@ -33,7 +33,7 @@ class SessionsRegistry:
     instance = None
 
     def __init__(self, sessions_file=None):
-        self._sessions = configparser.ConfigParser()
+        self._sessions = configparser.RawConfigParser()
         if sessions_file is None:
             self._sessions_file = const.DEFAULT_SESSIONS_FILE
         else:
