@@ -63,7 +63,6 @@ def test_model_sorts_rows_by_first_name_ascending(sakila_connection):
     model.sort('first_name', 'asc')
 
     row = model[0]
-    assert row[0] == 132
     assert row[1] == 'ADAM'
 
 def test_model_sorts_rows_by_first_name_descending(sakila_connection):

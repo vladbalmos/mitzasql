@@ -5,9 +5,8 @@ permalink: /user-manual/
 ---
 ## Requirements ##
 
-`MitzaSQL` runs on Linux and requires Python 3.5. No testing was done for versions lower than 3.5 but there's a good change that it will run.  
+`MitzaSQL` runs on Linux and requires Python 3.6. No testing was done for versions lower than 3.5 but there's a good change that it will run.  
 Supported MySQL versions:
-- 5.5
 - 5.6
 - 5.7
 - 8

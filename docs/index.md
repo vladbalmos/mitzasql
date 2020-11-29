@@ -38,9 +38,7 @@ To run `MitzaSQL` on Windows/MacOS build a Docker image and run it inside a cont
 
 ## Planned features
 - Support SSL connections
-- Query log
-- Autocomplete support and syntax highlighting for the SQL editor
-- Persist column sizes settings between sessions
+- Autocomplete support
 - Official Docker image
 
 ## Known issues

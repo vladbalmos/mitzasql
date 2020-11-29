@@ -6,8 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0]
+
 ### Changed
 - Switch to RawConfigParser to fix issue with percent sign in passwords (pull/86 by oliverseal)
+- Drop support for Python 3.5
+- Drop support for MySQL 5.5
+- Upgrade to Urwid 2.1.2
+- Upgrade mysql-connector-python to 8.0.22
+- Upgrade appdirs to 1.4.4
+- Upgrade pygments to 2.7.2
+- Update documentation
+
+### Fixed
+- Fix for #88: Database names with dashes cause error 1064 (42000)
 
 ## [1.2.0]
 

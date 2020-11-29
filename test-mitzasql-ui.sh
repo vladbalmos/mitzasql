@@ -18,13 +18,13 @@ docker-compose -f $FILE build
 docker-compose -f $FILE up -d
 
 if [ -z "$1" ]; then
-    mysql_versions='mysql55 mysql56 mysql57 mysql8'
+    mysql_versions='mysql56 mysql57 mysql8'
 else
     mysql_versions="$1"
 fi
 
 if [ -z "$2" ]; then
-    python_versions='py35 py36 py37 py38'
+    python_versions='py36 py37 py38 py39'
 else
     python_versions="$2"
 fi

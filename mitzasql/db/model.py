@@ -311,7 +311,7 @@ class TableModel(MysqlModel):
         return self._table_schema
 
     def _count_rows(self):
-        query = 'SELECT COUNT(*) AS total FROM {0}'.format(self.table_name)
+        query = 'SELECT COUNT(*) AS total FROM `{0}`'.format(self.table_name)
 
         if self._where:
             query += ' WHERE {0}'.format(self._where)

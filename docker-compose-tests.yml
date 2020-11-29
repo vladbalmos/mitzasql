@@ -1,27 +1,6 @@
 version: '3.5'
 services:
   # MySQL servers
-  mysql55:
-    image: mysql:5.5
-    expose:
-      - 3306
-    ports:
-      - "$MYSQL55_PORT:3306"
-    environment:
-      - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
-      - "MYSQL_USER=user"
-      - "MYSQL_PASSWORD=password"
-    volumes:
-      - ./tests/db_fixtures/55-56:/docker-entrypoint-initdb.d
-    command: --wait-timeout=2
-    healthcheck:
-      test: mysqladmin -h 127.0.0.1 ping
-      interval: 10s
-      timeout: 5m
-      retries: 10
-      start_period: 30s
-    networks:
-      - mitzasql-test-network
   mysql56:
     image: mysql:5.6
     expose:
@@ -86,24 +65,6 @@ services:
     networks:
       - mitzasql-test-network
   # Python versions
-  python35:
-    build:
-      context: .
-      args:
-        VERSION: 3.5
-        TOXENV: py35
-        USER_ID: $USER_ID
-    environment:
-      - "TOXENV=py35"
-      - "USER_ID=$USER_ID"
-    command: python --version
-    depends_on:
-      - mysql55
-      - mysql56
-      - mysql57
-      - mysql8
-    networks:
-      - mitzasql-test-network
   python36:
     build:
       context: .
@@ -116,7 +77,6 @@ services:
       - "USER_ID=$USER_ID"
     command: python --version
     depends_on:
-      - mysql55
       - mysql56
       - mysql57
       - mysql8
@@ -134,7 +94,6 @@ services:
       - "USER_ID=$USER_ID"
     command: python --version
     depends_on:
-      - mysql55
       - mysql56
       - mysql57
       - mysql8
@@ -144,7 +103,7 @@ services:
     build:
       context: .
       args:
-        VERSION: 3.8-rc
+        VERSION: 3.8
         TOXENV: py38
         USER_ID: $USER_ID
     environment:
@@ -152,7 +111,23 @@ services:
       - "USER_ID=$USER_ID"
     command: python --version
     depends_on:
-      - mysql55
+      - mysql56
+      - mysql57
+      - mysql8
+    networks:
+      - mitzasql-test-network
+  python39:
+    build:
+      context: .
+      args:
+        VERSION: 3.9
+        TOXENV: py39
+        USER_ID: $USER_ID
+    environment:
+      - "TOXENV=py39"
+      - "USER_ID=$USER_ID"
+    command: python --version
+    depends_on:
       - mysql56
       - mysql57
       - mysql8
@@ -164,4 +139,4 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 192.168.2.5/24
+        - subnet: 192.168.4.5/24

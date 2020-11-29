@@ -24,8 +24,8 @@ MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL)
 
 # System requirements
 * Linux
-* Python3 (3.5 - 3.8)
-* MySQL (5.5 - 8)
+* Python3 (3.6 - 3.9)
+* MySQL (5.6 - 8)
 
 # Security
 By default MitzaSQL stores connection credentials in plain text files in your home directory. If security is a concern you could store the file in an encrypted partition/directory and specify the path to the session file when the program starts using the `--sessions_file /path/to/sessions.ini` flag. Another option would be not to persist the connection credentials when creating a new session.

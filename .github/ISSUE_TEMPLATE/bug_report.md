@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Ubuntu]
- - Python version [e.g. 3.5]
+ - Python version [e.g. 3.6]
  - Mysql version [e.g. 5.7]
  - Version [e.g. 1.0]
 

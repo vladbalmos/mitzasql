@@ -49,8 +49,7 @@ class Connection(LoggerMixin):
                 'user': connection_data['username'],
                 'password': connection_data['password'],
                 'connection_timeout': 5,
-                'autocommit': True,
-                'use_pure': True
+                'autocommit': True
                 }
 
         protocol, host = self._extract_host(connection_data['host'])
@@ -149,7 +148,7 @@ class Connection(LoggerMixin):
             Connection.QUERY_LOG.append((datetime.now(), query, params, duration))
 
     def change_db(self, name):
-        query = 'USE {0}'.format(name);
+        query = 'USE `{0}`'.format(name);
         self.query(query);
         self.database = name
 
