@@ -29,6 +29,7 @@ import re
 from mitzasql.ui import theme
 from mitzasql.ui import main_loop as shared_main_loop
 from mitzasql.ui.builder import Builder
+from mitzasql.logger import logger
 
 top_most_widget = None
 palette = theme.get_palette()
@@ -84,10 +85,15 @@ def simulate_input_thread(fd, macro_file):
     macro_file:String Path to macro file
     """
     with open(macro_file) as file:
+        line_counter = 1
         while True:
             line = file.readline()
             if line is '':
                 break
+
+            logger.info(u'Executing macro line {0}'.format(str(line_counter)))
+            line_counter = line_counter + 1
+
             line = line.rstrip()
             input_type, *segments = line.split(':')
             if input_type.startswith('#'):
@@ -147,6 +153,7 @@ def start_loop(macro_file=None):
             print('Macro file does not exist!', file=sys.stderr)
             sys.exit(1)
 
+        logger.info(u'Executing macro file {0}'.format(macro_file))
         simulate_input_pipe = main_loop.watch_pipe(simulate_input)
         thread = threading.Thread(target=simulate_input_thread,
                 args=[simulate_input_pipe, macro_file])

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade appdirs to 1.4.4
 - Upgrade pygments to 2.7.2
 - Update documentation
+- Go back to previous screen after dismissing a SQL error
+- Log line numbers executed by macros
 
 ### Fixed
 - Fix for #88: Database names with dashes cause error 1064 (42000)
