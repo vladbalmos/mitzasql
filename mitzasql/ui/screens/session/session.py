@@ -238,7 +238,7 @@ class Session(Screen):
         self.view.original_widget = self.focused_widget
         if not isinstance(emitter, QueryView):
             self.view.close_pop_up()
-        self.focused_widget.set_model_error_handler(self.handle_custom_query_model_error)
+        self.focused_widget.set_model_error_handler(self.handle_model_error)
 
         # If query cursor did not return rows, show info message
         model = self.focused_widget.model
@@ -277,14 +277,11 @@ class Session(Screen):
         if self._connection.is_fatal_error(error):
             return self.view.show_fatal_error(error)
 
-        return self.view.show_error(error)
-
-    def handle_custom_query_model_error(self, emitter, model, error):
-        if self._connection.is_fatal_error(error):
-            return self.view.show_fatal_error(error)
-
         def go_back():
-            self._state_machine.change_state('back')
+            if self._state_machine.get_current_state() == states.STATE_SHOW_DATABASES:
+                raise urwid.ExitMainLoop()
+
+            self._state_machine.change_state('back', emitter)
 
         return self.view.show_error(error, on_close=go_back)
 

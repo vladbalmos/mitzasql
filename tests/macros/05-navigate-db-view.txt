@@ -45,7 +45,6 @@ key_sequence:invalid sql syntax
 key:f9
 sleep:1
 key:enter
-key:esc
 sleep:0.2
 
 # Quit

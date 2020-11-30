@@ -74,18 +74,17 @@ class SessionPopupLauncher(urwid.PopUpLauncher):
         self.showing_error_modal = True
 
         def on_ok_signal(*args, **kwargs):
-            if on_close is None:
-                self.close_pop_up()
-                return
-
             self.close_pop_up()
-            on_close()
+
+            if callable(on_close):
+                on_close()
 
         def factory_method():
             dialog = ErrorDialog(error)
             urwid.connect_signal(dialog, dialog.SIGNAL_OK,
                     on_ok_signal)
             return urwid.Filler(dialog)
+
         self._popup_factory_method = factory_method
         return self.open_pop_up()
 
