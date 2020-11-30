@@ -5,6 +5,7 @@ import urwid
 import mysql.connector.errors as errors
 from mitzasql.db.model import DBTablesModel
 from .connection_fixture import connection
+from .connection_fixture import db_dash_in_name_connection
 
 database = 'sakila'
 
@@ -48,3 +49,12 @@ def test_model_emits_signals_during_reloading(connection):
     assert pre_load_signal_handled is True
     assert load_signal_handled is True
 
+def test_model_escapes_db_name_with_dash(db_dash_in_name_connection):
+    model = DBTablesModel(db_dash_in_name_connection, 'db-with-dash')
+
+    assert len(model) == 1
+    table_names = []
+    for row in model:
+        table_names.append(row[0])
+
+    assert 'table-with-dash' in table_names

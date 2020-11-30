@@ -4,6 +4,8 @@ import pytest
 import mysql.connector.errors as errors
 from mitzasql.db.model import TableModel
 from .connection_fixture import sakila_connection
+from .connection_fixture import connection
+from .connection_fixture import db_dash_in_name_connection
 
 table = 'actor'
 
@@ -97,4 +99,8 @@ def test_model_filters_records(sakila_connection, filter):
     model = TableModel(sakila_connection, 'address')
     model.filter(filter)
 
+    assert model.last_error is None
+
+def test_model_properly_escapes_dash_in_table_names(db_dash_in_name_connection):
+    model = TableModel(db_dash_in_name_connection, 'table-with-dash')
     assert model.last_error is None
