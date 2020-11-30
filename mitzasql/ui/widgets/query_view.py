@@ -76,6 +76,7 @@ class QueryView(BaseDBView):
 
     def refresh(self, query, connection):
         if query == self._model.query:
+            self._model.reload()
             return
 
         self._model.query = query

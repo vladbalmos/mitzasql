@@ -69,8 +69,10 @@ class DBTablesView(BaseDBView):
         self.SIGNALS.append(self.SIGNAL_ACTION_SELECT_TABLE)
         self._connect_table_signals()
 
-    def refresh(self, database, connection):
+    def refresh(self, database, connection, **kwargs):
         if database == self._model.database:
+            if 'force_refresh' in kwargs and kwargs['force_refresh'] == True:
+                self._model.reload()
             return
         self._model.database = database
         self._model.reload()

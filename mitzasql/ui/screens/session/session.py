@@ -110,18 +110,20 @@ class Session(Screen):
         self._state_machine.change_state('database_selected', self, db_name)
 
     def show_databases(self, *args, **kwargs):
-        self.focused_widget = self._widgets_factory.create('databases_view', self._connection)
+        self.focused_widget = self._widgets_factory.create('databases_view',
+                self._connection, **kwargs)
         self._bind_help_handler(self.focused_widget)
         self._bind_log_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
-    def show_db_tables(self, emitter, database=None):
+    def show_db_tables(self, emitter, database=None, **kwargs):
         if database is None:
             database = self._last_database
         self._last_database = database
-        self.focused_widget = self._widgets_factory.create('db_tables_view', database, self._connection)
+        self.focused_widget = self._widgets_factory.create('db_tables_view',
+                database, self._connection, **kwargs)
         self._bind_help_handler(self.focused_widget)
         self._bind_log_handler(self.focused_widget)
         self.view.original_widget = self.focused_widget
@@ -159,8 +161,8 @@ class Session(Screen):
         urwid.connect_signal(self.focused_widget, self.focused_widget.SIGNAL_ACTION_SELECT_TABLE, on_select)
         self.focused_widget.select_handler_bound = True
 
-    def show_table(self, emitter, table):
-        self.focused_widget = self._widgets_factory.create('table_view', table, self._connection)
+    def show_table(self, emitter, table, **kwargs):
+        self.focused_widget = self._widgets_factory.create('table_view', table, self._connection, **kwargs)
         self.view.original_widget = self.focused_widget
         self._bind_help_handler(self.focused_widget)
         self._bind_log_handler(self.focused_widget)
@@ -243,7 +245,10 @@ class Session(Screen):
         # If query cursor did not return rows, show info message
         model = self.focused_widget.model
         if not model.last_error and not model.has_rows:
-            self.view.show_info(u'Affected rows: {0}'.format(model.affected_rows))
+            def go_back():
+                self._state_machine.change_state('back', emitter, force_refresh=True)
+
+            self.view.show_info(u'Affected rows: {0}'.format(model.affected_rows), on_close=go_back)
             return
 
         if hasattr(self.focused_widget, 'select_handler_bound'):
@@ -261,16 +266,16 @@ class Session(Screen):
 
     def goto_prev_view(self, *args, **kwargs):
         if isinstance(self._last_primary_view, DBView):
-            self._state_machine.change_state('show_db_view', self)
+            self._state_machine.change_state('show_db_view', self, **kwargs)
             return
 
         if isinstance(self._last_primary_view, DBTablesView):
-            self._state_machine.change_state('show_db_tables_view', self)
+            self._state_machine.change_state('show_db_tables_view', self, **kwargs)
             return
 
         if isinstance(self._last_primary_view, TableView):
             self._state_machine.change_state('show_table_view', self,
-                    self._last_primary_view.table)
+                    self._last_primary_view.table, **kwargs)
             return
 
     def handle_model_error(self, emitter, model, error):

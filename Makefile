@@ -19,3 +19,8 @@ install-website-deps:
 
 start-website:
 	cd docs && bundle exec jekyll serve
+
+clean:
+	rm -f dist/* || true
+	docker-compose down --remove-orphans
+	docker-compose -f docker-compose-tests.yml down --remove-orphans

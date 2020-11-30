@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update documentation
 - Go back to previous screen after dismissing a SQL error
 - Log line numbers executed by macros
+- Go back and refresh previous screen if the Query Editor runs sql which modifies records (insert, update, delete, etc...)
+- Prevent caching custom queries
 
 ### Fixed
 - Fix for #88: Database names with dashes cause error 1064 (42000)
