@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix for #88: Database names with dashes cause error 1064 (42000)
+- Fix for #84
+- Fix for #85
+- Fix for #86
 
 ## [1.2.0]
 
