@@ -25,6 +25,7 @@ import mitzasql.ui.utils as utils
 from mitzasql.history import History
 from mitzasql.db.model import (TableModel, QueryModel)
 from mitzasql.db.schema_cache import schema_cache_instance
+from mitzasql.sql_autocomplete_engine import SQLAutocompleteEngine
 from .db_view_footer import DBViewFooter
 from .query_widget import QueryWidget
 
@@ -48,6 +49,7 @@ class BaseDBView(urwid.Frame):
         self._model_error_handler = None
         self._table = None
         self._query_editor = None
+        self._sql_autocomplete_engine = SQLAutocompleteEngine(connection)
         self._connection = connection
         self._schema_cache = schema_cache_instance
 
@@ -174,7 +176,7 @@ class BaseDBView(urwid.Frame):
                 self.on_resize_table_column)
 
         self._table = table
-        self._query_editor = QueryWidget()
+        self._query_editor = QueryWidget(autocomplete_engine=self._sql_autocomplete_engine)
 
         pile = urwid.Pile([('weight', BaseDBView.TABLE_HEIGHT, table), ('weight', 0,
             self._query_editor)])

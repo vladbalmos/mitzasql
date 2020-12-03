@@ -29,6 +29,12 @@ def orig_w(widget):
         return widget.original_widget
     return widget
 
+def orig_w_recursive(widget):
+    if hasattr(widget, 'original_widget'):
+        return orig_w_recursive(widget.original_widget)
+
+    return widget
+
 def vim2emacs_translation(key):
     global last_key_press
     global pending_vim_command

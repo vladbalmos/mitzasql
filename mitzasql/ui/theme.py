@@ -27,7 +27,6 @@ default_theme = [
         ('action_bar', 'black', 'light gray', '', 'h250', 'g20'),
         ('action_bar:action', 'white', 'dark blue', '', 'g80', 'g30'),
         ('action_bar:action_key', 'light red,bold', 'dark blue', '', 'h122,bold', 'g30'),
-        # ('action_bar:content', 'light gray', '', '', 'light gray', ''),
         ('action_bar:content', '', '', '', '', ''),
 
         ('linebox', '', '', '', 'h186', ''),
@@ -52,6 +51,10 @@ default_theme = [
         ('tcell_null_focused', 'dark red', 'light gray'),
 
         ('tfooter', 'light red', '', '', 'h186', 'g10'),
+
+        # autocomplete
+        ('suggestion:highlight', 'light red,bold', '', '', 'h122,bold', ''),
+        ('suggestion', 'white', '', '', 'g80', ''),
 
         # sql syntax highlighting
         ('sql:default', '', ''),
