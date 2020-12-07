@@ -80,6 +80,8 @@ class QueryEditor(EmacsEdit):
 
         middle_pos = self._last_autocomplete_text_pos
 
+        # TODO: replace the whole word if trying to autocomplete in the middle
+        # of a word
         text = self.edit_text[0:middle_pos] + suggestion[len(prefix):] + self.edit_text[self.edit_pos:]
         self.edit_text = text
         self.edit_pos = middle_pos + len(suggestion[len(prefix):])

@@ -53,7 +53,8 @@ setuptools.setup(
             'urwid ==2.1.2',
             'mysql-connector-python ==8.0.22',
             'appdirs ==1.4.4',
-            'pygments ==2.7.2'
+            'pygments ==2.7.2',
+            'sqlparse ==0.4.1'
         ],
         scripts=['bin/mitzasql']
 )
