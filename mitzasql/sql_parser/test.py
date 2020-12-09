@@ -1,6 +1,13 @@
 from mitzasql.sql_parser import parser
 
 if __name__ == '__main__':
+    # sql = '''
+# SELECT
+    # b'',
+    # x'',
+    # 0x,
+    # 0B
+# '''
     sql = '''
 SELECT
 ALL DISTINCT DISTINCTROW HIGH_PRIORITY STRAIGHT_JOIN
@@ -8,7 +15,7 @@ SQL_NO_CACHE SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT SQL_BIG_RESULT
 SQL_SMALL_RESULT
     @something,
     @'something',
-    @"something",
+    @"something,
     @`something`,
     a <=>> b,
     a := b,
@@ -33,6 +40,13 @@ SQL_SMALL_RESULT
     x'01af',
     0xh1,
     0x01af,
+    0b000,
+    0b001,
+    0b02,
+    0B01,
+    0ba,
+    b'0101',
+    b'0123',
     +1 AS c,
     2 + 5 b,
     1,
@@ -55,6 +69,20 @@ WHERE
 ORDER BY name DESC
 GROUP BY id
 HAVING x > 5
+
+# this is a comment
+-- this is a comment
+select
+/* this is a comment */
+/* this is 
+also a comment*/
+/**/
+select
+false,
+FALSE,
+true,
+TRUE,
+null
 '''
 
     tokens = parser.Parser(sql).parse()

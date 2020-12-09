@@ -32,21 +32,36 @@ class Parser():
         self.pos = 0
         self.tokens = []
 
+    def _next_char(self, increment = 1):
+        try:
+            return self.raw_str[self.pos + increment]
+        except IndexError:
+            return None
+
+    def classify_identifier(self, identifier):
+        if identifier == 'false' or identifier == 'FALSE' or identifier == 'true' or identifier == 'TRUE':
+            return 'boolean'
+
+        if identifier.lower() == 'null':
+            return 'null'
+
+        return 'unquoted_identifier'
+
     def create_token(self, token):
         if token is False:
             return
         print(token)
         self.tokens.append(token)
 
-    def combine(self, *parsers):
-        def parser():
+    def either(self, *parsers):
+        def combined_parser():
             for parser in parsers:
                 result = parser()
                 if result is not False:
                     return result
             return False
 
-        return parser
+        return combined_parser
 
     def parse_dot(self):
         try:
@@ -58,7 +73,6 @@ class Parser():
             self.pos += 1
             return ('dot', char)
 
-        self.pos -= 1
         return False
 
     def parse_paren(self):
@@ -71,7 +85,6 @@ class Parser():
             self.pos += 1
             return ('paren', char)
 
-        self.pos -= 1
         return False
 
     def parse_separator(self):
@@ -84,7 +97,6 @@ class Parser():
             self.pos += 1
             return ('separator', char)
 
-        self.pos -= 1
         return False
 
     def parse_space(self):
@@ -93,7 +105,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('space', space)
+                break
 
             if char.isspace():
                 space += char
@@ -101,6 +113,9 @@ class Parser():
                 continue
 
             break
+
+        if not len(space):
+            return False
 
         return ('space', space)
 
@@ -110,7 +125,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('unquoted_identifier', identifier)
+                break
 
             if char.isalnum() or char == '_' or char == '$':
                 identifier += char
@@ -119,7 +134,12 @@ class Parser():
 
             break
 
-        return ('unquoted_identifier', identifier)
+        if not len(identifier):
+            return False
+
+        token = self.classify_identifier(identifier)
+
+        return (token, identifier)
 
     def parse_dec_number(self):
         '''
@@ -130,7 +150,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('number', number)
+                break
 
             if char == '.' or char.isdigit():
                 number += char
@@ -160,55 +180,209 @@ class Parser():
                 number += char
                 self.pos += 1
                 continue
-
             break
+
+        if not len(number):
+            return False
+
+        if number[-1].lower() == 'e':
+            self.pos -= len(number)
+            return False
+
         return ('number', number)
 
-    def parse_hex_number(self):
+    def parse_binary_number_ob(self):
+        '''
+        Parse binary numbers having the format 0b000
+        '''
         number = ''
         while True:
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('number', number)
+                break
 
             if not len(number):
-                if char == '0' or char.lower() == 'x':
+                if char == '0':
                     number += char
                     self.pos += 1
                     continue
                 break
 
             if len(number) == 1:
-                if number[0] == '0':
-                    if char == 'x':
-                        number += char
-                        self.pos += 1
-                        continue
-                    break
-
-                if number[0].lower() == 'x':
-                    if char == "'":
-                        number += char
-                        self.pos += 1
-                        continue
-                    break
-
-                break
-
-            if number[0] == '0':
-                if char in string.hexdigits:
+                if char == 'b':
                     number += char
                     self.pos += 1
                     continue
                 break
 
-            if char in string.hexdigits or char == "'":
+            if char == '0' or char == '1':
                 number += char
                 self.pos += 1
                 continue
 
+            if char.isalnum():
+                self.pos -= len(number)
+                return False
             break
+
+
+        if len(number) < 3:
+            self.pos -= len(number)
+            return False
+
+        return ('number', number)
+
+    def parse_hex_number_ox(self):
+        '''
+        Parse hex numbers having the format 0xfff
+        '''
+        number = ''
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(number):
+                if char == '0':
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(number) == 1:
+                if char == 'x':
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if char in string.hexdigits:
+                number += char
+                self.pos += 1
+                continue
+
+            if char.isalnum():
+                self.pos -= len(number)
+                return False
+
+            break
+
+        if len(number) < 3:
+            self.pos -= len(number)
+            return False
+
+        return ('number', number)
+
+    def parse_binary_number_b_quote(self):
+        '''
+        Parse binary number having the format b'010'
+        '''
+        number = ''
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(number):
+                if char.lower() == 'b':
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(number) == 1:
+                if char == "'":
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if char == '0' or char == '1':
+                number += char
+                self.pos += 1
+                continue
+
+            if char == "'":
+                number += char
+                self.pos += 1
+                break
+
+            if char.isalnum():
+                self.pos -= len(number)
+                return False
+
+            break
+
+        if len(number) < 3:
+            self.pos -= len(number)
+            return False
+
+        if number[-1] != "'":
+            self.pos -= len(number)
+            return False
+
+        if len(number) == 3 and number.lower() == "b''":
+            self.pos -= len(number)
+            return False
+
+        return ('number', number)
+
+    def parse_hex_number_x_quote(self):
+        '''
+        Parse hex number having the format x'fff'
+        '''
+        number = ''
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(number):
+                if char.lower() == 'x':
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(number) == 1:
+                if char == "'":
+                    number += char
+                    self.pos += 1
+                    continue
+                break
+
+            if char in string.hexdigits:
+                number += char
+                self.pos += 1
+                continue
+
+            if char == "'":
+                number += char
+                self.pos += 1
+                break
+
+            if char.isalnum():
+                self.pos -= len(number)
+                return False
+
+            break
+
+        if len(number) < 3:
+            self.pos -= len(number)
+            return False
+
+        if number[-1] != "'":
+            self.pos -= len(number)
+            return False
+
+        if len(number) == 3 and number.lower() == "x''":
+            self.pos -= len(number)
+            return False
+
         return ('number', number)
 
     def parse_string(self):
@@ -219,7 +393,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('string', string_)
+                break
 
             if (char == '"' or char == "'") and not match_quote:
                 match_quote = char
@@ -240,6 +414,9 @@ class Parser():
             string_ += char
             self.pos += 1
 
+        if not len(string_):
+            return False
+
         return ('string', string_)
 
     def parse_quoted_identifier(self):
@@ -250,7 +427,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('quoted_identifier', string_)
+                break
 
             if char == '`' and not match_quote:
                 match_quote = char
@@ -266,6 +443,9 @@ class Parser():
             string_ += char
             self.pos += 1
 
+        if not len(string_):
+            return False
+
         return ('quoted_identifier', string_)
 
     def parse_operator(self, base = ''):
@@ -274,7 +454,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('operator', operator)
+                break
 
             if char not in '&>=<!%*+-/:^|~':
                 break
@@ -283,13 +463,19 @@ class Parser():
             self.pos += 1
 
             if len(operator) < 3 and operator in symbol_operators:
-                _, operator = self.parse_operator(operator)
+                result = self.parse_operator(operator)
+                if not result:
+                    return False
+                _, operator = result
 
             if len(operator) > 1:
                 if operator in symbol_operators:
                     return ('operator', operator)
                 self.pos -= 1
                 return ('operator', operator[0:len(operator) - 1])
+
+        if not len(operator):
+            return False
 
         return ('operator', operator)
 
@@ -299,7 +485,7 @@ class Parser():
             try:
                 char = self.raw_str[self.pos]
             except IndexError:
-                return ('variable', var)
+                break
 
             if char == '@' and not len(var):
                 var += char
@@ -309,27 +495,147 @@ class Parser():
                 break
 
             if char == '"' or char == "'":
-                _, identifier = self.parse_string()
-                var += identifier
-                continue
+                result = self.parse_string()
+                if not result:
+                    self.pos -= len(var)
+                    return False
+
+                var += result[1]
+                break
 
             if char == '`':
-                _, identifier = self.parse_quoted_identifier()
-                var += identifier
-                continue
+                result = self.parse_quoted_identifier()
+                if not result:
+                    self.pos -= len(var)
+                    return False
 
-            _, identifier = self.parse_unquoted_identifier()
-            var += identifier
+                var += result[1]
+                break
+
+            result = self.parse_unquoted_identifier()
+            if not result:
+                self.pos -= len(var)
+                return False
+
+            var += result[1]
             break
+
+        if not len(var):
+            return False
+
+        if len(var) < 2:
+            self.pos -= len(var)
+            return False
 
         return ('variable', var)
 
+    def parse_c_style_comment(self):
+        comment = ''
 
-    def _next_char(self, increment = 1):
-        try:
-            return self.raw_str[self.pos + increment]
-        except IndexError:
-            return None
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(comment):
+                if char == '/':
+                    comment += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(comment) == 1:
+                if char == '*':
+                    comment += char
+                    self.pos += 1
+                    continue
+                break
+
+            if char == '/' and comment[-1] == '*':
+                comment += char
+                self.pos += 1
+                break
+
+            comment += char
+            self.pos += 1
+
+
+        if len(comment) < 2:
+            self.pos -= len(comment)
+            return False
+
+        return ('comment', comment)
+
+    def parse_dash_style_comment(self):
+        comment = ''
+
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(comment):
+                if char == '-':
+                    comment += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(comment) == 1:
+                if char == '-':
+                    comment += char
+                    self.pos += 1
+                    continue
+                break
+
+            if len(comment) == 2 and not char.isspace():
+                break
+
+            if char == '\n':
+                comment += char
+                self.pos += 1
+                break
+
+            comment += char
+            self.pos += 1
+
+        if len(comment) < 3:
+            self.pos -= len(comment)
+            return False
+
+        return ('comment', comment)
+
+    def parse_hash_style_comment(self):
+        comment = ''
+
+        while True:
+            try:
+                char = self.raw_str[self.pos]
+            except IndexError:
+                break
+
+            if not len(comment):
+                if char == '#':
+                    comment += char
+                    self.pos += 1
+                    continue
+                break
+
+            if char == '\n':
+                comment += char
+                self.pos += 1
+                break
+
+            comment += char
+            self.pos += 1
+
+        if not len(comment):
+            return False
+
+        return ('comment', comment)
+
 
     def parse(self):
         if not len(self.raw_str):
@@ -358,46 +664,56 @@ class Parser():
                 self.create_token(self.parse_paren())
                 continue
 
-            # parse dec and hex (0x1AF) numbers
+            # parse dec, binary (0b01) and hex (0x1AF) numbers
             if char.isdigit():
-                # if char == '0' and self._next_char() == 'x' and self._next_char(2) in string.hexdigits:
-                    # number = self.parse_hex_number()
-                # else:
-                    # number = self.parse_dec_number()
-                    # if number is False:
-                        # continue
-                # self.create_token('number', number)
-                # continue
-
-                if char == '0' and self._next_char() == 'x' and self._next_char(2) in string.hexdigits:
-                    parser = self.parse_hex_number
+                if char == '0':
+                    if self._next_char() == 'x':
+                        parser = self.parse_hex_number_ox
+                    elif self._next_char().lower() == 'b':
+                        parser = self.parse_binary_number_ob
+                    else:
+                        parser = self.parse_dec_number
                 else:
                     parser = self.parse_dec_number
 
-                dot_identifier = self.combine(self.parse_dot, self.parse_unquoted_identifier)
-                result = self.combine(parser, dot_identifier)()
-                print('------------------')
-                print(result)
-                # self.create_token(identifier)
+                parser = self.either(parser,
+                                     self.either(self.parse_dot, self.parse_unquoted_identifier))
+                result = parser()
+                self.create_token(result)
                 continue
 
             # parse hexadecimal X'01af' numbers
-            if char.lower() == 'x' and self._next_char() == "'" and self._next_char(2) in string.hexdigits:
-                number = self.parse_hex_number()
-                self.create_token(number)
+            if char.lower() == 'x' and self._next_char() == "'":
+                parser = self.either(self.parse_hex_number_x_quote, self.parse_unquoted_identifier)
+                result = parser()
+                self.create_token(result)
                 continue
 
-            # parse floating numbers starting with dot (.)
-            if char == '.':
-                if self._next_char() in string.digits:
-                    number = self.parse_dec_number()
-                    if number is False:
-                        continue
-                    self.create_token(number)
-                    continue
+            # parse binary b'01' numbers
+            if char.lower() == 'b' and self._next_char() == "'":
+                parser = self.either(self.parse_binary_number_b_quote, self.parse_unquoted_identifier)
+                result = parser()
+                self.create_token(result)
+                continue
 
-                # parse schema separator (.)
-                self.create_token(self.parse_dot())
+            # parse floating numbers starting with dot (.) or a single dot
+            if char == '.':
+                parser = self.either(self.parse_dec_number, self.parse_dot)
+                result = parser()
+                self.create_token(result)
+                continue
+
+            # parse /* c style comments */
+            if char == '/' and self._next_char() == '*':
+                comment = self.parse_c_style_comment()
+                self.create_token(comment)
+                continue
+
+            # parse -- comments
+            if char == '-' and self._next_char() == '-':
+                parser = self.either(self.parse_dash_style_comment, self.parse_operator)
+                result = parser()
+                self.create_token(result)
                 continue
 
             # parse operators
@@ -412,12 +728,6 @@ class Parser():
                 self.create_token(string_)
                 continue
 
-            # parse unquoted identifier
-            if char.isalnum() or char == '_' or char == '$':
-                identifier = self.parse_unquoted_identifier()
-                self.create_token(identifier)
-                continue
-
             # parse quoted identifier
             if char == '`':
                 identifier = self.parse_quoted_identifier()
@@ -429,8 +739,22 @@ class Parser():
                 var = self.parse_variable()
                 self.create_token(var)
 
-            # TODO: bit
-            # TODO: comments
+            # parse #hash style comment
+            if char == '#':
+                comment = self.parse_hash_style_comment()
+                self.create_token(comment)
+                continue
+
+            # parse unquoted identifier
+            if char.isalnum() or char == '_' or char == '$':
+                identifier = self.parse_unquoted_identifier()
+                self.create_token(identifier)
+                continue
+
+            # we shouldn't be here, the syntax is wrong so we skip this character
+            self.pos += 1
+
+            # TODO classify identifiers (boolean, null, functions, statements, operators)
 
 
 
