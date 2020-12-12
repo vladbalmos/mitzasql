@@ -1,4 +1,4 @@
-from mitzasql.sql_parser import parser
+from mitzasql.sql_parser.lexer import Lexer
 
 if __name__ == '__main__':
     # sql = '''
@@ -15,7 +15,7 @@ SQL_NO_CACHE SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT SQL_BIG_RESULT
 SQL_SMALL_RESULT
     @something,
     @'something',
-    @"something,
+    @"something",
     @`something`,
     a <=>> b,
     a := b,
@@ -85,4 +85,7 @@ TRUE,
 null
 '''
 
-    tokens = parser.Parser(sql).parse()
+    tokens = Lexer(sql).tokenize()
+    for t in tokens:
+        print(t)
+
