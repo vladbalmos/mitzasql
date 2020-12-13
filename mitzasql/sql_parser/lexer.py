@@ -397,6 +397,11 @@ class Lexer():
                 continue
 
             if char == match_quote:
+                if self._next_char() == match_quote:
+                    # Quote is escaped
+                    string_ += char
+                    self.pos += 2
+                    continue
                 string_ += char
                 self.pos += 1
                 break
@@ -436,7 +441,7 @@ class Lexer():
         if not len(string_):
             return False
 
-        return (Token.SchemaObject, string_)
+        return (Token.Name, string_)
 
     def parse_operator(self, base = ''):
         operator = base
@@ -481,7 +486,12 @@ class Lexer():
                 var += char
                 self.pos += 1
                 continue
-            elif char == '@' and len(var):
+            if char == '@' and len(var) == 1 and var[0] == '@':
+                var += char
+                self.pos += 1
+                continue
+
+            if char == '@' and len(var) > 1:
                 break
 
             if char == '"' or char == "'":

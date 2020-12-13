@@ -8,6 +8,6 @@ def test_schema_object_is_tokenized():
 @`not a schema object`
 '''
     tokens = list(Lexer(raw).tokenize())
-    assert (Token.SchemaObject, '`schema`') in tokens
-    assert (Token.SchemaObject, '`object`') in tokens
-    assert (Token.SchemaObject, '`not a schema object`') not in tokens
+    assert (Token.Name, '`schema`') in tokens
+    assert (Token.Name, '`object`') in tokens
+    assert (Token.Name, '`not a schema object`') not in tokens

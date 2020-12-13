@@ -30,3 +30,12 @@ last string
     assert (Token.String, "'third string'") in tokens
     assert (Token.String, '"fourth string"') in tokens
     assert (Token.String, "'\nlast string\n") in tokens
+
+def test_doubled_quotes_count_as_an_escape_quoted():
+    raw = '''
+"encoded "" string",
+'encoded '' string',
+'''
+    tokens = list(Lexer(raw).tokenize())
+    assert (Token.String, '"encoded " string"') in tokens
+    assert (Token.String, "'encoded ' string'") in tokens

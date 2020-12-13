@@ -8,10 +8,11 @@ def test_variables_are_tokenized():
 @'single quoted variable',
 @"double quoted variable",
 @`backtick quoted variable`
-@@is this a variable
+@@global
 '''
     tokens = list(Lexer(raw).tokenize())
     assert (Token.Variable, '@variable') in tokens
     assert (Token.Variable, "@'single quoted variable'") in tokens
     assert (Token.Variable, '@"double quoted variable"') in tokens
     assert (Token.Variable, '@`backtick quoted variable`') in tokens
+    assert (Token.Variable, '@@global') in tokens

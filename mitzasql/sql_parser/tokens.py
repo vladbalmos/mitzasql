@@ -64,22 +64,17 @@ Operator.Symbol = Token.Operator.Symbol
 # Variable
 Variable = Token.Variable
 
-# Schema object
-SchemaObject = Token.SchemaObject
-
 # Comment
 Comment = Token.Comment
 
-# Data type
-Datatype = Token.Datatype
-
-# Flow control
-FlowControl = Token.FlowControl
+# Function
+Function = Token.Function
 
 # Keyword
 Keyword = Token.Keyword
+Reserved = Keyword.Reserved
 
 # Misc
-Other = Token.Other
 Name = Token.Name
+Other = Token.Other
 Paren = Token.Paren
