@@ -31,7 +31,7 @@ last string
     assert (Token.String, '"fourth string"') in tokens
     assert (Token.String, "'\nlast string\n") in tokens
 
-def test_doubled_quotes_count_as_an_escape_quoted():
+def test_doubled_quotes_count_as_an_escaped_quote():
     raw = '''
 "encoded "" string",
 'encoded '' string',

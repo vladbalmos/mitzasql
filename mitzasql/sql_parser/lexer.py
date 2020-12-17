@@ -1,7 +1,6 @@
 import string
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.keywords as keywords
-import pudb
 
 class Lexer():
 
