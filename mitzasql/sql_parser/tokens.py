@@ -39,6 +39,9 @@ Dot = Punctuation.Dot
 Comma = Punctuation.Comma
 Semicolon = Punctuation.Semicolon
 
+# Literal
+Literal = Token.Literal
+
 # Numbers
 Number = Token.Literal.Number
 Number.Dec = Token.Literal.Number.Dec
