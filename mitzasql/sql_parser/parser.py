@@ -1,4 +1,5 @@
 import os
+import itertools
 from collections import deque
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
@@ -51,69 +52,52 @@ def operator_has_priority(op1, op2):
 
     return op1_priority > op2_priority
 
-def parse_expression(tokens):
+def parse_expression(tokens, current_token=None):
+    print('\n')
     expr = None
     stack = []
-    prev_node = None
-    for ttype, value in tokens:
-        try:
-            prev_node = stack.pop()
-        except IndexError:
-            pass
+    postfix = []
 
+    if current_token:
+        tokens = itertools.chain([current_token], tokens)
+
+    for ttype, value in tokens:
         if ttype == Token.Whitespace:
             continue
         if ttype == Token.Comment:
             continue
         if ttype == Token.Comma:
-            return expr
+            break
 
         if ttype in Token.Literal:
-            node = ast.Expression(value, ttype)
-            if not prev_node:
-                stack.append(node)
-                continue
-
-            prev_node.add_child(node)
-            stack.append(prev_node)
+            postfix.append(value)
             continue
 
         if ttype in Token.Operator:
-            op = ast.Operator(value)
-
-            if not prev_node:
-                stack.append(op)
+            if not len(stack):
+                stack.append(value)
                 continue
 
-            if not isinstance(prev_node, ast.Operator):
-                op.add_child(prev_node)
-                stack.append(op)
-                continue
+            while len(stack):
+                if ast.operator_precedance[stack[-1]] >= operator_precedance[value]:
+                    postfix.append(stack.pop())
+                    continue
+                break
+            stack.append(value)
 
-            if op.is_unary():
-                op.add_child(parse_expression(tokens))
-                prev_node.add_child(op)
-                stack.append(prev_node)
-                continue
-
-            if op.has_precedance(prev_node):
-                stack.append(prev_node)
-                op.add_child(prev_node.children[-1])
-                prev_node.children[-1] = op
-                stack.append(op)
-                continue
-
-            op.add_child(prev_node)
-            stack.append(op)
-            continue
-
-
-
-    expr = ast.Expression()
 
     while len(stack):
-        child = stack.pop()
-        expr.add_child(child)
+        postfix.append(stack.pop())
+
+    print(''.join(postfix))
+
+    expr = ast.Expression(type='expr')
+
+    # if len(stack):
+        # expr.add_child(stack[0])
+
+    # while len(stack):
+        # dfs(stack.pop())
 
     return expr
 
@@ -123,6 +107,7 @@ def parse_select_stmt(tokens):
 def parse_statement(tokens):
     stmt = None
     for ttype, value in tokens:
+        # pudb.set_trace();
         if ttype == Token.Whitespace:
             continue
         if ttype == Token.Comment:
@@ -135,7 +120,7 @@ def parse_statement(tokens):
                 stmt = parse_select_stmt(tokens)
                 continue
 
-        stmt = parse_expression(tokens)
+        stmt = parse_expression(tokens, current_token=(ttype, value))
     return stmt
 
 def parse(raw_sql):
@@ -148,6 +133,8 @@ def parse(raw_sql):
             break
 
         statements.append(stmt)
+
+    dfs(statements[0])
 
     return statements
 
