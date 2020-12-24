@@ -776,5 +776,9 @@ class Lexer():
                     yield result
                     continue
 
+            if char == '?':
+                self.pos += 1
+                yield (Token.ParamMarker, char)
+
             # we shouldn't be here, the syntax is wrong so we skip this character
             self.pos += 1

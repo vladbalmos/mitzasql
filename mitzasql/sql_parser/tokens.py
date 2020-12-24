@@ -80,4 +80,5 @@ Reserved = Keyword.Reserved
 # Misc
 Name = Token.Name
 Other = Token.Other
+ParamMarker = Token.ParamMarker
 Paren = Token.Paren
