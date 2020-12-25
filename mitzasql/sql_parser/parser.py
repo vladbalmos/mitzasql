@@ -1,48 +1,10 @@
-import os
-import itertools
 from collections import deque
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
 from mitzasql.sql_parser.lexer import Lexer
 import pudb
 
-comparison_operators = [
-    '=',
-    '>=',
-    '>',
-    '<=',
-    '<',
-    '<>',
-    '!=',
-]
-
-valid_boolean_primary_operators = [
-    'is',
-    '=',
-    '<=>',
-    '>=',
-    '>',
-    '<=',
-    '<',
-    '<>',
-    '!=',
-]
-
-valid_bit_expr_operators = [
-    '^',
-    '*',
-    '/',
-    'div',
-    '%',
-    'mod',
-    '-',
-    '+',
-    '<<',
-    '>>',
-    '&',
-    '|'
-]
-
+visited_tokens_queue = deque()
 tokens = None
 t = None
 
@@ -58,15 +20,96 @@ def dfs(root, padding_left=0):
     for child in root.children:
         dfs(child, padding_left + 5)
 
-def token_is_valid_boolean_primary_operator():
+def skip_whitespace():
+    while t is not None and (t[0] == Token.Whitespace or t[0] == Token.Comment):
+        next_token()
+
+def next_token():
+    global t
+
+    if len(visited_tokens_queue):
+        t = visited_tokens_queue.popleft()
+        return t
+
+    try:
+        value = next(tokens)
+    except StopIteration:
+        value = None
+    t = value
+    skip_whitespace()
+
+
+def token_is_valid_expression_operator():
+    global visited_tokens_queue
+    global t
+    # pudb.set_trace()
+
     if t is None:
         return False
 
     if t[0] not in Token.Operator:
         return False
 
-    return t[1] in valid_boolean_primary_operators
+    if t[1].lower() not in ast.valid_expression_operators:
+        return False
 
+    if t[1].lower() != 'is':
+        return True
+
+    return_value = False
+    visited_tokens = []
+    current_token = t
+    next_token()
+    visited_tokens.append(t)
+
+    if t and t[1].lower() == 'not':
+        next_token()
+        visited_tokens.append(t)
+
+    if t and t[1].lower() in ['true', 'false', 'unknown']:
+        return_value = True
+
+    for vt in visited_tokens:
+        visited_tokens_queue.append(vt)
+
+    t = current_token
+    return return_value
+
+
+def token_is_valid_boolean_primary_operator():
+    # pudb.set_trace()
+    global visited_tokens_queue
+    global t
+    if t is None:
+        return False
+
+    if t[0] not in Token.Operator:
+        return False
+
+    if t[1].lower() not in ast.valid_boolean_primary_operators:
+        return False
+
+    if t[1].lower() != 'is':
+        return True
+
+    return_value = False
+    visited_tokens = []
+    current_token = t
+    next_token()
+    visited_tokens.append(t)
+
+    if t and t[1].lower() == 'not':
+        next_token()
+        visited_tokens.append(t)
+
+    if t and t[1].lower() == 'null':
+        return_value = True
+
+    for vt in visited_tokens:
+        visited_tokens_queue.append(vt)
+
+    t = current_token
+    return return_value
 
 def token_is_valid_bit_expr_operator():
     if t is None:
@@ -75,20 +118,7 @@ def token_is_valid_bit_expr_operator():
     if t[0] not in Token.Operator:
         return False
 
-    return t[1] in valid_bit_expr_operators
-
-def skip_whitespace():
-    while t is not None and (t[0] == Token.Whitespace or t[0] == Token.Comment):
-        next_token()
-
-def next_token():
-    global t
-    try:
-        value = next(tokens)
-    except StopIteration:
-        value = None
-    t = value
-    skip_whitespace()
+    return t[1].lower() in ast.valid_bit_expr_operators
 
 def parse_collation():
     if t is None or t[0] != Token.Other:
@@ -98,7 +128,7 @@ def parse_collation():
     next_token()
     return ast.Expression(value, 'collation')
 
-def parse_expr_term():
+def parse_simple_expr_term():
     if t is None or t[0] == Token.Comma:
         return
 
@@ -150,7 +180,7 @@ def parse_expr_term():
         return ast.Expression(value, 'unknown')
 
 def parse_simple_expr():
-    expr = parse_expr_term()
+    expr = parse_simple_expr_term()
     if expr is None:
         return
 
@@ -183,6 +213,9 @@ def parse_bit_expr(prev_operator=None):
             prev_operator.add_child(lexpr)
             return prev_operator
         return lexpr
+
+    if lexpr is None:
+        return
 
     ttype, value = t
     next_token()
@@ -278,26 +311,23 @@ def parse_predicate(lexpr = None):
 
     return lexpr
 
-def parse_boolean_primary():
-    # pudb.set_trace()
-    lexpr = parse_predicate()
-    ttype, value = t
+def parse_boolean_primary(lexpr=None):
     if lexpr is None:
-        return
+        lexpr = parse_predicate()
+        if lexpr is None:
+            return
 
-    if t is None:
-        return lexpr
-
-    # print(t)
     if not token_is_valid_boolean_primary_operator():
         return lexpr
 
+    # pudb.set_trace()
     ttype, value = t
     next_token()
 
     lvalue = value.lower()
     operator = ast.Op(lvalue)
     operator.add_child(lexpr)
+
 
     if lvalue == 'is':
         if t[0] in Token.Operator and t[1].lower() == 'not':
@@ -309,24 +339,86 @@ def parse_boolean_primary():
                 not_op.add_child(ast.Expression('null', 'literal'))
 
             operator.add_child(not_op)
-            return operator
-
-        if t[0] in Token.Literal and t[1].lower() == 'null':
+        elif t[0] in Token.Literal and t[1].lower() == 'null':
             next_token()
             operator.add_child(ast.Expression('null', 'literal'))
-            return operator
-
-        return operator
-
-    if lvalue == '<=>':
+    else:
         operator.add_child(parse_predicate())
-        return operator
 
-    if lvalue in comparison_operators:
-        operator.add_child(parse_predicate())
-        return operator
+    if token_is_valid_boolean_primary_operator():
+        return parse_boolean_primary(operator)
 
-    return lexpr
+    return operator
+
+def parse_expr_term(lexpr=None):
+    if token_is_valid_expression_operator() and (t[1] == '!' or t[1].lower() == 'not'):
+        expr = ast.UnaryOp(t[1].lower())
+        next_token()
+        expr.add_child(parse_expr())
+        return expr
+
+    if lexpr is None:
+        lexpr = parse_boolean_primary()
+        if lexpr is None:
+           return
+
+    if not token_is_valid_expression_operator() or t[1].lower() != 'is':
+        return lexpr
+
+    ttype, value = t
+    next_token()
+
+    lvalue = value.lower()
+    operator = ast.Op(lvalue)
+    operator.add_child(lexpr)
+
+    if t[0] in Token.Operator and t[1].lower() == 'not':
+        not_op = ast.UnaryOp('not')
+        next_token()
+
+        if t[1].lower() in ['true', 'false', 'unknown']:
+            not_op.add_child(ast.Expression(t[1].lower(), 'literal'))
+            next_token()
+
+        operator.add_child(not_op)
+    elif t[1].lower() in ['true', 'false', 'unknown']:
+        operator.add_child(ast.Expression(t[1].lower(), 'literal'))
+        next_token()
+
+    return operator
+
+def parse_expr(prev_operator=None):
+    lexpr = parse_expr_term()
+    if not token_is_valid_expression_operator():
+        if prev_operator:
+            prev_operator.add_child(lexpr)
+            return prev_operator
+        return lexpr
+
+    if lexpr is None:
+        return
+
+    ttype, value = t
+    next_token()
+
+    lvalue = value.lower()
+    operator = ast.Op(lvalue)
+
+    if lvalue == 'is':
+        return parse_expr_term(lexpr)
+
+    if not prev_operator:
+        operator.add_child(lexpr)
+        return parse_expr(operator)
+
+    if prev_operator.has_precedance(operator):
+        prev_operator.add_child(lexpr)
+        operator.add_child(prev_operator)
+        return parse_expr(operator)
+
+    operator.add_child(lexpr)
+    prev_operator.add_child(parse_expr(operator))
+    return prev_operator
 
 def parse_select_stmt():
     next_token()
@@ -338,7 +430,7 @@ def parse_statement():
         if value.lower() == 'select':
             return parse_select_stmt()
 
-    return parse_boolean_primary()
+    return parse_expr()
 
 def parse(raw_sql):
     global tokens

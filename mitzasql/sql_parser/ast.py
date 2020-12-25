@@ -26,7 +26,6 @@ operator_precedance = {
     'regexp': -6,
     'in': -6,
     'between': -7,
-    'not': -8,
     'and': -9,
     '&&': -10,
     'xor': -11,
@@ -34,6 +33,54 @@ operator_precedance = {
     '||': -12,
     ':=': -13,
 }
+
+comparison_operators = [
+    '=',
+    '>=',
+    '>',
+    '<=',
+    '<',
+    '<>',
+    '!=',
+]
+
+valid_expression_operators = [
+    'or',
+    '||',
+    'xor',
+    'and',
+    '&&',
+    'not',
+    '!',
+    'is'
+]
+
+valid_boolean_primary_operators = [
+    'is',
+    '=',
+    '<=>',
+    '>=',
+    '>',
+    '<=',
+    '<',
+    '<>',
+    '!=',
+]
+
+valid_bit_expr_operators = [
+    '^',
+    '*',
+    '/',
+    'div',
+    '%',
+    'mod',
+    '-',
+    '+',
+    '<<',
+    '>>',
+    '&',
+    '|'
+]
 
 class NodeMixin:
     def __init__(self, value=None, type=None):
