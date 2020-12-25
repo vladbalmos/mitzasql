@@ -1,4 +1,4 @@
-unary_operators = ['+', '-', '~', '!']
+simple_expr_unary_operators = ['+', '-', '~', '!']
 
 operator_precedance = {
     '^': 0,
