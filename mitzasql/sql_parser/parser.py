@@ -90,8 +90,15 @@ def next_token(skip_whitespace=True):
     # dequeue any already inspected tokens
     # before advancing to the unprocessed tokens
     if len(lookahead_tokens_queue):
-        t = lookahead_tokens_queue.popleft()
-        return
+        if skip_whitespace is False:
+            t = lookahead_tokens_queue.popleft()
+            return
+
+        while len(lookahead_tokens_queue):
+            t = lookahead_tokens_queue.popleft()
+            if t[0] == Token.Whitespace or t[0] == Token.Comment:
+                continue
+            break
 
     try:
         value = next(tokens)
@@ -244,7 +251,57 @@ def parse_identifier(allowed_types=[Token.Name]):
 
     return expr
 
+def parse_binary_expr():
+    expr = ast.UnaryOp(t[0])
+    next_token()
+    expr.add_child(parse_simple_expr())
+    return expr
+
+def parse_interval_expr():
+    expr = ast.Expression(t[0], 'interval')
+    next_token()
+    expr.add_child(parse_simple_expr())
+    expr.add_child(parse_simple_expr())
+    return expr
+
+def parse_match_expr():
+    expr = ast.Expression(t[1], 'match')
+    next_token()
+    expr.add_child(parse_paren())
+
+    if t is None:
+        return expr
+
+    if t[0] != Token.Keyword or t[1].lower() != 'against':
+        return expr
+
+    against = ast.Op(t[1])
+    expr.add_child(against)
+    next_token()
+
+    if not is_open_paren():
+        return expr
+
+    next_token()
+
+    against.add_child(parse_expr())
+
+    modifier = None
+    while t and not is_closed_paren():
+        if modifier is None:
+            modifier = ast.Op('modifier')
+
+        modifier.add_child(parse_expr())
+
+    against.add_child(modifier)
+
+    if is_closed_paren():
+        next_token()
+
+    return expr
+
 def parse_paren():
+    next_token()
     paren_expr = ast.Expression(type='paren_group')
     while t and not is_closed_paren():
         paren_expr.add_child(parse_expr())
@@ -282,6 +339,21 @@ def parse_simple_expr_term():
         return
 
     ttype, value = t
+    lvalue = value.lower()
+
+    if ttype in Token.Reserved:
+        if lvalue == 'binary':
+            return parse_binary_expr()
+
+        if lvalue == 'interval':
+            return parse_interval_expr()
+
+        if lvalue == 'match':
+            return parse_match_expr()
+
+        if lvalue == 'case':
+            return parse_case_expr()
+
 
     if token_is_row_subquery():
         return parse_row_subquery()
@@ -290,31 +362,16 @@ def parse_simple_expr_term():
         return parse_function_call()
 
     if is_open_paren():
-        next_token()
         return parse_paren()
 
     if is_closed_paren():
         next_token()
         return
 
-    if ttype in Token.Reserved:
-        if value.lower() == 'binary':
-            next_token()
-            expr = ast.UnaryOp(value.lower())
-            expr.add_child(parse_simple_expr())
-            return expr
-
-        if value.lower() == 'interval':
-            next_token()
-            expr = ast.Expression(value, 'interval')
-            expr.add_child(parse_simple_expr())
-            expr.add_child(parse_simple_expr())
-            return expr
-
     if is_operator():
-        if value in ast.simple_expr_unary_operators:
+        if lvalue in ast.simple_expr_unary_operators:
             next_token()
-            expr = ast.UnaryOp(value.lower())
+            expr = ast.UnaryOp(lvalue)
             expr.add_child(parse_simple_expr())
             return expr
 
