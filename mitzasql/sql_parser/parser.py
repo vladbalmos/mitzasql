@@ -4,7 +4,7 @@ import mitzasql.sql_parser.ast as ast
 from mitzasql.sql_parser.lexer import Lexer
 import pudb
 
-visited_tokens_queue = deque()
+lookahead_tokens_queue = deque()
 tokens = None
 t = None
 
@@ -19,6 +19,43 @@ def dfs(root, padding_left=0):
 
     for child in root.children:
         dfs(child, padding_left + 5)
+
+def skip_invalid_tokens(fn):
+    def decorate():
+        result = None
+
+        while result is None and t is not None:
+            result = fn()
+            if result is None:
+                next_token()
+
+        return result
+
+    return decorate
+
+def is_dot():
+    if t is None:
+        return False
+
+    return t[0] == Token.Dot
+
+def is_comma():
+    if t is None:
+        return False
+
+    return t[0] == Token.Comma
+
+def is_open_paren():
+    if t is None:
+        return False
+
+    return t[0] == Token.Paren and t[1] == '('
+
+def is_closed_paren():
+    if t is None:
+        return False
+
+    return t[0] == Token.Paren and t[1] == ')'
 
 def is_literal(label=None, lowercase=True):
     if t is None:
@@ -52,8 +89,8 @@ def next_token(skip_whitespace=True):
 
     # dequeue any already inspected tokens
     # before advancing to the unprocessed tokens
-    if len(visited_tokens_queue):
-        t = visited_tokens_queue.popleft()
+    if len(lookahead_tokens_queue):
+        t = lookahead_tokens_queue.popleft()
         return
 
     try:
@@ -65,9 +102,58 @@ def next_token(skip_whitespace=True):
     if skip_whitespace:
         skip_past_whitespace()
 
+def token_is_row_subquery():
+    global lookahead_tokens_queue
+    global t
+
+    if t is None:
+        return False
+
+    if t[0] != Token.Reserved or t[1].lower() != 'row':
+        return False
+
+    return_value = False
+    lookahead_tokens = []
+    current_token = t
+    next_token()
+    lookahead_tokens.append(t)
+
+    if is_open_paren():
+        return_value = True
+
+    for lt in lookahead_tokens:
+        lookahead_tokens_queue.append(lt)
+
+    t = current_token
+    return return_value
+
+def token_is_function_call():
+    global lookahead_tokens_queue
+    global t
+
+    if t is None:
+        return False
+
+    if t[0] != Token.Function and t[0] not in Token.Keyword:
+        return False
+
+    return_value = False
+    lookahead_tokens = []
+    current_token = t
+    next_token(skip_whitespace=False)
+    lookahead_tokens.append(t)
+
+    if is_open_paren():
+        return_value = True
+
+    for lt in lookahead_tokens:
+        lookahead_tokens_queue.append(lt)
+
+    t = current_token
+    return return_value
 
 def token_is_valid_expression_operator():
-    global visited_tokens_queue
+    global lookahead_tokens_queue
     global t
 
     if not is_operator():
@@ -80,27 +166,27 @@ def token_is_valid_expression_operator():
         return True
 
     return_value = False
-    visited_tokens = []
+    lookahead_tokens = []
     current_token = t
     next_token()
-    visited_tokens.append(t)
+    lookahead_tokens.append(t)
 
     if is_operator('not'):
         next_token()
-        visited_tokens.append(t)
+        lookahead_tokens.append(t)
 
     if t and t[1].lower() in ['true', 'false', 'unknown']:
         return_value = True
 
-    for vt in visited_tokens:
-        visited_tokens_queue.append(vt)
+    for lt in lookahead_tokens:
+        lookahead_tokens_queue.append(lt)
 
     t = current_token
     return return_value
 
 
 def token_is_valid_boolean_primary_operator():
-    global visited_tokens_queue
+    global lookahead_tokens_queue
     global t
 
     if not is_operator():
@@ -113,20 +199,20 @@ def token_is_valid_boolean_primary_operator():
         return True
 
     return_value = False
-    visited_tokens = []
+    lookahead_tokens = []
     current_token = t
     next_token()
-    visited_tokens.append(t)
+    lookahead_tokens.append(t)
 
     if is_operator('not'):
         next_token()
-        visited_tokens.append(t)
+        lookahead_tokens.append(t)
 
     if t and t[1].lower() == 'null':
         return_value = True
 
-    for vt in visited_tokens:
-        visited_tokens_queue.append(vt)
+    for lt in lookahead_tokens:
+        lookahead_tokens_queue.append(lt)
 
     t = current_token
     return return_value
@@ -145,30 +231,71 @@ def parse_collation():
     next_token()
     return ast.Expression(value, 'collation')
 
+def parse_identifier(allowed_types=[Token.Name]):
+    if t is None or t[0] not in allowed_types:
+        return
+
+    expr = ast.Expression(t[1], 'identifier')
+    next_token()
+
+    if is_dot():
+        next_token()
+        expr.add_child(parse_identifier())
+
+    return expr
+
+def parse_paren():
+    paren_expr = ast.Expression(type='paren_group')
+    while t and not is_closed_paren():
+        paren_expr.add_child(parse_expr())
+        if is_comma():
+            next_token()
+
+    if is_closed_paren():
+        next_token()
+
+    return paren_expr
+
+
+def parse_row_subquery():
+    expr = ast.Expression(t[1], 'row_subquery')
+    next_token()
+
+    expr.add_child(parse_paren())
+    return expr
+
+def parse_function_call():
+    expr = ast.Expression(t[1], 'function')
+    next_token()
+
+    while t and not is_closed_paren():
+        next_token()
+        argument = parse_expr()
+        expr.add_child(argument)
+
+    next_token()
+    return expr
+
+@skip_invalid_tokens
 def parse_simple_expr_term():
     if t is None or t[0] == Token.Comma:
         return
 
     ttype, value = t
 
-    if ttype in Token.Literal:
-        next_token()
-        return ast.Expression(value, 'literal')
+    if token_is_row_subquery():
+        return parse_row_subquery()
 
-    if ttype == Token.Name:
-        next_token()
-        return ast.Expression(value, 'identifier')
+    if token_is_function_call():
+        return parse_function_call()
 
-    if ttype == Token.Keyword:
+    if is_open_paren():
         next_token()
-        return ast.Expression(value, 'keyword')
+        return parse_paren()
 
-    if is_operator():
-        if value in ast.simple_expr_unary_operators:
-            next_token()
-            expr = ast.UnaryOp(value.lower())
-            expr.add_child(parse_simple_expr())
-            return expr
+    if is_closed_paren():
+        next_token()
+        return
 
     if ttype in Token.Reserved:
         if value.lower() == 'binary':
@@ -184,6 +311,28 @@ def parse_simple_expr_term():
             expr.add_child(parse_simple_expr())
             return expr
 
+    if is_operator():
+        if value in ast.simple_expr_unary_operators:
+            next_token()
+            expr = ast.UnaryOp(value.lower())
+            expr.add_child(parse_simple_expr())
+            return expr
+
+        if is_operator('*'):
+            next_token()
+            return ast.Op('*')
+
+    if ttype in Token.Literal:
+        next_token()
+        return ast.Expression(value, 'literal')
+
+    if ttype == Token.Name:
+        return parse_identifier()
+
+    if ttype in Token.Keyword:
+        next_token()
+        return ast.Expression(value, 'keyword')
+
     if ttype == Token.Variable:
         next_token()
         return ast.Expression(value, 'variable')
@@ -192,9 +341,9 @@ def parse_simple_expr_term():
         next_token()
         return ast.Expression(value, 'param_marker')
 
-    if ttype == Token.Other:
-        next_token()
-        return ast.Expression(value, 'unknown')
+    expr = ast.Expression(value, 'unknown')
+    next_token()
+    return expr
 
 def parse_simple_expr():
     expr = parse_simple_expr_term()
