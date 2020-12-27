@@ -2,23 +2,12 @@ from collections import deque
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
 from mitzasql.sql_parser.lexer import Lexer
+from mitzasql.utils import dfs
 import pudb
 
 lookahead_tokens_queue = deque()
 tokens = None
 t = None
-
-def dfs(root, padding_left=0):
-    if not root:
-        return
-
-    if padding_left == 0:
-        print('\n')
-
-    print(''.rjust(padding_left, ' ') + str(root))
-
-    for child in root.children:
-        dfs(child, padding_left + 5)
 
 def skip_invalid_tokens(fn):
     def decorate():
@@ -252,13 +241,13 @@ def parse_identifier(allowed_types=[Token.Name]):
     return expr
 
 def parse_binary_expr():
-    expr = ast.UnaryOp(t[0])
+    expr = ast.UnaryOp(t[1])
     next_token()
     expr.add_child(parse_simple_expr())
     return expr
 
 def parse_interval_expr():
-    expr = ast.Expression(t[0], 'interval')
+    expr = ast.Expression(t[1], 'interval')
     next_token()
     expr.add_child(parse_simple_expr())
     expr.add_child(parse_simple_expr())

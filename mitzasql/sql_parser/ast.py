@@ -51,7 +51,6 @@ valid_expression_operators = [
     'and',
     '&&',
     'not',
-    '!',
     'is'
 ]
 
