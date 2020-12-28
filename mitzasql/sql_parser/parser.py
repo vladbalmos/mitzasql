@@ -1,16 +1,18 @@
 from mitzasql.sql_parser.lexer import Lexer
 from mitzasql.sql_parser.state import State
-from mitzasql.sql_parser.parser_factory import create_parser
+from mitzasql.utils import dfs
+import mitzasql.sql_parser.parser_factory as parser_factory
 
 def parse(raw_sql):
     tokens = Lexer(raw_sql).tokenize()
     state = State(tokens)
     statements = []
 
-    parse_statement = create_parser('stmt', state)
+    parser = parser_factory.create(parser_factory.STMT, state)
 
-    while state.is_valid():
-        stmt = parse_statement()
+    while state:
+        stmt = parser.run()
+        dfs(stmt)
         statements.append(stmt)
 
     return statements

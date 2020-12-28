@@ -1,3 +1,4 @@
+import pudb
 import pytest
 from mitzasql.sql_parser.parser import parse
 
@@ -5,6 +6,7 @@ def test_binary_unary_operator_has_precedance():
     raw_sql = '''
 binary 1 * 20
 '''
+    # pudb.set_trace()
     ast = parse(raw_sql)
     ast = ast[0]
 

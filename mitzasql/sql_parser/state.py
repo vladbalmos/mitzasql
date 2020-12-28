@@ -12,20 +12,32 @@ class State:
         self.value = None
         self.lcase_value = None
 
-        if future is False:
+        if not future:
             self.next()
 
+    def __bool__(self):
+        return self.type is not None
+
+    def __add__(self, num):
+        for i in range(num):
+            self.next()
+        return self
+
     def __enter__(self):
-        self._future_state = State(tokens, future=True)
+        self._future_state = State(self._tokens, future=True)
         return self._future_state
 
     def __exit__(self, type, value, traceback):
         self.lookahead_tokens = self._future_state.lookahead_tokens
         self._future_state = None
 
-    def is(self, type, value=None, lowercase=True):
-        if self.type not in type:
-            return False
+    def token_is(self, type, value=None, lowercase=True, equal_type=False):
+        if equal_type:
+            if self.type != type:
+                return False
+        else:
+            if self.type not in type:
+                return False
 
         if value is None:
             return True
@@ -39,40 +51,55 @@ class State:
 
         return val == value
 
-    def is_valid(self):
-        return self.type is not None
+    def is_other(self, label=None, lowercase=True):
+        return self.token_is(Token.Other, label, lowercase)
+
+    def is_name(self, label=None, lowercase=True):
+        return self.token_is(Token.Name, label, lowercase)
+
+    def is_variable(self, label=None, lowercase=True):
+        return self.token_is(Token.Variable, label, lowercase)
+
+    def is_keyword(self, label=None, lowercase=True):
+        return self.token_is(Token.Keyword, label, lowercase)
+
+    def is_param_marker(self, label=None, lowercase=True):
+        return self.token_is(Token.ParamMarker, label, lowercase)
+
+    def is_reserved(self, label=None, lowercase=True):
+        return self.token_is(Token.Reserved, label, lowercase, equal_type=True)
 
     def is_skippable(self):
-        return self.is(Token.Whitespace) or self.is(Token.Comment)
+        return self.token_is(Token.Whitespace) or self.token_is(Token.Comment)
 
     def is_dot(self):
-        return self.is(Token.Dot)
+        return self.token_is(Token.Dot)
 
     def is_comma(self):
-        return self.is(Token.Comma)
+        return self.token_is(Token.Comma)
 
     def is_open_paren(self):
-        return self.is(Token.Paren, '(')
+        return self.token_is(Token.Paren, '(')
 
     def is_closed_paren(self):
-        return self.is(Token.Paren, ')')
+        return self.token_is(Token.Paren, ')')
 
     def is_literal(self, label=None, lowercase=True):
-        return self.is(Token.Literal, label, lowercase)
+        return self.token_is(Token.Literal, label, lowercase)
 
     def is_operator(self, label=None):
-        return self.is(Token.Operator, label)
+        return self.token_is(Token.Operator, label)
 
     def is_row_subquery(self):
-        if not self.is(Token.Reserved, 'row'):
+        if not self.token_is(Token.Reserved, 'row'):
             return False
 
         with self as future_state:
             future_state.next()
-            return future_state.is_open_paren():
+            return future_state.is_open_paren()
 
     def is_function_call(self):
-        if not self.is(Token.Function) and not self.is(Token.Keyword):
+        if not self.token_is(Token.Function) and not self.token_is(Token.Keyword):
             return False
 
         with self as future_state:
@@ -80,7 +107,7 @@ class State:
             return future_state.is_open_paren()
 
     def is_expression_operator(self):
-        if not self.is(Token.Operator, ast.valid_expression_operators):
+        if not self.token_is(Token.Operator, ast.valid_expression_operators):
             return False
 
         if not self.is_operator('is'):
@@ -91,10 +118,10 @@ class State:
             if future_state.is_operator('not'):
                 future_state.next()
 
-            return future_state.lcase_value in ['true', 'false', 'unknown']:
+            return future_state.lcase_value in ['true', 'false', 'unknown']
 
     def is_bool_primary_operator(self):
-        if not self.is(Token.Operator, ast.valid_boolean_primary_operators):
+        if not self.token_is(Token.Operator, ast.valid_boolean_primary_operators):
             return False
 
         if not self.is_operator('is'):
@@ -108,15 +135,15 @@ class State:
             return future_state.type == Token.Null
 
     def is_bit_expr_operator(self):
-        return self.is(Token.Operator, ast.valid_bit_expr_operators)
+        return self.token_is(Token.Operator, ast.valid_bit_expr_operators)
 
-    def skip_whitespace():
-        while self.is_valid() and self.is_skippable():
+    def skip_whitespace(self):
+        while self and self.is_skippable():
             self.next()
 
     def update(self, token):
         self.type, self.value = token or (None, None)
-        if self.is_valid():
+        if self:
             self.lcase_value = self.value.lower()
         else:
             self.lcase_value = None
@@ -129,12 +156,15 @@ class State:
         while len(self.lookahead_tokens):
             self.update(self.lookahead_tokens.popleft())
             if self.is_skippable():
+                if not len(self.lookahead_tokens):
+                    return self.next(skip_whitespace)
                 continue
             break
 
     def next(self, skip_whitespace=True):
-        if len(self.lookahead_tokens):
+        if len(self.lookahead_tokens) and not self._is_future:
             self.next_in_lookahead_queue(skip_whitespace)
+            return
 
         try:
             token = next(self._tokens)
