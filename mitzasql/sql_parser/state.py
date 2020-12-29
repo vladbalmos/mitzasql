@@ -18,11 +18,6 @@ class State:
     def __bool__(self):
         return self.type is not None
 
-    def __add__(self, num):
-        for i in range(num):
-            self.next()
-        return self
-
     def __enter__(self):
         self._future_state = State(self._tokens, future=True)
         return self._future_state
@@ -99,7 +94,7 @@ class State:
             return future_state.is_open_paren()
 
     def is_function_call(self):
-        if not self.token_is(Token.Function) and not self.token_is(Token.Keyword):
+        if not self.token_is(Token.Function) and not self.is_keyword() and not self.is_other():
             return False
 
         with self as future_state:
@@ -133,6 +128,17 @@ class State:
                 future_state.next()
 
             return future_state.type == Token.Null
+
+    def is_predicate_operator(self):
+        if not self.is_operator('not') and not self.token_is(Token.Operator, ast.valid_predicate_operators):
+            return False
+
+        if not self.is_operator('not') and self.token_is(Token.Operator, ast.valid_predicate_operators):
+            return True
+
+        with self as future_state:
+            future_state.next()
+            return future_state.token_is(Token.Operator, ast.valid_predicate_operators)
 
     def is_bit_expr_operator(self):
         return self.token_is(Token.Operator, ast.valid_bit_expr_operators)

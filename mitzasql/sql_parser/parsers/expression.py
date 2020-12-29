@@ -1,3 +1,74 @@
+# Expressions parser for the following grammar:
+# https://dev.mysql.com/doc/refman/8.0/en/expressions.html
+#
+# expr:
+#     expr OR expr
+#   | expr || expr
+#   | expr XOR expr
+#   | expr AND expr
+#   | expr && expr
+#   | NOT expr
+#   | ! expr
+#   | boolean_primary IS [NOT] {TRUE | FALSE | UNKNOWN}
+#   | boolean_primary
+#
+# boolean_primary:
+#     boolean_primary IS [NOT] NULL
+#   | boolean_primary <=> predicate
+#   | boolean_primary comparison_operator predicate
+#   | boolean_primary comparison_operator {ALL | ANY} (subquery)
+#   | predicate
+#
+# comparison_operator: = | >= | > | <= | < | <> | !=
+#
+# predicate:
+#     bit_expr [NOT] IN (subquery)
+#   | bit_expr [NOT] IN (expr [, expr] ...)
+#   | bit_expr [NOT] BETWEEN bit_expr AND predicate
+#   | bit_expr SOUNDS LIKE bit_expr
+#   | bit_expr [NOT] LIKE simple_expr [ESCAPE simple_expr]
+#   | bit_expr [NOT] REGEXP bit_expr
+#   | bit_expr
+#
+# bit_expr:
+#     bit_expr | bit_expr
+#   | bit_expr & bit_expr
+#   | bit_expr << bit_expr
+#   | bit_expr >> bit_expr
+#   | bit_expr + bit_expr
+#   | bit_expr - bit_expr
+#   | bit_expr * bit_expr
+#   | bit_expr / bit_expr
+#   | bit_expr DIV bit_expr
+#   | bit_expr MOD bit_expr
+#   | bit_expr % bit_expr
+#   | bit_expr ^ bit_expr
+#   | bit_expr + interval_expr
+#   | bit_expr - interval_expr
+#   | simple_expr
+#
+# simple_expr:
+#     literal
+#   | identifier
+#   | function_call
+#   | simple_expr COLLATE collation_name
+#   | param_marker
+#   | variable
+#   | simple_expr || simple_expr
+#   | + simple_expr
+#   | - simple_expr
+#   | ~ simple_expr
+#   | ! simple_expr
+#   | BINARY simple_expr
+#   | (expr [, expr] ...)
+#   | ROW (expr, expr [, expr] ...)
+#   | (subquery)
+#   | EXISTS (subquery)
+#   | {identifier expr}
+#   | match_expr
+#   | case_expr
+#   | interval_expr
+
 import pudb
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
@@ -8,59 +79,61 @@ class ExpressionParser:
     def __init__(self, state):
         self.state = state
 
-    def parse_collation(self):
-        if not self.state.is_other():
-            return
-
-        expr = ast.Expression(self.state.value, 'collation')
-        self.state += 1
-        return expr
+    def accept(self, cls, *args, **kwargs):
+        node = cls(*args, **kwargs)
+        self.state.next()
+        return node
 
     def parse_identifier(self, allowed_types=[Token.Name]):
         if self.state.type not in allowed_types:
             return
 
-        expr = ast.Expression(self.state.value, 'identifier')
-        self.state += 1
+        expr = self.accept(ast.Expression, self.state.value, 'identifier')
 
         if self.state.is_dot():
-            self.state += 1
+            self.state.next(skip_whitespace=False)
             expr.add_child(self.parse_identifier())
 
         return expr
 
-    def parse_binary_expr(self):
-        expr = ast.UnaryOp(self.state.value)
-        self.state += 1
+    def parse_binary_operator(self):
+        '''
+        Parse binary operator expression:
+            BINARY simple_expr
+        '''
+        expr = self.accept(ast.UnaryOp, self.state.value)
         expr.add_child(self.parse_simple_expr())
         return expr
 
     def parse_interval_expr(self):
-        expr = ast.Expression(self.state.value, 'interval')
-        self.state += 1
+        '''
+        Parse interval expression:
+            interval_expr: INTERVAL expr unit
+        '''
+        expr = self.accept(ast.Expression, self.state.value, 'interval')
         expr.add_child(self.parse_simple_expr())
         expr.add_child(self.parse_simple_expr())
         return expr
 
     def parse_match_expr(self):
-        expr = ast.Expression(self.state.value, 'match')
-        self.state += 1
-        expr.add_child(self.parse_paren())
+        '''
+        Parse match expression:
+            match_expr: MATCH (col1, col2) AGAINST ("string" IN BOOLEAN MODE)
+        '''
+        expr = self.accept(ast.Expression, self.state.value, 'match')
 
-        if not self.state:
-            return expr
+        expr.add_child(self.parse_paren())
 
         if not self.state.is_keyword() or self.state.lcase_value != 'against':
             return expr
 
-        against = ast.Op(self.state.value)
+        against = self.accept(ast.Op, self.state.value)
         expr.add_child(against)
-        self.state += 1
 
         if not self.state.is_open_paren():
             return expr
 
-        self.state += 1
+        self.state.next()
 
         against.add_child(self.parse_expr())
 
@@ -74,42 +147,68 @@ class ExpressionParser:
         against.add_child(modifier)
 
         if self.state.is_closed_paren():
-            self.state += 1
+            self.state.next()
 
         return expr
 
     def parse_paren(self):
-        self.state += 1
-        paren_expr = ast.Expression(type='paren_group')
+        '''
+        Parse parenthesized expression:
+            (expr [, expr] ...)
+        '''
+        if not self.state.is_open_paren():
+            return
+
+        paren_expr = self.accept(ast.Expression, type='paren_group')
         while self.state and not self.state.is_closed_paren():
             paren_expr.add_child(self.parse_expr())
             if self.state.is_comma():
-                self.state += 1
+                self.state.next()
 
         if self.state.is_closed_paren():
-            self.state += 1
+            self.state.next()
 
         return paren_expr
 
     def parse_row_subquery(self):
-        expr = ast.Expression(self.state.value, 'row_subquery')
-        self.state += 1
+        '''
+        Parse row subquery:
+            ROW (expr, expr [, expr] ...): ROW (col1, col2)
+        '''
+        expr = self.accept(ast.Expression, self.state.value, 'row_subquery')
 
-        expr.add_child(self.parse_paren())
+        self.state.next()
+
+        while self.state and not self.state.is_closed_paren():
+            expr.add_child(self.parse_expr())
+            if self.state.is_comma():
+                self.state.next()
+
+        if self.state.is_closed_paren():
+            self.state.next()
+
         return expr
 
     def parse_function_call(self):
-        expr = ast.Expression(self.state.value, 'function')
-        self.state += 1
+        '''
+        Parse function call:
+            function_call: LEFT('string')
+        '''
+
+        expr = self.accept(ast.Expression, self.state.value, 'function')
 
         while self.state and not self.state.is_closed_paren():
+            self.state.next()
             argument = self.parse_expr()
             expr.add_child(argument)
 
-        self.state += 1
+        self.state.next()
         return expr
 
     def parse_simple_expr_term(self):
+        '''
+        Parse simple expression which can contain only unary operators
+        '''
         if not self.state or self.state.is_comma():
             return
 
@@ -117,7 +216,7 @@ class ExpressionParser:
 
         if self.state.is_reserved():
             if tvalue == 'binary':
-                return self.parse_binary_expr()
+                return self.parse_binary_operator()
 
             if tvalue == 'interval':
                 return self.parse_interval_expr()
@@ -140,46 +239,34 @@ class ExpressionParser:
             return self.parse_paren()
 
         if self.state.is_closed_paren():
-            self.state += 1
+            self.state.next()
             return
 
         if self.state.is_operator():
             if tvalue in ast.simple_expr_unary_operators:
-                self.state += 1
-                expr = ast.UnaryOp(tvalue)
+                expr = self.accept(ast.UnaryOp, tvalue)
                 expr.add_child(self.parse_simple_expr())
                 return expr
 
             if self.state.is_operator('*'):
-                self.state += 1
-                return ast.Op('*')
+                return self.accept(ast.Op, '*')
 
         if self.state.is_literal():
-            expr = ast.Expression(self.state.value, 'literal')
-            self.state += 1
-            return expr
+            return self.accept(ast.Expression, self.state.value, 'literal')
 
         if self.state.is_name():
             return self.parse_identifier()
 
         if self.state.is_keyword():
-            expr = ast.Expression(self.state.value, 'keyword')
-            self.state += 1
-            return expr
+            return self.accept(ast.Expression, self.state.value, 'keyword')
 
         if self.state.is_variable():
-            expr = ast.Expression(self.state.value, 'variable')
-            self.state += 1
-            return expr
+            return self.accept(ast.Expression, self.state.value, 'variable')
 
         if self.state.is_param_marker():
-            expr = ast.Expression(self.state.value, 'param_marker')
-            self.state += 1
-            return expr
+            return self.accept(ast.Expression, self.state.value, 'param_marker')
 
-        expr = ast.Expression(self.state.value, 'unknown')
-        self.state += 1
-        return expr
+        return self.accept(ast.Expression, self.state.value, 'unknown')
 
     def parse_simple_expr(self):
         expr = None
@@ -187,7 +274,7 @@ class ExpressionParser:
         while expr is None and self.state:
             expr = self.parse_simple_expr_term()
             if expr is None:
-                self.state += 1
+                self.state.next()
 
         if expr is None:
             return expr
@@ -195,18 +282,18 @@ class ExpressionParser:
         tvalue = self.state.lcase_value
 
         if self.state.is_operator('||'):
-            self.state += 1
-            op = ast.Op(tvalue)
+            op = self.accept(ast.Op, tvalue)
             op.add_child(expr)
             op.add_child(self.parse_simple_expr())
             return op
 
         if self.state.is_reserved():
             if tvalue == 'collate':
-                self.state += 1
-                op = ast.Op(tvalue)
+                op = self.accept(ast.Op, tvalue)
                 op.add_child(expr)
-                op.add_child(self.parse_collation())
+                if not self.state.is_other():
+                    return op
+                op.add_child(self.accept(ast.Expression, self.state.value, 'collation'))
                 return op
 
         return expr
@@ -223,9 +310,7 @@ class ExpressionParser:
             return
 
         tvalue = self.state.lcase_value
-        self.state +=1
-
-        operator = ast.Op(tvalue)
+        operator = self.accept(ast.Op, tvalue)
 
         if not prev_operator:
             operator.add_child(lexpr)
@@ -240,65 +325,74 @@ class ExpressionParser:
         prev_operator.add_child(self.parse_bit_expr(operator))
         return prev_operator
 
-    def parse_predicate(self, lexpr = None):
-        if lexpr is None:
-            lexpr = self.parse_bit_expr()
+    def parse_predicate(self):
+        lexpr = self.parse_bit_expr()
 
-        if lexpr is None:
+        if lexpr is None or not self.state.is_predicate_operator():
             return lexpr
 
-        tvalue = self.state.lcase_value
+        not_op = None
 
-        if self.state.is_operator():
-            if self.state.is_operator('not'):
-                self.state += 1
-                op = ast.UnaryOp(tvalue)
-                op.add_child(self.parse_predicate(lexpr))
-                return op
+        if self.state.is_operator('not'):
+            not_op = self.accept(ast.Op, self.state.value)
 
-            if self.state.is_operator('sounds'):
-                self.state += 1
-                op = ast.Op(tvalue)
-                op.add_child(lexpr)
-
-                if self.state.is_operator('like'):
-                    self.state += 1
-                    like_op = ast.Op(self.state.lcase_value)
-                    like_op.add_child(self.parse_bit_expr())
-                    op.add_child(like_op)
-                return op
-
-            if self.state.is_operator('regexp'):
-                self.state += 1
-                op = ast.Op(tvalue)
-                op.add_child(lexpr)
-                op.add_child(self.parse_bit_expr())
-                return op
+        if self.state.is_operator('sounds'):
+            op = self.accept(ast.Op, self.state.value)
+            op.add_child(lexpr)
 
             if self.state.is_operator('like'):
-                self.state += 1
-                op = ast.Op(tvalue)
-                op.add_child(lexpr)
-                op.add_child(self.parse_simple_expr())
+                like_op = self.accept(ast.Op, self.state.value)
+                like_op.add_child(self.parse_bit_expr())
+                op.add_child(like_op)
+            return op
 
-                if self.state.is_keyword('escape'):
-                    escape_op_value = self.state.lcase_value
-                    self.state += 1
-                    escape_op = ast.Op(escape_op_value)
-                    escape_op.add_child(self.parse_simple_expr())
-                    op.add_child(escape_op)
-                return op
+        if self.state.is_operator('regexp'):
+            op = self.accept(ast.Op, self.state.value)
+            op.add_child(lexpr)
+            rexpr = self.parse_bit_expr()
 
-            if self.state.is_operator('between'):
-                self.state += 1
-                op = ast.Op(tvalue)
-                op.add_child(lexpr)
-                op.add_child(self.parse_bit_expr())
+            if not_op:
+                not_op.add_child(rexpr)
+                rexpr = not_op
+            op.add_child(rexpr)
+            return op
 
-                if self.state.is_operator('and'):
-                    self.state += 1
-                    op.add_child(self.parse_predicate())
-                return op
+        if self.state.is_operator('like'):
+            op = self.accept(ast.Op, self.state.value)
+            op.add_child(lexpr)
+            rexpr = self.parse_simple_expr()
+
+            escape_op = None
+            if self.state.is_keyword('escape'):
+                escape_op_value = self.state.lcase_value
+                escape_op = self.accept(ast.Op, escape_op_value)
+                escape_op.add_child(self.parse_simple_expr())
+
+            if not_op:
+                not_op.add_child(rexpr)
+                rexpr = not_op
+
+            op.add_child(rexpr)
+            if escape_op:
+                op.add_child(escape_op)
+            return op
+
+        if self.state.is_operator('between'):
+            op = self.accept(ast.Op, self.state.value)
+            op.add_child(lexpr)
+
+            range = ast.Expression(type='range')
+            range.add_child(self.parse_bit_expr())
+
+            if self.state.is_operator('and'):
+                self.state.next()
+                range.add_child(self.parse_predicate())
+
+            if not_op:
+                not_op.add_child(range)
+                range = not_op
+            op.add_child(range)
+            return op
 
         return lexpr
 
@@ -310,24 +404,20 @@ class ExpressionParser:
             return lexpr
 
         tvalue = self.state.lcase_value
-        self.state += 1
 
-        operator = ast.Op(tvalue)
+        operator = self.accept(ast.Op, tvalue)
         operator.add_child(lexpr)
 
         if tvalue == 'is':
             if self.state.is_operator('not'):
-                not_op = ast.UnaryOp('not')
-                self.state += 1
+                not_op = self.accept(ast.UnaryOp, 'not')
 
                 if self.state.is_literal('null'):
-                    self.state += 1
-                    not_op.add_child(ast.Expression('null', 'literal'))
+                    not_op.add_child(self.accept(ast.Expression, 'null', 'literal'))
 
                 operator.add_child(not_op)
             elif self.state.is_literal('null'):
-                self.state += 1
-                operator.add_child(ast.Expression('null', 'literal'))
+                operator.add_child(self.accept(ast.Expression, 'null', 'literal'))
         else:
             operator.add_child(self.parse_predicate())
 
@@ -338,8 +428,7 @@ class ExpressionParser:
 
     def parse_expr_term(self, lexpr=None):
         if self.state.is_expression_operator() and (self.state.lcase_value == '!' or self.state.lcase_value == 'not'):
-            expr = ast.UnaryOp(self.state.lcase_value)
-            self.state += 1
+            expr = self.accept(ast.UnaryOp, self.state.lcase_value)
             expr.add_child(self.parse_expr())
             return expr
 
@@ -352,41 +441,33 @@ class ExpressionParser:
             return lexpr
 
         tvalue = self.state.lcase_value
-        self.state += 1
 
-        operator = ast.Op(tvalue)
+        operator = self.accept(ast.Op, tvalue)
         operator.add_child(lexpr)
 
         if self.state.is_operator('not'):
-            not_op = ast.UnaryOp('not')
-            self.state += 1
+            not_op = self.accept(ast.UnaryOp, 'not')
 
             if self.state.lcase_value in ['true', 'false', 'unknown']:
-                not_op.add_child(ast.Expression(self.state.lcase_value, 'literal'))
-                self.state += 1
+                not_op.add_child(self.accept(ast.Expression, self.state.lcase_value, 'literal'))
 
             operator.add_child(not_op)
         elif self.state.lcase_value in ['true', 'false', 'unknown']:
-            operator.add_child(ast.Expression(self.state.lcase_value, 'literal'))
-            self.state += 1
+            operator.add_child(self.accept(ast.Expression, self.state.lcase_value, 'literal'))
 
         return operator
 
     def parse_expr(self, prev_operator=None):
         lexpr = self.parse_expr_term()
-        if not self.state.is_expression_operator():
+        if not self.state.is_expression_operator() or self.state.is_operator('not') or self.state.is_operator('!'):
             if prev_operator:
                 prev_operator.add_child(lexpr)
                 return prev_operator
             return lexpr
 
-        if lexpr is None:
-            return
-
         tvalue = self.state.lcase_value
-        self.state += 1
 
-        operator = ast.Op(tvalue)
+        operator = self.accept(ast.Op, tvalue)
 
         if tvalue == 'is':
             return self.parse_expr_term(lexpr)

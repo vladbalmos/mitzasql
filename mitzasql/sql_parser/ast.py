@@ -26,12 +26,12 @@ operator_precedance = {
     'regexp': -6,
     'in': -6,
     'between': -7,
-    'and': -9,
-    '&&': -10,
-    'xor': -11,
-    'or': -12,
-    '||': -12,
-    ':=': -13,
+    'and': -8,
+    '&&': -8,
+    'xor': -9,
+    'or': -10,
+    '||': -10,
+    ':=': -11,
 }
 
 comparison_operators = [
@@ -79,6 +79,14 @@ valid_bit_expr_operators = [
     '>>',
     '&',
     '|'
+]
+
+valid_predicate_operators = [
+    'in',
+    'between',
+    'sounds',
+    'like',
+    'regexp'
 ]
 
 class NodeMixin:
