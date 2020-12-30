@@ -15,6 +15,8 @@ class SelectStmtParser:
                 'having', 'order', 'limit', 'procedure', 'for', 'into', 'lock',
                 'union')
 
+        self.table_terminator_keywords = self.col_terminator_keywords[1:]
+
     def accept(self, cls, *args, **kwargs):
         node = cls(*args, **kwargs)
         self.state.next()
@@ -31,6 +33,36 @@ class SelectStmtParser:
             return True
 
         return self.state.lcase_value not in self.col_terminator_keywords
+
+    def is_table_reference(self, state=None):
+        if state is None:
+            state = self.state
+        if state.is_literal() or state.is_name() or state.is_other():
+            return True
+
+        if not (state.is_keyword() or state.token_is(Token.Function) or state.is_open_paren):
+            return False
+
+        terminator_keywords = self.table_terminator_keywords + ('partition',
+                'as', 'inner', 'cross', 'join', 'straight_join', 'on', 'left',
+                'right', 'outer', 'natural', 'using', 'use', 'index', 'key',
+                'ignore', 'force', 'index', 'key', 'for')
+
+        return state.lcase_value not in terminator_keywords
+
+    def is_table_alias(self):
+        if self.state.is_reserved('as'):
+            return True
+
+        if self.state.is_literal() or self.state.is_name() or self.state.is_other():
+            return True
+
+        return self.is_table_reference()
+
+        with self.state as future_state:
+            future_state.next()
+            val = self.is_table_reference(future_state)
+            return val
 
     def parse_alias(self):
         if self.state.is_reserved('as'):
@@ -182,8 +214,197 @@ class SelectStmtParser:
 
         return into
 
+    def parse_table_partition(self):
+        if not self.state.is_reserved('partition'):
+            return
+
+        partition = self.accept(ast.UnaryOp, self.state.value)
+        partition.add_child(self.expr_parser.parse_expr())
+        return partition
+
+    def parse_table_index_hint(self):
+        if not self.state.is_reserved() or self.state.lcase_value not in ('use', 'ignore', 'force', 'index', 'key'):
+            return
+
+        index_hint = ast.Expression(type='index_hint')
+
+        def parse_for(parent):
+            if not self.state.is_reserved('for'):
+                return
+
+            for_ = self.accept(ast.UnaryOp, self.state.value)
+            if self.state.is_reserved() and self.state.lcase_value in ('join', 'order', 'group'):
+                if self.state.is_reserved('join'):
+                    for_.add_child(self.accept(ast.Expression, self.state.value))
+                else:
+                    expr = self.accept(ast.UnaryOp, self.state.value)
+                    if self.state.is_reserved('by'):
+                        expr.add_child(self.accept(ast.UnaryOp, self.state.value))
+                    for_.add_child(expr)
+            parent.add_child(for_)
+
+        if self.state.is_reserved('use'):
+            use = self.accept(ast.UnaryOp, self.state.value)
+            index_hint.add_child(use)
+            if self.state.is_reserved('index') or self.state.is_reserved('key'):
+                use.add_child(self.accept(ast.Expression, self.state.value))
+
+            parse_for(use)
+
+            if self.state.is_open_paren():
+                use.add_child(self.expr_parser.parse_expr())
+
+            return index_hint
+
+        expr = None
+        if self.state.lcase_value in ('ignore', 'force'):
+            expr = self.accept(ast.UnaryOp, self.state.value)
+            index_hint.add_child(expr)
+
+        if self.state.lcase_value in ('index', 'key'):
+            expr_ = self.accept(ast.UnaryOp, self.state.value)
+            if expr is not None:
+                expr.add_child(expr_)
+
+        parse_for(index_hint)
+
+        if self.state.is_open_paren():
+            index_hint.add_child(self.expr_parser.parse_expr())
+
+        return index_hint
+
+    def parse_join_spec(self, spec):
+        if not self.state.is_reserved(spec):
+            return
+        op = self.accept(ast.UnaryOp, self.state.value)
+        op.add_child(self.expr_parser.parse_expr())
+        return op
+
+    def parse_join(self, parse_outer=False, parse_dir=True, parse_table_factor=True):
+        if parse_dir and self.state.lcase_value in ('left', 'right'):
+            join = self.accept(ast.UnaryOp, self.state.value)
+            join.add_child(self.parse_join(parse_outer=True, parse_dir=False, parse_table_factor=parse_table_factor))
+            return join
+
+        if parse_outer and self.state.is_reserved('outer'):
+            outer = self.accept(ast.UnaryOp, self.state.value)
+            outer.add_child(self.parse_join(parse_outer=False, parse_dir=False, parse_table_factor=parse_table_factor))
+            return outer
+
+        if self.state.is_reserved('join'):
+            join = self.accept(ast.UnaryOp, self.state.value)
+            if not parse_table_factor:
+                join.add_child(self.parse_table_reference())
+            else:
+                join.add_child(self.parse_table_factor())
+
+            if self.state.is_reserved('on'):
+                join.add_child(self.parse_join_spec('on'))
+
+            if self.state.is_reserved('using'):
+                join.add_child(self.parse_join_spec('using'))
+            return join
+
+    def parse_table_factor(self):
+        if not self.is_table_reference():
+            return
+
+        table_factor = None
+        if self.state.is_open_paren():
+            self.state.next()
+            table_factor = ast.Expression(type='table_reference')
+            while self.state and not self.state.is_closed_paren():
+                table_factor.add_child(self.parse_table_reference())
+                if self.state.is_comma():
+                    self.state.next()
+
+            if self.state.is_closed_paren():
+                self.state.next()
+
+        if table_factor is None:
+            table_factor = ast.Expression(type='table_reference')
+
+        if self.state.is_reserved('select'):
+            table_factor.add_child(self.parse_select_stmt())
+        else:
+            table_factor.add_child(self.accept(ast.Expression, self.state.value))
+
+        if self.state.is_reserved('partition'):
+            table_factor.add_child(self.parse_table_partition())
+
+        if self.is_table_alias():
+            table_factor.add_child(self.parse_alias())
+
+        while self.state and self.state.is_reserved() and self.state.lcase_value in ('use', 'ignore', 'force', 'index', 'key'):
+            table_factor.add_child(self.parse_table_index_hint())
+            if self.state.is_comma():
+                self.state.next()
+
+        return table_factor
+
+    def parse_table_reference(self, table_factor=None):
+        if table_factor is None:
+            table_factor = self.parse_table_factor()
+            if table_factor is None:
+                return
+
+        if not self.state.is_reserved() and not self.state.token_is(Token.Function):
+            return table_factor
+
+        if self.state.lcase_value not in ('inner', 'cross', 'straight_join', 'left', 'right', 'outer', 'natural', 'join'):
+            return table_factor
+
+        if self.state.is_reserved('straight_join'):
+            join = self.accept(ast.UnaryOp, self.state.value)
+            join.add_child(self.parse_table_factor())
+
+            if self.state.is_reserved('on'):
+                join.add_child(self.parse_join_spec('on'))
+
+            table_factor.add_child(join)
+            return self.parse_table_reference(table_factor)
+
+        if self.state.is_reserved('inner') or self.state.is_reserved('cross'):
+            join_op = self.accept(ast.UnaryOp, self.state.value)
+            join_op.add_child(self.parse_join(parse_outer=False, parse_dir=False))
+            table_factor.add_child(join_op)
+            return self.parse_table_reference(table_factor)
+
+        if self.state.is_reserved('natural'):
+            natural_op = self.accept(ast.UnaryOp, self.state.value)
+            natural_op.add_child(self.parse_join(parse_outer=True))
+            table_factor.add_child(natural_op)
+            return self.parse_table_reference(table_factor)
+
+        if self.state.is_reserved() or self.state.token_is(Token.Function):
+            if self.state.lcase_value in ('inner', 'cross', 'straight_join', 'left', 'right', 'outer', 'natural', 'join'):
+                table_factor.add_child(self.parse_join(parse_outer=True, parse_dir=True, parse_table_factor=False))
+
+        table_factor = self.parse_table_reference(table_factor)
+
+        return table_factor
+
     def parse_from(self):
-        return
+        if not self.state.is_reserved('from'):
+            return
+
+        from_clause = self.accept(ast.Expression, type='from')
+
+        while self.state and self.is_table_reference():
+            from_clause.add_child(self.parse_table_reference())
+            if self.state.is_comma():
+                self.state.next()
+
+        return from_clause
+
+    def parse_where(self):
+        if not self.state.is_reserved('where'):
+            return
+
+        where_clause = self.accept(ast.Expression, type='where')
+        where_clause.add_child(self.expr_parser.parse_expr())
+        return where_clause
+
 
     def parse_group_by(self):
         return
@@ -233,6 +454,10 @@ class SelectStmtParser:
         if self.state.is_reserved('from'):
             from_clause = self.parse_from()
             stmt.add_child(from_clause)
+
+        if self.state.is_reserved('where'):
+            where_clause = self.parse_where()
+            stmt.add_child(where_clause)
 
         if self.state.is_reserved('group'):
             group_clause = self.parse_group_by()
