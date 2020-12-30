@@ -3,12 +3,16 @@ import mitzasql.sql_parser.parser_factory as parser_factory
 class StatementParser:
     def __init__(self, state):
         self.state = state
-        self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
 
-    def parse_expr(self):
-        return self.expr_parser.run()
+    def parse_stmt(self):
+        if self.state.is_reserved('select'):
+            select_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
+            return select_parser.run()
+
+        expr_parser = parser_factory.create(parser_factory.EXPR, self.state)
+        return expr_parser.run()
 
 
     def run(self):
-        return self.parse_expr()
+        return self.parse_stmt()
 

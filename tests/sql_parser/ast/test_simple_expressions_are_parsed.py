@@ -202,3 +202,81 @@ FN(col1 collate latin)
 
     assert collate_op.children[1].type == 'collation'
     assert collate_op.children[1].value == 'latin'
+
+def test_case_expression_is_parsed():
+    raw_sql = '''
+
+case 1 when 1 then 'one'
+when 2 then 'two' else 'more' end
+
+case when 1 > 0 then 'true'
+when 1 < 0 then 'true' else 'false' end
+
+'''
+
+    ast = parse(raw_sql)
+
+    child_ast = ast[0]
+
+    assert child_ast.type == 'operator'
+    assert child_ast.value == 'case'
+    assert len(child_ast.children) == 4
+
+    children = child_ast.children
+
+    assert children[0].type == 'value'
+    assert len(children[0].children) == 1
+    assert children[0].children[0].type == 'literal'
+    assert children[0].children[0].value == '1'
+
+    assert children[1].type == 'operator'
+    assert children[1].value == 'when'
+    assert len(children[1].children) == 2
+    assert children[1].children[0].type == 'literal'
+    assert children[1].children[0].value == '1'
+    assert children[1].children[1].type == 'literal'
+    assert children[1].children[1].value == "'one'"
+
+    assert children[2].type == 'operator'
+    assert children[2].value == 'when'
+    assert len(children[2].children) == 2
+    assert children[2].children[0].type == 'literal'
+    assert children[2].children[0].value == '2'
+    assert children[2].children[1].type == 'literal'
+    assert children[2].children[1].value == "'two'"
+
+    assert children[3].type == 'operator'
+    assert children[3].value == 'else'
+    assert len(children[3].children) == 1
+    assert children[3].children[0].type == 'literal'
+    assert children[3].children[0].value == "'more'"
+
+    child_ast = ast[1]
+
+    assert child_ast.type == 'operator'
+    assert child_ast.value == 'case'
+    assert len(child_ast.children) == 3
+
+    children = child_ast.children
+
+    assert children[0].type == 'operator'
+    assert children[0].value == 'when'
+    assert len(children[0].children) == 2
+    assert children[0].children[0].type == 'operator'
+    assert children[0].children[0].value == '>'
+    assert children[0].children[1].type == 'literal'
+    assert children[0].children[1].value == "'true'"
+
+    assert children[1].type == 'operator'
+    assert children[1].value == 'when'
+    assert len(children[1].children) == 2
+    assert children[1].children[0].type == 'operator'
+    assert children[1].children[0].value == '<'
+    assert children[1].children[1].type == 'literal'
+    assert children[1].children[1].value == "'true'"
+
+    assert children[2].type == 'operator'
+    assert children[2].value == 'else'
+    assert len(children[2].children) == 1
+    assert children[2].children[0].type == 'literal'
+    assert children[2].children[0].value == "'false'"

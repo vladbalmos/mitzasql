@@ -113,8 +113,8 @@ class NodeMixin:
         return len(self.children) > 0
 
 class Statement(NodeMixin):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, value=None, type='statement'):
+        super().__init__(value, type)
 
 class Expression(NodeMixin):
     def __init__(self, value=None, type='expression'):

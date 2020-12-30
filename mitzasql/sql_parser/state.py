@@ -1,11 +1,13 @@
+import pudb
 from collections import deque
 import mitzasql.sql_parser.ast as ast
 import mitzasql.sql_parser.tokens as Token
 
 class State:
-    def __init__(self, tokens, future=False):
+    def __init__(self, tokens, future=False, prev_state_lookahead=None):
         self._tokens = tokens
         self.lookahead_tokens = deque()
+        self.prev_state_lookahead = prev_state_lookahead
         self._future_state = None
         self._is_future = future
         self.type = None
@@ -19,11 +21,12 @@ class State:
         return self.type is not None
 
     def __enter__(self):
-        self._future_state = State(self._tokens, future=True)
+        self._future_state = State(self._tokens, future=True, prev_state_lookahead=self.lookahead_tokens.copy())
         return self._future_state
 
     def __exit__(self, type, value, traceback):
-        self.lookahead_tokens = self._future_state.lookahead_tokens
+        if self._future_state is not None:
+            self.lookahead_tokens.extend(self._future_state.lookahead_tokens)
         self._future_state = None
 
     def token_is(self, type, value=None, lowercase=True, equal_type=False):
@@ -84,6 +87,26 @@ class State:
 
     def is_operator(self, label=None):
         return self.token_is(Token.Operator, label)
+
+    def is_identifier(self):
+        if self.is_name():
+            return True
+
+        if self.is_other():
+            with self as future_state:
+                future_state.next()
+                return future_state.is_dot()
+
+    def is_column_alias(self):
+        if self.is_reserved('as'):
+            return True
+
+        if self.is_literal() or self.is_name() or self.is_other():
+            return True
+
+        with self as future_state:
+            future_state.next()
+            return future_state.is_comma()
 
     def is_row_subquery(self):
         if not self.token_is(Token.Reserved, 'row'):
@@ -168,6 +191,10 @@ class State:
             break
 
     def next(self, skip_whitespace=True):
+        if self._is_future and self.prev_state_lookahead and len(self.prev_state_lookahead):
+            self.update(self.prev_state_lookahead.popleft())
+            return
+
         if len(self.lookahead_tokens) and not self._is_future:
             self.next_in_lookahead_queue(skip_whitespace)
             return

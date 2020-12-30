@@ -84,7 +84,7 @@ class ExpressionParser:
         self.state.next()
         return node
 
-    def parse_identifier(self, allowed_types=[Token.Name]):
+    def parse_identifier(self, allowed_types=(Token.Name, Token.Other)):
         if self.state.type not in allowed_types:
             return
 
@@ -150,6 +150,48 @@ class ExpressionParser:
             self.state.next()
 
         return expr
+
+    def parse_when_expr(self):
+        if not self.state.is_reserved('when'):
+            return
+
+        op = self.accept(ast.Op, self.state.value)
+        op.add_child(self.parse_expr())
+
+        if self.state.is_reserved('then'):
+            self.state.next()
+            op.add_child(self.parse_expr())
+
+        return op
+
+    def parse_case_expr(self):
+        # pudb.set_trace()
+        if not self.state.is_operator('case'):
+            return
+
+        op = self.accept(ast.Op, self.state.value)
+
+        if not self.state.is_reserved('when'):
+            value_expr = self.parse_expr()
+            value = ast.Expression(type='value')
+            value.add_child(value_expr)
+            op.add_child(value)
+
+        if self.state.is_reserved('when'):
+            while self.state and not (self.state.is_keyword('end') or self.state.is_keyword('else')):
+                when = self.parse_when_expr()
+                op.add_child(when)
+
+            if self.state.is_keyword('else'):
+                else_ = ast.Op(self.state.value)
+                self.state.next()
+                else_.add_child(self.parse_expr())
+                op.add_child(else_)
+
+            if self.state.is_keyword('end'):
+                self.state.next()
+
+        return op
 
     def parse_paren(self):
         '''
@@ -224,10 +266,8 @@ class ExpressionParser:
             if tvalue == 'match':
                 return self.parse_match_expr()
 
-            # TODO: fix this
-            if tvalue == 'case':
-                return self.parse_case_expr()
-
+        if self.state.is_operator('case'):
+            return self.parse_case_expr()
 
         if self.state.is_row_subquery():
             return self.parse_row_subquery()
@@ -254,7 +294,8 @@ class ExpressionParser:
         if self.state.is_literal():
             return self.accept(ast.Expression, self.state.value, 'literal')
 
-        if self.state.is_name():
+        # pudb.set_trace()
+        if self.state.is_identifier():
             return self.parse_identifier()
 
         if self.state.is_keyword():

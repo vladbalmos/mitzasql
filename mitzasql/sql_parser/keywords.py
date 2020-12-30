@@ -673,6 +673,7 @@ keywords = {
     'sql_after_gtids': Token.Keyword,
     'sql_after_mts_gaps': Token.Keyword,
     'sql_buffer_result': Token.Keyword,
+    'sql_cache': Token.Keyword,
     'sql_no_cache': Token.Keyword,
     'sql_thread': Token.Keyword,
     'sql_tsi_day': Token.Keyword,
