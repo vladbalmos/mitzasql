@@ -61,6 +61,9 @@ class State:
     def is_keyword(self, label=None, lowercase=True):
         return self.token_is(Token.Keyword, label, lowercase)
 
+    def is_function(self, label=None, lowercase=True):
+        return self.token_is(Token.Function, label, lowercase)
+
     def is_param_marker(self, label=None, lowercase=True):
         return self.token_is(Token.ParamMarker, label, lowercase)
 
@@ -75,6 +78,9 @@ class State:
 
     def is_comma(self):
         return self.token_is(Token.Comma)
+
+    def is_semicolon(self):
+        return self.token_is(Token.Semicolon)
 
     def is_open_paren(self):
         return self.token_is(Token.Paren, '(')
@@ -92,7 +98,7 @@ class State:
         if self.is_name():
             return True
 
-        if self.is_other():
+        if self.is_other() or self.is_keyword() or self.is_function():
             with self as future_state:
                 future_state.next()
                 return future_state.is_dot()
@@ -115,6 +121,14 @@ class State:
         with self as future_state:
             future_state.next()
             return future_state.is_open_paren()
+
+    def is_subquery(self):
+        if not self.is_open_paren():
+            return False
+
+        with self as future_state:
+            future_state.next()
+            return future_state.is_reserved('select')
 
     def is_function_call(self):
         if not self.token_is(Token.Function) and not self.is_keyword() and not self.is_other():

@@ -40,7 +40,7 @@ class SelectStmtParser:
         if state.is_literal() or state.is_name() or state.is_other():
             return True
 
-        if not (state.is_keyword() or state.token_is(Token.Function) or state.is_open_paren):
+        if not (state.is_keyword() or state.is_function() or state.is_open_paren):
             return False
 
         terminator_keywords = self.table_terminator_keywords + ('partition',
@@ -348,7 +348,7 @@ class SelectStmtParser:
             if table_factor is None:
                 return
 
-        if not self.state.is_reserved() and not self.state.token_is(Token.Function):
+        if not self.state.is_reserved() and not self.state.is_function():
             return table_factor
 
         if self.state.lcase_value not in ('inner', 'cross', 'straight_join', 'left', 'right', 'outer', 'natural', 'join'):
@@ -376,7 +376,7 @@ class SelectStmtParser:
             table_factor.add_child(natural_op)
             return self.parse_table_reference(table_factor)
 
-        if self.state.is_reserved() or self.state.token_is(Token.Function):
+        if self.state.is_reserved() or self.state.is_function():
             if self.state.lcase_value in ('inner', 'cross', 'straight_join', 'left', 'right', 'outer', 'natural', 'join'):
                 table_factor.add_child(self.parse_join(parse_outer=True, parse_dir=True, parse_table_factor=False))
 
@@ -405,29 +405,153 @@ class SelectStmtParser:
         where_clause.add_child(self.expr_parser.parse_expr())
         return where_clause
 
+    def parse_order_expr(self):
+        expr = self.expr_parser.parse_expr()
+        if expr is None:
+            return
+
+        if self.state.is_reserved() and self.state.lcase_value in ('asc', 'desc'):
+            order_op = self.accept(ast.UnaryOp, self.state.value)
+            order_op.add_child(expr)
+            return order_op
+
+        return expr
 
     def parse_group_by(self):
-        return
+        if not self.state.is_reserved('group'):
+            return
+
+        group = self.accept(ast.Op, self.state.value)
+
+        if not self.state.is_reserved('by'):
+            return group
+
+        by = self.accept(ast.Op, self.state.value)
+        group.add_child(by)
+
+        while self.state:
+            expr = self.parse_order_expr()
+            if expr is None:
+                break
+            by.add_child(expr)
+
+            if self.state.is_comma():
+                self.state.next()
+                continue
+            break
+
+        if self.state.is_reserved('with'):
+            with_ = self.accept(ast.UnaryOp, self.state.value)
+            if self.state.is_keyword('rollup'):
+                rollup = self.accept(ast.UnaryOp, self.state.value)
+                with_.add_child(rollup)
+
+            group.add_child(with_)
+
+        return group
 
     def parse_having(self):
-        return
+        if not self.state.is_reserved('having'):
+            return
+
+        where_clause = self.accept(ast.Expression, type='having')
+        where_clause.add_child(self.expr_parser.parse_expr())
+        return where_clause
 
     def parse_order_by(self):
-        return
+        if not self.state.is_reserved('order'):
+            return
+
+        order = self.accept(ast.Op, self.state.value)
+
+        if not self.state.is_reserved('by'):
+            return order
+
+        by = self.accept(ast.Op, self.state.value)
+        order.add_child(by)
+
+        while self.state:
+            expr = self.parse_order_expr()
+            if expr is None:
+                break
+            by.add_child(expr)
+
+            if self.state.is_comma():
+                self.state.next()
+                continue
+            break
+
+        return order
 
     def parse_limit(self):
-        return
+        if not self.state.is_reserved('limit'):
+            return
+
+        offset = quantity = None
+        limit = self.accept(ast.Op, self.state.value)
+        # pudb.set_trace()
+
+        val = self.expr_parser.parse_expr()
+        if val is None:
+            return limit
+
+        if self.state.is_keyword('offset'):
+            self.state.next()
+            quantity = val
+            offset = self.expr_parser.parse_expr()
+        elif self.state.is_comma():
+            self.state.next()
+            offset = val
+            quantity = self.expr_parser.parse_expr()
+        else:
+            quantity = val
+
+        limit.add_child(offset)
+        limit.add_child(quantity)
+        return limit
 
     def parse_procedure(self):
-        return
+        if not self.state.is_reserved('procedure'):
+            return
+
+        procedure = self.accept(ast.UnaryOp, self.state.value)
+        if self.state.is_function_call():
+            procedure.add_child(self.expr_parser.parse_expr())
+
+        return procedure
 
     def parse_for_clause(self):
-        return
+        if not self.state.is_reserved('for'):
+            return
+
+        for_ = self.accept(ast.UnaryOp, self.state.value)
+
+        if self.state.is_reserved('update'):
+            for_.add_child(self.accept(ast.UnaryOp, self.state.value))
+
+        return for_
 
     def parse_lock_clause(self):
-        return
+        if not self.state.is_reserved('lock'):
+            return
 
-    def parse_select_stmt(self):
+        lock = self.accept(ast.UnaryOp, self.state.value)
+
+        if not self.state.is_reserved('in'):
+            return lock
+        lock.add_child(self.accept(ast.UnaryOp, self.state.value))
+
+        if not self.state.is_keyword('share'):
+            return lock
+        lock.add_child(self.accept(ast.UnaryOp, self.state.value))
+
+        if not self.state.is_keyword('mode'):
+            return lock
+        lock.add_child(self.accept(ast.UnaryOp, self.state.value))
+
+        return lock
+
+    def parse_select_stmt(self, union_op=None):
         if not self.state.is_reserved('select'):
             return
 
@@ -490,6 +614,17 @@ class SelectStmtParser:
         if self.state.is_reserved('lock'):
             lock_clause = self.parse_lock_clause()
             stmt.add_child(lock_clause)
+
+        if self.state.is_reserved('union'):
+            if union_op is not None:
+                self.state.next()
+            else:
+                union = self.accept(ast.Op, self.state.value)
+                union.add_child(stmt)
+
+                while self.state and not self.state.is_semicolon():
+                    union.add_child(self.parse_select_stmt(union))
+                return union
 
         return stmt
 

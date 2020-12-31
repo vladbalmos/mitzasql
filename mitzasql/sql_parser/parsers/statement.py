@@ -7,7 +7,11 @@ class StatementParser:
     def parse_stmt(self):
         if self.state.is_reserved('select'):
             select_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
-            return select_parser.run()
+            stmt = select_parser.run()
+            if stmt is None:
+                return self.parse_stmt()
+            return stmt
+
 
         expr_parser = parser_factory.create(parser_factory.EXPR, self.state)
         return expr_parser.run()

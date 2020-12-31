@@ -84,10 +84,7 @@ class ExpressionParser:
         self.state.next()
         return node
 
-    def parse_identifier(self, allowed_types=(Token.Name, Token.Other)):
-        if self.state.type not in allowed_types:
-            return
-
+    def parse_identifier(self):
         expr = self.accept(ast.Expression, self.state.value, 'identifier')
 
         if self.state.is_dot():
@@ -275,6 +272,15 @@ class ExpressionParser:
         if self.state.is_function_call():
             return self.parse_function_call()
 
+        if self.state.is_subquery():
+            self.state.next()
+            select_stmt_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
+            subquery = select_stmt_parser.parse_select_stmt()
+
+            if self.state.is_closed_paren():
+                self.state.next()
+            return subquery
+
         if self.state.is_open_paren():
             return self.parse_paren()
 
@@ -294,7 +300,6 @@ class ExpressionParser:
         if self.state.is_literal():
             return self.accept(ast.Expression, self.state.value, 'literal')
 
-        # pudb.set_trace()
         if self.state.is_identifier():
             return self.parse_identifier()
 
