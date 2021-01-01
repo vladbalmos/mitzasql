@@ -1,3 +1,10 @@
+# TODO:
+    # - fix issue with parsing identifier (keyword/reserved case)
+    # - fix parsing subquery
+    # - fix parsing joins
+    # - fix parsing union
+    # - check for puntuation/parens when searching for columns termination tokens
+
 from mitzasql.sql_parser.lexer import Lexer
 from mitzasql.sql_parser.state import State
 from mitzasql.utils import dfs
