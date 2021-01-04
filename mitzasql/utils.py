@@ -1,3 +1,14 @@
+def token_is_parsed(needle, haystack):
+    expected_ttype, expected_value, *rest = needle
+    for item in haystack:
+        actual_ttype, actual_value, *rest = item
+
+        if actual_ttype == expected_ttype and actual_value == expected_value:
+            return True
+
+    return False
+
+
 def dfs(root, padding_left=0):
     if not root:
         return

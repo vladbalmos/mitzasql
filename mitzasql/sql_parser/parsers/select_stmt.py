@@ -18,6 +18,7 @@ class SelectStmtParser:
         self.table_terminator_keywords = self.col_terminator_keywords[1:]
 
     def accept(self, cls, *args, **kwargs):
+        kwargs['pos'] = self.state.pos
         node = cls(*args, **kwargs)
         self.state.next()
         return node
@@ -37,6 +38,7 @@ class SelectStmtParser:
     def is_table_reference(self, state=None):
         if state is None:
             state = self.state
+
         if state.is_literal() or state.is_name() or state.is_other():
             return True
 
@@ -54,10 +56,11 @@ class SelectStmtParser:
         if self.state.is_reserved('as'):
             return True
 
+        if self.state and not self.state.lcase_value.isalpha():
+            return False
+
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
             return True
-
-        return self.is_table_reference()
 
         with self.state as future_state:
             future_state.next()
@@ -68,6 +71,10 @@ class SelectStmtParser:
         if self.state.is_reserved('as'):
             self.state.next()
         expr = self.expr_parser.parse_expr()
+
+        if expr is None:
+            return
+
         alias = ast.Expression(type='alias')
         alias.add_child(expr)
         return alias

@@ -90,16 +90,17 @@ valid_predicate_operators = [
 ]
 
 class NodeMixin:
-    def __init__(self, value=None, type=None):
+    def __init__(self, value=None, type=None, pos=None):
         self.value = value
         self.type = type
+        self.pos = pos
         self.parent = None
         self.children = []
 
     def __repr__(self):
         repr_ = str(self.type);
         if self.value is not None:
-            repr_ += ':' + str(self.value)
+            repr_ += ':' + str(self.value) + ':' + str(self.pos)
 
         return repr_
 
@@ -113,16 +114,16 @@ class NodeMixin:
         return len(self.children) > 0
 
 class Statement(NodeMixin):
-    def __init__(self, value=None, type='statement'):
-        super().__init__(value, type)
+    def __init__(self, value=None, type='statement', pos=None):
+        super().__init__(value, type, pos)
 
 class Expression(NodeMixin):
-    def __init__(self, value=None, type='expression'):
-        super().__init__(value, type)
+    def __init__(self, value=None, type='expression', pos=None):
+        super().__init__(value, type, pos)
 
 class Op(NodeMixin):
-    def __init__(self, value, type='operator'):
-        super().__init__(value, type)
+    def __init__(self, value, type='operator', pos=None):
+        super().__init__(value, type, pos)
 
     def has_precedance(self, operator):
         own_priority = operator_precedance[self.value.lower()]
@@ -131,8 +132,8 @@ class Op(NodeMixin):
         return own_priority >= op_priority
 
 class UnaryOp(Op):
-    def __init__(self, value, type="unary_operator"):
-        super().__init__(value, type)
+    def __init__(self, value, type="unary_operator", pos=None):
+        super().__init__(value, type, pos)
 
     def has_precedance(self, operator):
         return True

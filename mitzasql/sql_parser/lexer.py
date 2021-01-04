@@ -15,6 +15,9 @@ class Lexer():
         except IndexError:
             return None
 
+    def _make_token(self, ttype, val):
+        return (ttype, val, self.pos - len(val))
+
     def _looks_like_keyword(self, char):
         return char.isalnum() or char == '_' or char == '$'
 
@@ -36,7 +39,7 @@ class Lexer():
 
         if char == '.':
             self.pos += 1
-            return (Token.Dot, char)
+            return self._make_token(Token.Dot, char)
 
         return False
 
@@ -48,7 +51,7 @@ class Lexer():
 
         if char == '(' or char == ')':
             self.pos += 1
-            return (Token.Paren, char)
+            return self._make_token(Token.Paren, char)
 
         return False
 
@@ -60,7 +63,7 @@ class Lexer():
 
         if char == ';':
             self.pos += 1
-            return (Token.Semicolon, char)
+            return self._make_token(Token.Semicolon, char)
 
         return False
 
@@ -72,7 +75,7 @@ class Lexer():
 
         if char == ',':
             self.pos += 1
-            return (Token.Comma, char)
+            return self._make_token(Token.Comma, char)
 
         return False
 
@@ -94,7 +97,7 @@ class Lexer():
         if not len(space):
             return False
 
-        return (Token.Whitespace, space)
+        return self._make_token(Token.Whitespace, space)
 
     def parse_unquoted_identifier(self):
         identifier = ''
@@ -116,7 +119,7 @@ class Lexer():
 
         token = keywords.classify(identifier)
 
-        return (token, identifier)
+        return self._make_token(token, identifier)
 
     def parse_dec_number(self):
         '''
@@ -178,7 +181,7 @@ class Lexer():
             self.pos -= 1
             return False
 
-        return (Token.Number.Dec, number)
+        return self._make_token(Token.Number.Dec, number)
 
     def parse_binary_number_ob(self):
         '''
@@ -220,7 +223,7 @@ class Lexer():
             self.pos -= len(number)
             return False
 
-        return (Token.Number.Bit, number)
+        return self._make_token(Token.Number.Bit, number)
 
     def parse_hex_number_ox(self):
         '''
@@ -262,7 +265,7 @@ class Lexer():
             self.pos -= len(number)
             return False
 
-        return (Token.Number.Hex, number)
+        return self._make_token(Token.Number.Hex, number)
 
     def parse_binary_number_b_quote(self):
         '''
@@ -317,7 +320,7 @@ class Lexer():
             self.pos -= len(number)
             return False
 
-        return (Token.Number.Bit, number)
+        return self._make_token(Token.Number.Bit, number)
 
     def parse_hex_number_x_quote(self):
         '''
@@ -372,7 +375,7 @@ class Lexer():
             self.pos -= len(number)
             return False
 
-        return (Token.Number.Hex, number)
+        return self._make_token(Token.Number.Hex, number)
 
     def parse_string(self):
         string_ = ''
@@ -411,7 +414,7 @@ class Lexer():
         if not len(string_):
             return False
 
-        return (Token.String, string_)
+        return self._make_token(Token.String, string_)
 
     def parse_quoted_identifier(self):
         string_ = ''
@@ -440,7 +443,7 @@ class Lexer():
         if not len(string_):
             return False
 
-        return (Token.Name, string_)
+        return self._make_token(Token.Name, string_)
 
     def parse_operator(self, base = ''):
         operator = base
@@ -460,18 +463,18 @@ class Lexer():
                 result = self.parse_operator(operator)
                 if not result:
                     return False
-                _, operator = result
+                _, operator, pos = result
 
             if len(operator) > 1:
                 if operator in keywords.symbol_operators:
-                    return (Token.Operator.Symbol, operator)
+                    return self._make_token(Token.Operator.Symbol, operator)
                 self.pos -= 1
-                return (Token.Operator.Symbol, operator[0:-1])
+                return self._make_token(Token.Operator.Symbol, operator[0:-1])
 
         if not len(operator):
             return False
 
-        return (Token.Operator.Symbol, operator)
+        return self._make_token(Token.Operator.Symbol, operator)
 
     def parse_variable(self):
         var = ''
@@ -526,7 +529,7 @@ class Lexer():
             self.pos -= len(var)
             return False
 
-        return (Token.Variable, var)
+        return self._make_token(Token.Variable, var)
 
     def parse_c_style_comment(self):
         comment = ''
@@ -564,7 +567,7 @@ class Lexer():
             self.pos -= len(comment)
             return False
 
-        return (Token.Comment, comment)
+        return self._make_token(Token.Comment, comment)
 
     def parse_dash_style_comment(self):
         comment = ''
@@ -604,7 +607,7 @@ class Lexer():
             self.pos -= len(comment)
             return False
 
-        return (Token.Comment, comment)
+        return self._make_token(Token.Comment, comment)
 
     def parse_hash_style_comment(self):
         comment = ''
@@ -633,7 +636,7 @@ class Lexer():
         if not len(comment):
             return False
 
-        return (Token.Comment, comment)
+        return self._make_token(Token.Comment, comment)
 
 
     def tokenize(self):
@@ -778,7 +781,7 @@ class Lexer():
 
             if char == '?':
                 self.pos += 1
-                yield (Token.ParamMarker, char)
+                yield self._make_token(Token.ParamMarker, char)
 
             # we shouldn't be here, the syntax is wrong so we skip this character
             self.pos += 1

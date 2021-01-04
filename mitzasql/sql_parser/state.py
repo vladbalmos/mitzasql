@@ -13,6 +13,7 @@ class State:
         self.type = None
         self.value = None
         self.lcase_value = None
+        self.pos = None
 
         if not future:
             self.next()
@@ -94,6 +95,9 @@ class State:
     def is_operator(self, label=None):
         return self.token_is(Token.Operator, label)
 
+    def is_delimiter(self):
+        return self.token_is(Token.Punctuation) or self.token_is(Token.Paren)
+
     def is_identifier(self):
         if self.is_name():
             return True
@@ -109,6 +113,9 @@ class State:
 
         if self.is_literal() or self.is_name() or self.is_other():
             return True
+
+        if self.is_delimiter():
+            return False
 
         with self as future_state:
             future_state.next()
@@ -167,6 +174,9 @@ class State:
             return future_state.type == Token.Null
 
     def is_predicate_operator(self):
+        if self.is_reserved('in'):
+            return True
+
         if not self.is_operator('not') and not self.token_is(Token.Operator, ast.valid_predicate_operators):
             return False
 
@@ -175,7 +185,7 @@ class State:
 
         with self as future_state:
             future_state.next()
-            return future_state.token_is(Token.Operator, ast.valid_predicate_operators)
+            return future_state.token_is(Token.Operator, ast.valid_predicate_operators) or future_state.is_reserved('in')
 
     def is_bit_expr_operator(self):
         return self.token_is(Token.Operator, ast.valid_bit_expr_operators)
@@ -185,7 +195,7 @@ class State:
             self.next()
 
     def update(self, token):
-        self.type, self.value = token or (None, None)
+        self.type, self.value, self.pos = token or (None, None, None)
         if self:
             self.lcase_value = self.value.lower()
         else:
@@ -216,7 +226,7 @@ class State:
         try:
             token = next(self._tokens)
         except StopIteration:
-            token = (None, None)
+            token = (None, None, None)
 
         self.update(token)
         if self._is_future:

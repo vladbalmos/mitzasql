@@ -280,3 +280,21 @@ when 1 < 0 then 'true' else 'false' end
     assert len(children[2].children) == 1
     assert children[2].children[0].type == 'literal'
     assert children[2].children[0].value == "'false'"
+
+def test_exists_expr_is_parsed():
+    raw_sql = '''
+
+exists (select * from table)
+
+'''
+
+    ast = parse(raw_sql)
+    ast = ast[0]
+
+    assert ast.type == 'unary_operator'
+    assert ast.value == 'exists'
+    assert len(ast.children) == 1
+
+    assert ast.children[0].type == 'select'
+    assert ast.children[0].value == 'select'
+

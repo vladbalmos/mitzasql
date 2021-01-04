@@ -1,6 +1,8 @@
 import pytest
 import mitzasql.sql_parser.tokens as Token
+import pudb
 from mitzasql.sql_parser.lexer import Lexer
+from mitzasql.utils import token_is_parsed
 
 def test_bit_numbers_are_tokenized():
     raw = '''
@@ -18,15 +20,15 @@ B"01"
 b'2'
 '''
     tokens = list(Lexer(raw).tokenize())
-    assert (Token.Number.Bit, '1') not in tokens
-    assert (Token.Number.Bit, '20.321') not in tokens
-    assert (Token.Number.Bit, '102e10') not in tokens
-    assert (Token.Number.Bit, '0b01') in tokens
-    assert (Token.Number.Bit, '0b02') not in tokens
-    assert (Token.Number.Bit, '0b111') in tokens
-    assert (Token.Number.Bit, '0B111') not in tokens
-    assert (Token.Number.Bit, "b'01'") in tokens
-    assert (Token.Number.Bit, "B'01'") in tokens
-    assert (Token.Number.Bit, 'B"01"') not in tokens
-    assert (Token.Number.Bit, '0b11b1') not in tokens
-    assert (Token.Number.Bit, "b'2'") not in tokens
+    assert not token_is_parsed((Token.Number.Bit, '1'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, '20.321'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, '102e10'), tokens)
+    assert token_is_parsed((Token.Number.Bit, '0b01'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, '0b02'), tokens)
+    assert token_is_parsed((Token.Number.Bit, '0b111'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, '0B111'), tokens)
+    assert token_is_parsed((Token.Number.Bit, "b'01'"), tokens)
+    assert token_is_parsed((Token.Number.Bit, "B'01'"), tokens)
+    assert not token_is_parsed((Token.Number.Bit, 'B"01"'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, '0b11b1'), tokens)
+    assert not token_is_parsed((Token.Number.Bit, "b'2'"), tokens)

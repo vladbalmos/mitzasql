@@ -80,6 +80,7 @@ class ExpressionParser:
         self.state = state
 
     def accept(self, cls, *args, **kwargs):
+        kwargs['pos'] = self.state.pos
         node = cls(*args, **kwargs)
         self.state.next()
         return node
@@ -148,6 +149,24 @@ class ExpressionParser:
 
         return expr
 
+    def parse_exist_expr(self):
+        '''
+        Parse exists expression:
+            EXISTS (subquery)
+        '''
+
+        if not self.state.is_reserved('exists'):
+            return
+
+        exists = self.accept(ast.UnaryOp, self.state.value)
+
+        if not self.state.is_subquery():
+            return exists
+
+        exists.add_child(self.parse_expr())
+        return exists
+
+
     def parse_when_expr(self):
         if not self.state.is_reserved('when'):
             return
@@ -180,7 +199,7 @@ class ExpressionParser:
                 op.add_child(when)
 
             if self.state.is_keyword('else'):
-                else_ = ast.Op(self.state.value)
+                else_ = ast.Op(self.state.value, pos=self.state.pos)
                 self.state.next()
                 else_.add_child(self.parse_expr())
                 op.add_child(else_)
@@ -262,6 +281,9 @@ class ExpressionParser:
 
             if tvalue == 'match':
                 return self.parse_match_expr()
+
+            if tvalue == 'exists':
+                return self.parse_exist_expr()
 
         if self.state.is_operator('case'):
             return self.parse_case_expr()
@@ -382,6 +404,17 @@ class ExpressionParser:
         if self.state.is_operator('not'):
             not_op = self.accept(ast.Op, self.state.value)
 
+        if self.state.is_reserved('in'):
+            in_op = self.accept(ast.Op, self.state.value)
+            in_op.add_child(lexpr)
+            in_op.add_child(self.parse_expr())
+
+            if not_op:
+                not_op.add_child(in_op)
+                in_op = not_op
+            return in_op
+
+
         if self.state.is_operator('sounds'):
             op = self.accept(ast.Op, self.state.value)
             op.add_child(lexpr)
@@ -427,7 +460,7 @@ class ExpressionParser:
             op = self.accept(ast.Op, self.state.value)
             op.add_child(lexpr)
 
-            range = ast.Expression(type='range')
+            range = ast.Expression(type='range', pos=self.state.pos)
             range.add_child(self.parse_bit_expr())
 
             if self.state.is_operator('and'):
@@ -513,7 +546,7 @@ class ExpressionParser:
 
         tvalue = self.state.lcase_value
 
-        operator = self.accept(ast.Op, tvalue)
+        operator = self.accept(ast.Op, self.state.lcase_value)
 
         if tvalue == 'is':
             return self.parse_expr_term(lexpr)

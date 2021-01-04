@@ -129,3 +129,23 @@ a not regexp 'expr'
 
     assert not_op.children[0].type == 'literal'
     assert not_op.children[0].value == "'expr'"
+
+def test_in_paren_expression_is_parsed():
+    raw_sql = '''
+
+num in (1, 2, 3)
+
+
+'''
+    ast = parse(raw_sql)
+    ast = ast[0]
+
+    assert ast.type == 'operator'
+    assert ast.value == 'in'
+    assert len(ast.children) == 2
+
+    assert ast.children[0].type == 'unknown'
+    assert ast.children[0].value == 'num'
+
+    assert ast.children[1].type == 'paren_group'
+    assert len(ast.children[1].children) == 3

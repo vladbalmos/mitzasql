@@ -5,6 +5,10 @@ from mitzasql.sql_parser.parser import parse
 def test_simple_select_stmt_is_parsed():
     raw_sql = '''
 
+select
+(select 2)
+
+
 # SELECT
 # tbl.col,
 # 1 + 2,
@@ -54,10 +58,10 @@ def test_simple_select_stmt_is_parsed():
 # union
 # (select a from b)
 
-select 
-1,
-2,
-(select 3)
+# select 
+# 1,
+# 2,
+# (select 3)
 '''
 
     ast = parse(raw_sql)

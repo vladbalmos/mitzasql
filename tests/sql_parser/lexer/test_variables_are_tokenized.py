@@ -1,6 +1,7 @@
 import pytest
 import mitzasql.sql_parser.tokens as Token
 from mitzasql.sql_parser.lexer import Lexer
+from mitzasql.utils import token_is_parsed
 
 def test_variables_are_tokenized():
     raw = '''
@@ -11,8 +12,8 @@ def test_variables_are_tokenized():
 @@global
 '''
     tokens = list(Lexer(raw).tokenize())
-    assert (Token.Variable, '@variable') in tokens
-    assert (Token.Variable, "@'single quoted variable'") in tokens
-    assert (Token.Variable, '@"double quoted variable"') in tokens
-    assert (Token.Variable, '@`backtick quoted variable`') in tokens
-    assert (Token.Variable, '@@global') in tokens
+    assert token_is_parsed((Token.Variable, '@variable'), tokens)
+    assert token_is_parsed((Token.Variable, "@'single quoted variable'"), tokens)
+    assert token_is_parsed((Token.Variable, '@"double quoted variable"'), tokens)
+    assert token_is_parsed((Token.Variable, '@`backtick quoted variable`'), tokens)
+    assert token_is_parsed((Token.Variable, '@@global'), tokens)
