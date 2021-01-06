@@ -18,32 +18,15 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import bisect
-import itertools
-from mitzasql.logger import logger
-from pygments.lexers import MySqlLexer
-from pygments.lexers import _mysql_builtins
-
-
-mysql_keywords = itertools.chain(_mysql_builtins.MYSQL_DATATYPES,
-        _mysql_builtins.MYSQL_FUNCTIONS, _mysql_builtins.MYSQL_OPTIMIZER_HINTS,
-        _mysql_builtins.MYSQL_KEYWORDS)
-
-keywords_pool = {}
-for kw in mysql_keywords:
-    c = kw[0]
-    if c not in keywords_pool:
-        keywords_pool[c] = []
-
-    bisect.insort(keywords_pool[c], kw.lower())
+from mitzasql.sql_parser.parser import parse
+from mitzasql.autocomplete.ast_suggestions import ASTSuggestions
 
 word_separators = [' ', '\t', '\n', '.', ';', ',', '"', "'", '`', '#', '(',
                    ')', '[', ']', '/', '=', '<', '>', '\\', '|', '+', '-', '%', '*']
 
-
 class SQLAutocompleteEngine:
     def __init__(self, connection):
-        self._connection = connection
+        self._ast_suggestions = ASTSuggestions(connection)
         self._last_search = None
         self._cached_suggestions = []
         self._cached_prefix = None
@@ -71,15 +54,8 @@ class SQLAutocompleteEngine:
         self._last_search = (text, pos)
         prefix = self._get_keyword_prefix(text, pos)
 
-        if not prefix:
-            return None
-
-        first_char = prefix[0].lower()
-
-        try:
-            suggestions = keywords_pool[first_char]
-        except:
-            return None
+        ast = parse(text)
+        suggestions = self._ast_suggestions.get(ast, prefix, pos)
 
         self._cached_suggestions = list(filter(lambda str: str.startswith(prefix.lower()), suggestions))
         self._cached_prefix = prefix

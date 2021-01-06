@@ -16,7 +16,7 @@ def parse(raw_sql):
 
     while state:
         stmt = parser.run()
-        dfs(stmt)
+        # dfs(stmt)
         statements.append(stmt)
 
     return statements

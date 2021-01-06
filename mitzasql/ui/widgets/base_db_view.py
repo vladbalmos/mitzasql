@@ -25,7 +25,7 @@ import mitzasql.ui.utils as utils
 from mitzasql.history import History
 from mitzasql.db.model import (TableModel, QueryModel)
 from mitzasql.db.schema_cache import schema_cache_instance
-from mitzasql.sql_autocomplete_engine import SQLAutocompleteEngine
+from mitzasql.autocomplete.engine import SQLAutocompleteEngine
 from .db_view_footer import DBViewFooter
 from .query_widget import QueryWidget
 
