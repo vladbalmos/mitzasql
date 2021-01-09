@@ -78,11 +78,21 @@ class ExpressionParser:
 
     def __init__(self, state):
         self.state = state
+        self.last_node = None
 
     def accept(self, cls, *args, **kwargs):
+        advance_state = True
+
+        if 'advance' in kwargs:
+            advance_state = kwargs['advance']
+            kwargs.pop('advance')
+
         kwargs['pos'] = self.state.pos
         node = cls(*args, **kwargs)
-        self.state.next()
+        self.last_node = node
+
+        if advance_state:
+            self.state.next()
         return node
 
     def parse_identifier(self):
@@ -138,7 +148,7 @@ class ExpressionParser:
         modifier = None
         while self.state and not self.state.is_closed_paren():
             if modifier is None:
-                modifier = ast.Op('modifier')
+                modifier = self.accept(ast.Op, 'modifier', advance=False)
 
             modifier.add_child(self.parse_expr())
 
@@ -189,7 +199,7 @@ class ExpressionParser:
 
         if not self.state.is_reserved('when'):
             value_expr = self.parse_expr()
-            value = ast.Expression(type='value')
+            value = self.accept(ast.Expression, type='value', advance=False)
             value.add_child(value_expr)
             op.add_child(value)
 
@@ -199,7 +209,7 @@ class ExpressionParser:
                 op.add_child(when)
 
             if self.state.is_keyword('else'):
-                else_ = ast.Op(self.state.value, pos=self.state.pos)
+                else_ = self.accept(ast.Op, self.state.value, pos=self.state.pos, advance=False)
                 self.state.next()
                 else_.add_child(self.parse_expr())
                 op.add_child(else_)
@@ -460,7 +470,7 @@ class ExpressionParser:
             op = self.accept(ast.Op, self.state.value)
             op.add_child(lexpr)
 
-            range = ast.Expression(type='range', pos=self.state.pos)
+            range = self.accept(ast.Expression, type='range', pos=self.state.pos, advance=False)
             range.add_child(self.parse_bit_expr())
 
             if self.state.is_operator('and'):

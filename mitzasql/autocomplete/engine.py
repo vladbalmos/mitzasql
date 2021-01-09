@@ -55,7 +55,7 @@ class SQLAutocompleteEngine:
         prefix = self._get_keyword_prefix(text, pos)
 
         ast = parse(text)
-        suggestions = self._ast_suggestions.get(ast, prefix, pos)
+        suggestions = self._ast_suggestions.get(ast, prefix, pos - 1)
 
         self._cached_suggestions = list(filter(lambda str: str.startswith(prefix.lower()), suggestions))
         self._cached_prefix = prefix

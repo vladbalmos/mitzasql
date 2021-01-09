@@ -6,6 +6,7 @@ import mitzasql.sql_parser.parser_factory as parser_factory
 class SelectStmtParser:
     def __init__(self, state):
         self.state = state
+        self.last_node = None
         self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
         self.select_modifier_kw = ('all', 'distinct', 'distinctrow',
                 'high_priority', 'straight_join', 'sql_small_result',
@@ -18,9 +19,18 @@ class SelectStmtParser:
         self.table_terminator_keywords = self.col_terminator_keywords[1:]
 
     def accept(self, cls, *args, **kwargs):
+        advance_state = True
+
+        if 'advance' in kwargs:
+            advance_state = kwargs['advance']
+            kwargs.pop('advance')
+
         kwargs['pos'] = self.state.pos
         node = cls(*args, **kwargs)
-        self.state.next()
+        self.last_node = node
+
+        if advance_state:
+            self.state.next()
         return node
 
     def is_select_modifier(self):
@@ -67,21 +77,26 @@ class SelectStmtParser:
             val = self.is_table_reference(future_state)
             return val
 
+    def parse_expr(self):
+        expr = self.expr_parser.parse_expr()
+        self.last_node = self.expr_parser.last_node
+        return expr
+
     def parse_alias(self):
         if self.state.is_reserved('as'):
             self.state.next()
-        expr = self.expr_parser.parse_expr()
+        expr = self.parse_expr()
 
         if expr is None:
             return
 
-        alias = ast.Expression(type='alias')
+        alias = self.accept(ast.Expression, type='alias', advance=False)
         alias.add_child(expr)
         return alias
 
     def parse_col(self):
-        col  = ast.Expression(type='column')
-        expr = self.expr_parser.parse_expr()
+        col  = self.accept(ast.Expression, type='column', advance=False)
+        expr = self.parse_expr()
 
         col.add_child(expr)
 
@@ -226,14 +241,14 @@ class SelectStmtParser:
             return
 
         partition = self.accept(ast.UnaryOp, self.state.value)
-        partition.add_child(self.expr_parser.parse_expr())
+        partition.add_child(self.parse_expr())
         return partition
 
     def parse_table_index_hint(self):
         if not self.state.is_reserved() or self.state.lcase_value not in ('use', 'ignore', 'force', 'index', 'key'):
             return
 
-        index_hint = ast.Expression(type='index_hint')
+        index_hint = self.accept(ast.Expression, type='index_hint', advance=False)
 
         def parse_for(parent):
             if not self.state.is_reserved('for'):
@@ -259,7 +274,7 @@ class SelectStmtParser:
             parse_for(use)
 
             if self.state.is_open_paren():
-                use.add_child(self.expr_parser.parse_expr())
+                use.add_child(self.parse_expr())
 
             return index_hint
 
@@ -276,7 +291,7 @@ class SelectStmtParser:
         parse_for(index_hint)
 
         if self.state.is_open_paren():
-            index_hint.add_child(self.expr_parser.parse_expr())
+            index_hint.add_child(self.parse_expr())
 
         return index_hint
 
@@ -284,7 +299,7 @@ class SelectStmtParser:
         if not self.state.is_reserved(spec):
             return
         op = self.accept(ast.UnaryOp, self.state.value)
-        op.add_child(self.expr_parser.parse_expr())
+        op.add_child(self.parse_expr())
         return op
 
     def parse_join(self, parse_outer=False, parse_dir=True, parse_table_factor=True):
@@ -319,7 +334,7 @@ class SelectStmtParser:
         table_factor = None
         if self.state.is_open_paren():
             self.state.next()
-            table_factor = ast.Expression(type='table_reference')
+            table_factor = self.accept(ast.Expression, type='table_reference', advance=False)
             while self.state and not self.state.is_closed_paren():
                 table_factor.add_child(self.parse_table_reference())
                 if self.state.is_comma():
@@ -329,7 +344,7 @@ class SelectStmtParser:
                 self.state.next()
 
         if table_factor is None:
-            table_factor = ast.Expression(type='table_reference')
+            table_factor = self.accept(ast.Expression, type='table_reference', advance=False)
 
         if self.state.is_reserved('select'):
             table_factor.add_child(self.parse_select_stmt())
@@ -409,11 +424,11 @@ class SelectStmtParser:
             return
 
         where_clause = self.accept(ast.Expression, type='where')
-        where_clause.add_child(self.expr_parser.parse_expr())
+        where_clause.add_child(self.parse_expr())
         return where_clause
 
     def parse_order_expr(self):
-        expr = self.expr_parser.parse_expr()
+        expr = self.parse_expr()
         if expr is None:
             return
 
@@ -462,7 +477,7 @@ class SelectStmtParser:
             return
 
         where_clause = self.accept(ast.Expression, type='having')
-        where_clause.add_child(self.expr_parser.parse_expr())
+        where_clause.add_child(self.parse_expr())
         return where_clause
 
     def parse_order_by(self):
@@ -498,18 +513,18 @@ class SelectStmtParser:
         limit = self.accept(ast.Op, self.state.value)
         # pudb.set_trace()
 
-        val = self.expr_parser.parse_expr()
+        val = self.parse_expr()
         if val is None:
             return limit
 
         if self.state.is_keyword('offset'):
             self.state.next()
             quantity = val
-            offset = self.expr_parser.parse_expr()
+            offset = self.parse_expr()
         elif self.state.is_comma():
             self.state.next()
             offset = val
-            quantity = self.expr_parser.parse_expr()
+            quantity = self.parse_expr()
         else:
             quantity = val
 
@@ -523,7 +538,7 @@ class SelectStmtParser:
 
         procedure = self.accept(ast.UnaryOp, self.state.value)
         if self.state.is_function_call():
-            procedure.add_child(self.expr_parser.parse_expr())
+            procedure.add_child(self.parse_expr())
 
         return procedure
 
@@ -565,14 +580,14 @@ class SelectStmtParser:
         stmt = self.accept(ast.Statement, self.state.value, 'select')
 
         if self.is_select_modifier():
-            modifier = ast.Expression(type='modifier')
+            modifier = self.accept(ast.Expression, type='modifier', advance=False)
 
             while self.state and self.is_select_modifier():
                 modifier.add_child(self.accept(ast.Expression, self.state.value))
 
             stmt.add_child(modifier)
 
-        columns = ast.Expression(type='columns')
+        columns = self.accept(ast.Expression, type='columns', advance=False)
         stmt.add_child(columns)
         while self.state and self.is_select_expr():
             col = self.parse_col()

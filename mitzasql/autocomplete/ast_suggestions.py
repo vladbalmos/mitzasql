@@ -4,6 +4,7 @@ from pygments.lexers import _mysql_builtins
 from mitzasql.utils import dfs
 import mitzasql.sql_parser.ast as Ast
 import mitzasql.sql_parser.tokens as Token
+from mitzasql.autocomplete.context import detect_context
 import pudb
 
 mysql_keywords = itertools.chain(_mysql_builtins.MYSQL_DATATYPES,
@@ -25,53 +26,42 @@ class SelectASTSuggestions:
         self._prefix = prefix
         self._pos = pos
 
-    def _search_for_child(self, node=None):
+    def _get_child_at_pos(self, pos, node=None, last_pos=0, last_node=None):
+        # pudb.set_trace()
         node = node or self._ast
-        node_pos = node.pos or 0
+        node_pos = node.pos or last_pos
 
-        if self._pos > node_pos:
-            for child in node.children:
-                found_node = self._search_for_child(child)
-                if found_node:
-                    return found_node
+        if node_pos == pos:
+            return (node, node_pos)
+        if node_pos > pos:
+            return (last_node, last_pos)
 
-        return node
+        last_node = node
+        last_pos = node_pos
+        for child in node.children:
+            child_node, child_pos = self._get_child_at_pos(pos, child, last_pos=last_pos, last_node=last_node)
+            if child_pos == pos:
+                return (child_node, child_pos)
 
-    def _detect_suggestions_type(self, node):
-        node_type = node.type
-        node_value = node.value or ''
-        node_value = node_value.lower()
+            if child_pos > pos:
+                return (last_node, last_pos)
 
-        if node_type == 'alias' or node_type == 'literal':
-            return self._detect_suggestions_type(node.parent)
+            last_node = child_node
+            last_pos = child_pos
 
-        if node_type == 'column' or node_type == 'columns':
-            return 'column'
-
-        if node_type == 'index_hint':
-            return node_type
-
-        if node_type == 'table_reference' or node_type == 'from':
-            return 'table'
-
-        if node_type == 'where' or node_type == 'having':
-            return node_type
-
-        if node_type == 'modifier':
-            return 'select_modifier'
-
-        if node_type == 'charset':
-            return 'charset'
-
-        if node_type == 'variable':
-            return 'variable'
+        return (last_node, last_pos)
 
     def get(self):
-        node = self._search_for_child()
+        dfs(self._ast)
+        node, pos = self._get_child_at_pos(self._pos)
+        print('node found')
+        dfs(node)
         if node is None:
             return []
 
-        suggestions_type = self._detect_suggestions_type(node)
+        suggestions_context = detect_context(node)
+        print('suggestion context is')
+        print(suggestions_context)
 
         return []
 
