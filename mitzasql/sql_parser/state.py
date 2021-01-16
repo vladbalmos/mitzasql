@@ -99,6 +99,9 @@ class State:
         return self.token_is(Token.Punctuation) or self.token_is(Token.Paren)
 
     def is_identifier(self):
+        if not self:
+            return False
+
         if self.is_name():
             return True
 
@@ -108,6 +111,9 @@ class State:
                 return future_state.is_dot()
 
     def is_column_alias(self):
+        if not self:
+            return False
+
         if self.is_reserved('as'):
             return True
 
@@ -122,6 +128,9 @@ class State:
             return future_state.is_comma()
 
     def is_row_subquery(self):
+        if not self:
+            return False
+
         if not self.token_is(Token.Reserved, 'row'):
             return False
 
@@ -130,6 +139,9 @@ class State:
             return future_state.is_open_paren()
 
     def is_subquery(self):
+        if not self:
+            return False
+
         if not self.is_open_paren():
             return False
 
@@ -138,6 +150,9 @@ class State:
             return future_state.is_reserved('select')
 
     def is_function_call(self):
+        if not self:
+            return False
+
         if not self.token_is(Token.Function) and not self.is_keyword() and not self.is_other():
             return False
 
@@ -146,6 +161,9 @@ class State:
             return future_state.is_open_paren()
 
     def is_expression_operator(self):
+        if not self:
+            return False
+
         if not self.token_is(Token.Operator, ast.valid_expression_operators):
             return False
 
@@ -160,6 +178,9 @@ class State:
             return future_state.lcase_value in ['true', 'false', 'unknown']
 
     def is_bool_primary_operator(self):
+        if not self:
+            return False
+
         if not self.token_is(Token.Operator, ast.valid_boolean_primary_operators):
             return False
 
@@ -174,6 +195,9 @@ class State:
             return future_state.type == Token.Null
 
     def is_predicate_operator(self):
+        if not self:
+            return False
+
         if self.is_reserved('in'):
             return True
 

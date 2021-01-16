@@ -34,18 +34,27 @@ class SelectStmtParser:
         return node
 
     def is_select_modifier(self):
+        if not self.state:
+            return False
+
         if not self.state.is_keyword():
             return False
 
         return self.state.lcase_value in self.select_modifier_kw
 
     def is_select_expr(self):
+        if not self.state:
+            return False
+
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
             return True
 
         return self.state.lcase_value not in self.col_terminator_keywords
 
     def is_table_reference(self, state=None):
+        if not self.state:
+            return False
+
         if state is None:
             state = self.state
 
@@ -63,6 +72,9 @@ class SelectStmtParser:
         return state.lcase_value not in terminator_keywords
 
     def is_table_alias(self):
+        if not self.state:
+            return False
+
         if self.state.is_reserved('as'):
             return True
 

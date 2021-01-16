@@ -18,21 +18,39 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from mitzasql.sql_parser.parser import parse
-from mitzasql.autocomplete.ast_suggestions import ASTSuggestions
+import bisect
+import itertools
+from pygments.lexers import _mysql_builtins
+from mitzasql.sql_parser.parser import *
+from mitzasql.autocomplete.smart_suggestions import *
+import pudb
 
 word_separators = [' ', '\t', '\n', '.', ';', ',', '"', "'", '`', '#', '(',
                    ')', '[', ']', '/', '=', '<', '>', '\\', '|', '+', '-', '%', '*']
 
+mysql_keywords = itertools.chain(_mysql_builtins.MYSQL_DATATYPES,
+        _mysql_builtins.MYSQL_FUNCTIONS, _mysql_builtins.MYSQL_OPTIMIZER_HINTS,
+        _mysql_builtins.MYSQL_KEYWORDS)
+
+keywords_pool = {}
+for kw in mysql_keywords:
+    c = kw[0]
+    if c not in keywords_pool:
+        keywords_pool[c] = []
+
+    bisect.insort(keywords_pool[c], kw.lower())
+
+
 class SQLAutocompleteEngine:
-    def __init__(self, connection):
-        self._ast_suggestions = ASTSuggestions(connection)
+    def __init__(self, model):
+        set_smart_suggestions_model(model)
         self._last_search = None
         self._cached_suggestions = []
         self._cached_prefix = None
 
 
-    def _get_keyword_prefix(self, text, pos):
+    def _get_keyword_prefix(self, text):
+        pos = len(text)
         prefix = ''
         while (True):
             if pos == 0:
@@ -48,14 +66,24 @@ class SQLAutocompleteEngine:
         return prefix
 
     def get_suggestions(self, text, pos):
-        if self._last_search == (text, pos) and self._cached_suggestions is not None:
+        text = text[0:pos]
+        if self._last_search == text and self._cached_suggestions is not None:
             return self._cached_suggestions, self._cached_prefix
 
-        self._last_search = (text, pos)
-        prefix = self._get_keyword_prefix(text, pos)
+        self._last_search = text
+        prefix = self._get_keyword_prefix(text)
 
+        suggestions = []
         ast = parse(text)
-        suggestions = self._ast_suggestions.get(ast, prefix, pos - 1)
+
+        if not len(ast):
+            suggestions = self._dumb_suggestions(prefix)
+        else:
+            ast = ast[0]
+            last_node = get_last_parsed_node()
+            suggestions = smart_suggestions(ast, last_node)
+
+        suggestions += self._dumb_suggestions(prefix)
 
         self._cached_suggestions = list(filter(lambda str: str.startswith(prefix.lower()), suggestions))
         self._cached_prefix = prefix
@@ -63,3 +91,15 @@ class SQLAutocompleteEngine:
 
     def get_word_separators(self):
         return word_separators
+
+    def _dumb_suggestions(self, prefix):
+        if not prefix:
+            return []
+
+        first_char = prefix[0].lower()
+
+        try:
+            suggestions = keywords_pool[first_char]
+            return suggestions
+        except:
+            return []

@@ -98,6 +98,10 @@ class MysqlModel(Model):
         self._fetch_data()
 
     @property
+    def connection(self):
+        return self._con
+
+    @property
     def columns(self):
         # get cached widths
         # iterate over columns, create column hash and check

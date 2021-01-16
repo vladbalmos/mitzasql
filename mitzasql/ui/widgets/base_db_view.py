@@ -49,7 +49,7 @@ class BaseDBView(urwid.Frame):
         self._model_error_handler = None
         self._table = None
         self._query_editor = None
-        self._sql_autocomplete_engine = SQLAutocompleteEngine(connection)
+        self._sql_autocomplete_engine = SQLAutocompleteEngine(model)
         self._connection = connection
         self._schema_cache = schema_cache_instance
 
