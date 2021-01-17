@@ -110,6 +110,18 @@ class NodeMixin:
         child.parent = self
         self.children.append(child)
 
+    def get_child(self, type):
+        if not self.has_children():
+            return
+
+        for child in self.children:
+            if child.type == type:
+                return child
+            child_ = child.get_child(type)
+            if child_ is None:
+                continue
+            return child_
+
     def has_children(self):
         return len(self.children) > 0
 

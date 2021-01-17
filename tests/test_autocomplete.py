@@ -4,7 +4,7 @@ from mitzasql.autocomplete.engine import SQLAutocompleteEngine
 import pytest
 
 def test(sakila_connection):
-    raw_sql = 'select actor.actor_id'
+    raw_sql = 'select actor_id from actor order by actor_id'
 
     model = TableModel(sakila_connection, 'address')
     engine = SQLAutocompleteEngine(model)

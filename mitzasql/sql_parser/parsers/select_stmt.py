@@ -78,7 +78,10 @@ class SelectStmtParser:
         if self.state.is_reserved('as'):
             return True
 
-        if self.state and not self.state.lcase_value.isalpha():
+        if not self.state.lcase_value.isalpha():
+            return False
+
+        if self.state.lcase_value in self.col_terminator_keywords:
             return False
 
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
@@ -91,7 +94,8 @@ class SelectStmtParser:
 
     def parse_expr(self):
         expr = self.expr_parser.parse_expr()
-        self.last_node = self.expr_parser.last_node
+        if expr is not None:
+            self.last_node = self.expr_parser.last_node
         return expr
 
     def parse_alias(self):
@@ -496,7 +500,7 @@ class SelectStmtParser:
         if not self.state.is_reserved('order'):
             return
 
-        order = self.accept(ast.Op, self.state.value)
+        order = self.accept(ast.Expression, type='order')
 
         if not self.state.is_reserved('by'):
             return order
@@ -523,7 +527,6 @@ class SelectStmtParser:
 
         offset = quantity = None
         limit = self.accept(ast.Op, self.state.value)
-        # pudb.set_trace()
 
         val = self.parse_expr()
         if val is None:

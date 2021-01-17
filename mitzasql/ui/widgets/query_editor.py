@@ -23,6 +23,7 @@ import urwid
 from .emacs_edit import EmacsEdit
 from mitzasql.ui.syntax_highlight import highlight
 from mitzasql.logger import logger
+import pudb
 
 class QueryEditor(EmacsEdit):
     SIGNAL_SHOW_SUGGESTIONS = 'show_suggestions'
@@ -33,6 +34,7 @@ class QueryEditor(EmacsEdit):
         self._autocomplete_engine = autocomplete_engine
         self._suggestion_index = -1
         self._last_autocomplete_text_pos = None
+        self._start_autocomplete_markers = [' ', '\t', '.', '(', '`']
         urwid.register_signal(self.__class__, [self.SIGNAL_SHOW_SUGGESTIONS,
             self.SIGNAL_HIDE_SUGGESTIONS])
 
@@ -44,6 +46,10 @@ class QueryEditor(EmacsEdit):
             return False
 
         prev_char = self.edit_text[self.edit_pos - 1]
+
+        if prev_char in self._start_autocomplete_markers:
+            return True
+
         word_separators = self._autocomplete_engine.get_word_separators()
 
         return prev_char not in word_separators
@@ -79,10 +85,17 @@ class QueryEditor(EmacsEdit):
             suggestion = suggestion.upper()
 
         middle_pos = self._last_autocomplete_text_pos
+        after_suggestion_pos = self.edit_pos
+        word_separators = self._autocomplete_engine.get_word_separators()
 
-        # TODO: replace the whole word if trying to autocomplete in the middle
-        # of a word
-        text = self.edit_text[0:middle_pos] + suggestion[len(prefix):] + self.edit_text[self.edit_pos:]
+        # pudb.set_trace()
+        while after_suggestion_pos <= len(self.edit_text) - 1:
+            char = self.edit_text[after_suggestion_pos]
+            if char in word_separators:
+                break
+            after_suggestion_pos += 1
+
+        text = self.edit_text[0:middle_pos] + suggestion[len(prefix):] + self.edit_text[after_suggestion_pos:]
         self.edit_text = text
         self.edit_pos = middle_pos + len(suggestion[len(prefix):])
         urwid.emit_signal(self, self.SIGNAL_SHOW_SUGGESTIONS, self, suggestions, index)

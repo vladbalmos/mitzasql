@@ -43,7 +43,7 @@ for kw in mysql_keywords:
 
 class SQLAutocompleteEngine:
     def __init__(self, model):
-        set_smart_suggestions_model(model)
+        self._model = model
         self._last_search = None
         self._cached_suggestions = []
         self._cached_prefix = None
@@ -66,6 +66,7 @@ class SQLAutocompleteEngine:
         return prefix
 
     def get_suggestions(self, text, pos):
+        set_smart_suggestions_model(self._model)
         text = text[0:pos]
         if self._last_search == text and self._cached_suggestions is not None:
             return self._cached_suggestions, self._cached_prefix
@@ -81,7 +82,7 @@ class SQLAutocompleteEngine:
         else:
             ast = ast[0]
             last_node = get_last_parsed_node()
-            suggestions = smart_suggestions(ast, last_node)
+            suggestions = smart_suggestions(ast, last_node, prefix)
 
         suggestions += self._dumb_suggestions(prefix)
 

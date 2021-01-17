@@ -8,6 +8,15 @@ def token_is_parsed(needle, haystack):
 
     return False
 
+def walk_ast(root, callback):
+    if not root:
+        return
+
+    callback(root)
+
+    for child in root.children:
+        walk_ast(child, callback)
+
 
 def dfs(root, padding_left=0):
     if not root:
