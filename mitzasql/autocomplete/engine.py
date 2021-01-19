@@ -74,24 +74,38 @@ class SQLAutocompleteEngine:
         self._last_search = text
         prefix = self._get_keyword_prefix(text)
 
-        suggestions = []
         ast = parse(text)
 
-        if not len(ast):
-            suggestions = self._dumb_suggestions(prefix)
-        else:
+        if len(ast):
             ast = ast[0]
             last_node = get_last_parsed_node()
-            suggestions = smart_suggestions(ast, last_node, prefix)
+            suggestion_candidates = smart_suggestions(ast, last_node, prefix)
+        else:
+            suggestion_candidates = []
 
-        suggestions += self._dumb_suggestions(prefix)
+        suggestions = self._compile(suggestion_candidates, prefix)
 
-        self._cached_suggestions = list(filter(lambda str: str.startswith(prefix.lower()), suggestions))
+        self._cached_suggestions = suggestions
         self._cached_prefix = prefix
         return self._cached_suggestions, self._cached_prefix
 
     def get_word_separators(self):
         return word_separators
+
+    def _compile(self, candidates, prefix):
+        candidates += [self._dumb_suggestions(prefix)]
+
+        compiled_suggestions = []
+        for sugg_set in candidates:
+            filtered_set = list(filter(lambda str: str.startswith(prefix.lower()), sugg_set))
+            if not len(filtered_set):
+                continue
+
+            for item in filtered_set:
+                if item not in compiled_suggestions:
+                    compiled_suggestions.append(item)
+
+        return compiled_suggestions
 
     def _dumb_suggestions(self, prefix):
         if not prefix:

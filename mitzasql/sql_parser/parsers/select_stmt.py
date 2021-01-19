@@ -78,10 +78,10 @@ class SelectStmtParser:
         if self.state.is_reserved('as'):
             return True
 
-        if not self.state.lcase_value.isalpha():
+        if not (self.state.lcase_value.isalnum() and not self.state.lcase_value.isnumeric()):
             return False
 
-        if self.state.lcase_value in self.col_terminator_keywords:
+        if self.state.lcase_value in self.table_terminator_keywords:
             return False
 
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
@@ -359,13 +359,16 @@ class SelectStmtParser:
             if self.state.is_closed_paren():
                 self.state.next()
 
+        if self.state.is_closed_paren():
+            self.state.next()
+
         if table_factor is None:
             table_factor = self.accept(ast.Expression, type='table_reference', advance=False)
 
         if self.state.is_reserved('select'):
             table_factor.add_child(self.parse_select_stmt())
-        else:
-            table_factor.add_child(self.accept(ast.Expression, self.state.value))
+        elif self.state:
+            table_factor.add_child(self.parse_expr())
 
         if self.state.is_reserved('partition'):
             table_factor.add_child(self.parse_table_partition())

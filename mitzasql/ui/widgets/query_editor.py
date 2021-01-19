@@ -34,7 +34,7 @@ class QueryEditor(EmacsEdit):
         self._autocomplete_engine = autocomplete_engine
         self._suggestion_index = -1
         self._last_autocomplete_text_pos = None
-        self._start_autocomplete_markers = [' ', '\t', '.', '(', '`']
+        self._start_autocomplete_markers = [' ', '\t', '.', '(', '`', '*']
         urwid.register_signal(self.__class__, [self.SIGNAL_SHOW_SUGGESTIONS,
             self.SIGNAL_HIDE_SUGGESTIONS])
 
@@ -88,7 +88,6 @@ class QueryEditor(EmacsEdit):
         after_suggestion_pos = self.edit_pos
         word_separators = self._autocomplete_engine.get_word_separators()
 
-        # pudb.set_trace()
         while after_suggestion_pos <= len(self.edit_text) - 1:
             char = self.edit_text[after_suggestion_pos]
             if char in word_separators:

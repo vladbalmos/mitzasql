@@ -508,7 +508,17 @@ class ExpressionParser:
             elif self.state.is_literal('null'):
                 operator.add_child(self.accept(ast.Expression, 'null', 'literal'))
         else:
-            operator.add_child(self.parse_predicate())
+            modifier_op = None
+            if self.state.lcase_value in ('any', 'all'):
+                modifier_op = self.accept(ast.UnaryOp, self.state.value)
+
+            predicate = self.parse_predicate()
+
+            if modifier_op:
+                modifier_op.add_child(predicate)
+                predicate = modifier_op
+
+            operator.add_child(predicate)
 
         if self.state.is_bool_primary_operator():
             return self.parse_boolean_primary(operator)

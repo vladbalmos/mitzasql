@@ -298,3 +298,5 @@ exists (select * from table)
     assert ast.children[0].type == 'select'
     assert ast.children[0].value == 'select'
 
+def test_subquery_is_parsed():
+    pass

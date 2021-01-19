@@ -35,7 +35,7 @@ class SuggestionsWidget(urwid.Columns):
             self._append(u'No suggestions found')
             return
 
-        if self._last_suggestions == suggestions:
+        if self._last_suggestions == suggestions and len(self.contents):
             self._highlight_suggestion(index)
             return
 
