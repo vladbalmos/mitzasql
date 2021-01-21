@@ -4,7 +4,11 @@ from mitzasql.autocomplete.engine import SQLAutocompleteEngine
 import pytest
 
 def test(sakila_connection):
-    raw_sql = 'select actor_id from actor t1 join actor_info t2 on t1.'
+    raw_sql = '''
+    select actor_id from actor t1 join actor_info t2 on 
+        (t1.a = t2.b and sakila.t3.c = 1)
+    left join t1 on t1.b = t2.
+    '''
 
     model = TableModel(sakila_connection, 'address')
     engine = SQLAutocompleteEngine(model)

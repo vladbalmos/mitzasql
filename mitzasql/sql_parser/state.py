@@ -240,7 +240,15 @@ class State:
 
     def next(self, skip_whitespace=True):
         if self._is_future and self.prev_state_lookahead and len(self.prev_state_lookahead):
-            self.update(self.prev_state_lookahead.popleft())
+            if skip_whitespace is False:
+                self.update(self.prev_state_lookahead.popleft())
+                return
+
+            while len(self.prev_state_lookahead):
+                self.update(self.prev_state_lookahead.popleft())
+                if self.is_skippable():
+                    continue
+                break
             return
 
         if len(self.lookahead_tokens) and not self._is_future:

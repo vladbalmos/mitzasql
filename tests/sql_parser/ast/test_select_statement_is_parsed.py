@@ -123,6 +123,7 @@ def test_subquery_as_table_reference():
     assert len(ast) > 0
 
     ast = ast[0]
+    dfs(ast)
 
     columns = ast.get_child('columns')
     tables = ast.get_child('from')
@@ -131,5 +132,46 @@ def test_subquery_as_table_reference():
     assert len(tables.children) == 1
 
     table = tables.children[0].children[0]
-    table = table.children[0]
     assert table.type == 'select'
+
+def test_join_is_parsed():
+    raw_sql = '''
+    SELECT col1, col2, col3
+    FROM ((SELECT a FROM b) as A, a, c)
+    JOIN t5
+    join t4
+    join (t1, t2)
+    ON t5.a = 2 and t5.b3 = a
+
+    # SELECT col1, col2, col3
+    # FROM (t1, t2, t3)
+    # JOIN t5
+
+    # SELECT
+        # col1,
+        # col2,
+        # col3
+    # FROM
+        # tbl10,
+        # tbl5,
+        # tbl1 AS t1 JOIN tbl2 AS t2 ON t1.id = t2.id
+
+        # JOIN tbl3 on tbl2.t3_id = tbl3.id
+
+            # STRAIGHT_JOIN (
+                # SELECT col1, col2 FROM tbl
+            # ) AS subquery ON t1.sid = subquery.id
+
+            # NATURAL RIGHT OUTER JOIN tbl4
+            # LEFT OUTER JOIN tbl5 t5
+                # ON (t5.id = t2.id AND t3.id = t4.id)
+
+            # JOIN (t2, t3, t4) USING (a, b, c)
+
+    # WHERE
+        # a > 1
+'''
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
