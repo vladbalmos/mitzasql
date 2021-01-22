@@ -308,7 +308,7 @@ class SelectStmtParser(Parser):
     def parse_join_spec(self, spec):
         if not self.state.is_reserved(spec):
             return
-        op = self.accept(ast.Expression, self.state.value, spec)
+        op = self.accept(ast.Expression, self.state.value, 'join_spec')
         op.add_child(self.parse_expr())
         return op
 

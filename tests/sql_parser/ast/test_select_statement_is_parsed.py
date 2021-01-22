@@ -369,7 +369,7 @@ def test_join_is_parsed():
     alias = joined_table.children[1].children[0]
     assert alias.value == 't'
 
-    join_spec = join.get_child('on')
+    join_spec = join.get_child('join_spec')
     assert join_spec is not None
 
     assert len(join_spec.children) == 1
@@ -398,7 +398,7 @@ def test_multiple_join_single_join_spec_is_parsed():
     assert from_node is not None
     assert len(from_node.children) == 1
 
-    join_spec = from_node.get_child('on')
+    join_spec = from_node.get_child('join_spec')
 
     assert join_spec is not None
     assert len(join_spec.children) == 1

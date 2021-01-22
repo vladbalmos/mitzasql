@@ -120,7 +120,7 @@ def detect_select_context(ast_node, is_child=True):
     node_value = ast_node.value or ''
     node_value = node_value.lower()
 
-    if node_type == 'column' or node_type == 'columns':
+    if node_type == 'column' or node_type == 'columns' or node_type == 'join_spec':
         return 'column'
 
     if node_type == 'index_hint':
@@ -142,6 +142,12 @@ def detect_select_context(ast_node, is_child=True):
         return 'variable'
 
     return detect_select_context(ast_node.parent, is_child=False)
+
+def is_alias(alias):
+    for item in suggestions_pool['aliases']:
+        if alias in item:
+            return True
+    return False
 
 def table_name_from_alias(alias):
     for item in suggestions_pool['aliases']:

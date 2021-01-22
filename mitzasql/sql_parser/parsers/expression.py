@@ -69,6 +69,7 @@
 #   | case_expr
 #   | interval_expr
 
+import pudb
 import mitzasql.sql_parser.ast as ast
 import mitzasql.sql_parser.parser_factory as parser_factory
 from mitzasql.sql_parser.parsers.parser import Parser
@@ -82,7 +83,7 @@ class ExpressionParser(Parser):
         expr = self.accept(ast.Expression, self.state.value, 'identifier')
 
         if self.state.is_dot():
-            self.state.next(skip_whitespace=False)
+            self.state.next()
             expr.add_child(self.parse_identifier())
 
         return expr
