@@ -134,44 +134,272 @@ def test_subquery_as_table_reference():
     table = tables.children[0].children[0]
     assert table.type == 'select'
 
-def test_join_is_parsed():
+def test_inner_join_is_parsed():
     raw_sql = '''
-    SELECT col1, col2, col3
-    FROM ((SELECT a FROM b) as A, a, c)
-    JOIN t5
-    join t4
-    join (t1, t2)
-    ON t5.a = 2 and t5.b3 = a
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 INNER JOIN t2 t on t1.a = t.id
+    '''
 
-    # SELECT col1, col2, col3
-    # FROM (t1, t2, t3)
-    # JOIN t5
-
-    # SELECT
-        # col1,
-        # col2,
-        # col3
-    # FROM
-        # tbl10,
-        # tbl5,
-        # tbl1 AS t1 JOIN tbl2 AS t2 ON t1.id = t2.id
-
-        # JOIN tbl3 on tbl2.t3_id = tbl3.id
-
-            # STRAIGHT_JOIN (
-                # SELECT col1, col2 FROM tbl
-            # ) AS subquery ON t1.sid = subquery.id
-
-            # NATURAL RIGHT OUTER JOIN tbl4
-            # LEFT OUTER JOIN tbl5 t5
-                # ON (t5.id = t2.id AND t3.id = t4.id)
-
-            # JOIN (t2, t3, t4) USING (a, b, c)
-
-    # WHERE
-        # a > 1
-'''
     ast = parse(raw_sql)
     assert len(ast) > 0
 
     ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_type = from_node.get_child('join_type')
+
+    assert join_type is not None
+    assert join_type.value == 'INNER'
+    assert len(join_type.children) == 1
+    assert join_type.children[0].type == 'join'
+
+def test_cross_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 CROSS JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_type = from_node.get_child('join_type')
+
+    assert join_type is not None
+    assert join_type.value == 'CROSS'
+    assert len(join_type.children) == 1
+    assert join_type.children[0].type == 'join'
+
+def test_straight_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 straight_join t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join = from_node.get_child('join')
+
+    assert join is not None
+    assert join.value == 'straight_join'
+
+def test_left_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 LEFT JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_dir = from_node.get_child('join_dir')
+
+    assert join_dir is not None
+    assert join_dir.value == 'LEFT'
+    assert len(join_dir.children) == 1
+    assert join_dir.children[0].type == 'join'
+
+def test_right_outer_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 RIGHT OUTER JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_dir = from_node.get_child('join_dir')
+
+    assert join_dir is not None
+    assert join_dir.value == 'RIGHT'
+    assert len(join_dir.children) == 1
+
+    join_type = join_dir.children[0]
+    assert join_type is not None
+    assert join_type.value == 'OUTER'
+    assert len(join_type.children) == 1
+    assert join_type.children[0].type == 'join'
+
+def test_natural_right_outer_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 NATURAL RIGHT OUTER JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_type = from_node.get_child('join_type')
+
+    assert join_type is not None
+    assert join_type.value == 'NATURAL'
+    assert len(join_type.children) == 1
+
+    join_dir = join_type.get_child('join_dir')
+
+    assert join_dir is not None
+    assert join_dir.value == 'RIGHT'
+    assert len(join_dir.children) == 1
+
+    join_type = join_dir.children[0]
+    assert join_type is not None
+    assert join_type.value == 'OUTER'
+    assert len(join_type.children) == 1
+    assert join_type.children[0].type == 'join'
+
+def test_natural_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 NATURAL JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_type = from_node.get_child('join_type')
+
+    assert join_type is not None
+    assert join_type.value == 'NATURAL'
+    assert len(join_type.children) == 1
+    assert join_type.children[0].type == 'join'
+
+def test_join_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 JOIN t2 t on t1.a = t.id
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    table_reference = from_node.children[0]
+    assert len(table_reference.children) == 2
+
+    assert table_reference.children[0].type == 'unknown'
+    assert table_reference.children[0].value == 't1'
+
+    join = table_reference.children[1]
+    assert join is not None
+    assert join.value == 'JOIN'
+
+    joined_table = join.get_child('table_reference')
+    assert joined_table is not None
+    assert len(joined_table.children) == 2
+
+    assert joined_table.children[0].value == 't2'
+    assert joined_table.children[1].type == 'alias'
+
+    alias = joined_table.children[1].children[0]
+    assert alias.value == 't'
+
+    join_spec = join.get_child('on')
+    assert join_spec is not None
+
+    assert len(join_spec.children) == 1
+    assert join_spec.children[0].type == 'operator'
+    assert join_spec.children[0].value == '='
+
+def test_multiple_join_single_join_spec_is_parsed():
+    raw_sql = '''
+    SELECT
+        a,
+        b,
+        c
+    FROM t1 LEFT JOIN t2
+    RIGHT JOIN t3
+    NATURAL LEFT OUTER JOIN t4
+    ON (t1.a = t2.c AND t2.c = t3.d and t3.e = t4.e)
+    '''
+
+    ast = parse(raw_sql)
+    assert len(ast) > 0
+
+    ast = ast[0]
+
+    from_node = ast.get_child('from')
+
+    assert from_node is not None
+    assert len(from_node.children) == 1
+
+    join_spec = from_node.get_child('on')
+
+    assert join_spec is not None
+    assert len(join_spec.children) == 1
+    assert join_spec.children[0]

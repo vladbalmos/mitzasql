@@ -1,37 +1,25 @@
-import pudb
-import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
 import mitzasql.sql_parser.parser_factory as parser_factory
+from mitzasql.sql_parser.parsers.parser import Parser
 
-class SelectStmtParser:
+SELECT_MODIFIER_KW = ('all', 'distinct', 'distinctrow',
+        'high_priority', 'straight_join', 'sql_small_result',
+        'sql_big_result', 'sql_buffer_result', 'sql_cache',
+        'sql_no_cache', 'sql_calc_found_rows')
+
+COL_TERMINATOR_KEYWORDS = ('from', 'where', 'group',
+        'having', 'order', 'limit', 'procedure', 'for', 'into', 'lock',
+        'union')
+
+TABLE_TERMINATOR_KEYWORDS = COL_TERMINATOR_KEYWORDS[1:] + ('partition',
+        'as', 'inner', 'cross', 'join', 'straight_join', 'on',
+        'left', 'right', 'outer', 'natural', 'using',
+        'use', 'index', 'key', 'ignore', 'force', 'index', 'key', 'for')
+
+class SelectStmtParser(Parser):
     def __init__(self, state):
-        self.state = state
-        self.last_node = None
+        super().__init__(state)
         self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
-        self.select_modifier_kw = ('all', 'distinct', 'distinctrow',
-                'high_priority', 'straight_join', 'sql_small_result',
-                'sql_big_result', 'sql_buffer_result', 'sql_cache',
-                'sql_no_cache', 'sql_calc_found_rows')
-        self.col_terminator_keywords = ('from', 'where', 'group',
-                'having', 'order', 'limit', 'procedure', 'for', 'into', 'lock',
-                'union')
-
-        self.table_terminator_keywords = self.col_terminator_keywords[1:]
-
-    def accept(self, cls, *args, **kwargs):
-        advance_state = True
-
-        if 'advance' in kwargs:
-            advance_state = kwargs['advance']
-            kwargs.pop('advance')
-
-        kwargs['pos'] = self.state.pos
-        node = cls(*args, **kwargs)
-        self.last_node = node
-
-        if advance_state:
-            self.state.next()
-        return node
 
     def is_select_modifier(self):
         if not self.state:
@@ -40,7 +28,7 @@ class SelectStmtParser:
         if not self.state.is_keyword():
             return False
 
-        return self.state.lcase_value in self.select_modifier_kw
+        return self.state.lcase_value in SELECT_MODIFIER_KW
 
     def is_select_expr(self):
         if not self.state:
@@ -49,7 +37,7 @@ class SelectStmtParser:
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
             return True
 
-        return self.state.lcase_value not in self.col_terminator_keywords
+        return self.state.lcase_value not in COL_TERMINATOR_KEYWORDS
 
     def is_subquery_table_reference(self):
         if not self.state:
@@ -75,12 +63,7 @@ class SelectStmtParser:
         if not (state.is_keyword() or state.is_function() or state.is_open_paren()):
             return False
 
-        terminator_keywords = self.table_terminator_keywords + ('partition',
-                'as', 'inner', 'cross', 'join', 'straight_join', 'on', 'left',
-                'right', 'outer', 'natural', 'using', 'use', 'index', 'key',
-                'ignore', 'force', 'index', 'key', 'for')
-
-        return state.lcase_value not in terminator_keywords
+        return state.lcase_value not in TABLE_TERMINATOR_KEYWORDS
 
     def is_table_alias(self):
         if not self.state:
@@ -92,12 +75,7 @@ class SelectStmtParser:
         if not (self.state.lcase_value.isalnum() and not self.state.lcase_value.isnumeric()):
             return False
 
-        terminator_keywords = self.table_terminator_keywords + ('partition',
-                'as', 'inner', 'cross', 'join', 'straight_join', 'on', 'left',
-                'right', 'outer', 'natural', 'using', 'use', 'index', 'key',
-                'ignore', 'force', 'index', 'key', 'for')
-
-        if self.state.lcase_value in terminator_keywords:
+        if self.state.lcase_value in TABLE_TERMINATOR_KEYWORDS:
             return False
 
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():
@@ -629,10 +607,7 @@ class SelectStmtParser:
 
         return lock
 
-    def parse_select_stmt(self, union_op=None):
-        if not self.state.is_reserved('select'):
-            return
-
+    def parse_select_body(self):
         stmt = self.accept(ast.Statement, self.state.value, 'select')
 
         if self.is_select_modifier():
@@ -693,16 +668,24 @@ class SelectStmtParser:
             lock_clause = self.parse_lock_clause()
             stmt.add_child(lock_clause)
 
-        if self.state.is_reserved('union'):
-            if union_op is not None:
-                self.state.next()
-            else:
-                union = self.accept(ast.Op, self.state.value)
-                union.add_child(stmt)
+        return stmt
 
-                while self.state and not self.state.is_semicolon():
-                    union.add_child(self.parse_select_stmt(union))
-                return union
+    def parse_select_stmt(self, union_op=None):
+        if not self.state.is_reserved('select') and not self.state.is_open_paren():
+            return
+
+        if self.state.is_open_paren():
+            stmt = self.parse_expr()
+        else:
+            stmt = self.parse_select_body()
+
+        if self.state.is_reserved('union'):
+            union = self.accept(ast.Op, self.state.value)
+            union.add_child(stmt)
+            next_stmt = self.parse_select_stmt()
+            if next_stmt:
+                union.add_child(next_stmt)
+            return union
 
         return stmt
 

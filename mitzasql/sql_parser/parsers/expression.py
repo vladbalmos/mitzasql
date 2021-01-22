@@ -69,31 +69,14 @@
 #   | case_expr
 #   | interval_expr
 
-import pudb
-import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.ast as ast
 import mitzasql.sql_parser.parser_factory as parser_factory
+from mitzasql.sql_parser.parsers.parser import Parser
 
-class ExpressionParser:
+class ExpressionParser(Parser):
 
     def __init__(self, state):
-        self.state = state
-        self.last_node = None
-
-    def accept(self, cls, *args, **kwargs):
-        advance_state = True
-
-        if 'advance' in kwargs:
-            advance_state = kwargs['advance']
-            kwargs.pop('advance')
-
-        kwargs['pos'] = self.state.pos
-        node = cls(*args, **kwargs)
-        self.last_node = node
-
-        if advance_state:
-            self.state.next()
-        return node
+        super().__init__(state)
 
     def parse_identifier(self):
         expr = self.accept(ast.Expression, self.state.value, 'identifier')
@@ -191,7 +174,6 @@ class ExpressionParser:
         return op
 
     def parse_case_expr(self):
-        # pudb.set_trace()
         if not self.state.is_operator('case'):
             return
 

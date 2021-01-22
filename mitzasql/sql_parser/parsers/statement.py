@@ -1,12 +1,12 @@
 import mitzasql.sql_parser.parser_factory as parser_factory
+from mitzasql.sql_parser.parsers.parser import Parser
 
-class StatementParser:
+class StatementParser(Parser):
     def __init__(self, state):
-        self.state = state
-        self.last_node = None
+        super().__init__(state)
 
     def parse_stmt(self):
-        if self.state.is_reserved('select'):
+        if self.state.is_reserved('select') or self.state.is_open_paren():
             select_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
             stmt = select_parser.run()
             self.last_node = select_parser.last_node
