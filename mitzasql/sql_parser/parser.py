@@ -1,7 +1,3 @@
-# TODO:
-    # - fix parsing joins
-    # - fix parsing union
-
 from mitzasql.sql_parser.lexer import Lexer
 from mitzasql.sql_parser.state import State
 from mitzasql.utils import dfs

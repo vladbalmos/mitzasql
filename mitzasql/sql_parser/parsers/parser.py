@@ -18,4 +18,6 @@ class Parser:
             self.state.next()
         return node
 
+    def run(self):
+        raise NotImplementedError('Parser method must be implemented in subclass')
 

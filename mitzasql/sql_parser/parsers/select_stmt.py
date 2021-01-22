@@ -87,7 +87,7 @@ class SelectStmtParser(Parser):
             return val
 
     def parse_expr(self):
-        expr = self.expr_parser.parse_expr()
+        expr = self.expr_parser.run()
         if expr is not None:
             self.last_node = self.expr_parser.last_node
         return expr
@@ -682,7 +682,7 @@ class SelectStmtParser(Parser):
         if self.state.is_reserved('union'):
             union = self.accept(ast.Op, self.state.value)
             union.add_child(stmt)
-            next_stmt = self.parse_select_stmt()
+            next_stmt = self.run()
             if next_stmt:
                 union.add_child(next_stmt)
             return union

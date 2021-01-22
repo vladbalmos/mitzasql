@@ -289,7 +289,7 @@ class ExpressionParser(Parser):
         if self.state.is_subquery():
             self.state.next()
             select_stmt_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
-            subquery = select_stmt_parser.parse_select_stmt()
+            subquery = select_stmt_parser.run()
 
             if self.state.is_closed_paren():
                 self.state.next()
