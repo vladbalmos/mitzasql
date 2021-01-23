@@ -23,7 +23,7 @@ class SelectStmtParser(Parser, DMSParserMixin, ExprParserMixin):
         return self.state.lcase_value in MODIFIER_KEYWORDS
 
     def is_select_expr(self):
-        if not self.state:
+        if not self.state or self.state.is_semicolon():
             return False
 
         if self.state.is_literal() or self.state.is_name() or self.state.is_other():

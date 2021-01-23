@@ -123,7 +123,6 @@ def test_subquery_as_table_reference():
     assert len(ast) > 0
 
     ast = ast[0]
-    dfs(ast)
 
     columns = ast.get_child('columns')
     tables = ast.get_child('from')

@@ -37,7 +37,10 @@ class UpdateStmtParser(Parser, DMSParserMixin, ExprParserMixin):
 
         table_references = self.accept(ast.Expression, type='table_references', advance=False)
         while self.state and self.is_table_reference():
-            table_references.add_child(self.parse_table_reference())
+            table_ref = self.parse_table_reference()
+            if table_ref:
+                table_references.add_child(table_ref)
+
             if self.state.is_comma():
                 self.state.next()
 

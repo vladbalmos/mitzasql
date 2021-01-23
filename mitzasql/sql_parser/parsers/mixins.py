@@ -22,7 +22,7 @@ class DMSParserMixin():
         if state is None:
             state = self.state
 
-        if not state:
+        if not state or state.is_semicolon():
             return False
 
         if state.is_literal() or state.is_name() or state.is_other():
@@ -123,7 +123,8 @@ class DMSParserMixin():
         expr = None
         if self.state.lcase_value in ('ignore', 'force'):
             expr = self.accept(ast.Expression, self.state.value, type=self.state.lcas)
-            index_hint.add_child(expr)
+            if expr:
+                index_hint.add_child(expr)
 
         if self.state.lcase_value in ('index', 'key'):
             expr_ = self.accept(ast.Expression, self.state.value, type=self.state.lcase_value)

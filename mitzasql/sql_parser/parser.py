@@ -1,3 +1,4 @@
+import pudb
 from mitzasql.sql_parser.lexer import Lexer
 from mitzasql.sql_parser.state import State
 from mitzasql.utils import dfs
@@ -17,6 +18,9 @@ def parse(raw_sql):
         stmt = parser.run()
         last_parsed_node = parser.last_node
         statements.append(stmt)
+
+        if state and state.is_semicolon():
+            state.next()
 
     return statements
 

@@ -13,6 +13,8 @@ class StatementParser(Parser):
             parser = parser_factory.create(parser_factory.UPDATE_STMT, self.state)
         elif self.state.is_reserved('delete'):
             parser = parser_factory.create(parser_factory.DELETE_STMT, self.state)
+        elif self.state.is_keyword('do'):
+            parser = parser_factory.create(parser_factory.DO_STMT, self.state)
 
         if parser:
             stmt = parser.run()

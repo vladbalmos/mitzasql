@@ -20,6 +20,15 @@ class DeleteStmtParser(Parser, DMSParserMixin, ExprParserMixin):
 
         return self.state.lcase_value in MODIFIER_KEYWORDS
 
+    def parse_table_refs(self, parent_stmt):
+        while self.state and self.is_table_reference():
+            table_ref = self.parse_table_reference()
+            if table_ref:
+                parent_stmt.add_child(table_ref)
+
+            if self.state.is_comma():
+                self.state.next()
+
     def parse_delete_stmt(self):
         if not self.state.is_reserved('delete'):
             return
@@ -36,28 +45,17 @@ class DeleteStmtParser(Parser, DMSParserMixin, ExprParserMixin):
 
         if self.state.lcase_value not in ('from', 'where', 'order', 'limit') and self.is_table_reference():
             table_references = self.accept(ast.Expression, type='table_references', advance=False)
-            while self.state and self.is_table_reference():
-                table_references.add_child(self.parse_table_reference())
-                if self.state.is_comma():
-                    self.state.next()
+            self.parse_table_refs(table_references)
             stmt.add_child(table_references)
 
         if self.state.is_reserved('from'):
             from_clause = self.accept(ast.Expression, type='from')
-            while self.state and self.is_table_reference():
-                from_clause.add_child(self.parse_table_reference())
-                if self.state.is_comma():
-                    self.state.next()
-
+            self.parse_table_refs(from_clause)
             stmt.add_child(from_clause)
 
         if self.state.is_reserved('using'):
             using_clause = self.accept(ast.Expression, type='using')
-            while self.state and self.is_table_reference():
-                using_clause.add_child(self.parse_table_reference())
-                if self.state.is_comma():
-                    self.state.next()
-
+            self.parse_table_refs(using_clause)
             stmt.add_child(using_clause)
 
         if self.state.is_reserved('where'):

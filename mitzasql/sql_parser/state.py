@@ -111,7 +111,7 @@ class State:
                 return future_state.is_dot()
 
     def is_column_alias(self):
-        if not self:
+        if not self or self.is_delimiter():
             return False
 
         if self.is_reserved('as'):
@@ -119,9 +119,6 @@ class State:
 
         if self.is_literal() or self.is_name() or self.is_other():
             return True
-
-        if self.is_delimiter():
-            return False
 
         with self as future_state:
             future_state.next()
