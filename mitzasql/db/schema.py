@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import sys
+import pudb
 from collections import OrderedDict
 
 import mysql.connector.errors as errors
@@ -94,6 +95,8 @@ auto_detect_field_type_length = [
         FieldType.GEOMETRY
         ]
 
+max_allowed_col_length = 30
+
 class QuerySchema:
     def __init__(self, cursor, data_sample):
         self.cursor = cursor
@@ -116,6 +119,7 @@ class QuerySchema:
 
         column_index = 0
         for column_data in self.cursor.description:
+            max_len = None
             name = column_data[0]
             driver_type = column_data[1]
             flags = get_column_flags(column_data[7])
@@ -148,19 +152,22 @@ class QuerySchema:
             try:
                 max_len = self.schema[name]['max_len']
             except KeyError as e:
-                max_len = None
+                pass
 
             if max_len is None:
-                if driver_type in auto_detect_field_type_length:
-                    max_len = auto_detect_column_length(column_index, self.data)
-
-                if max_len is None:
+                try:
                     max_len = field_types_length[driver_type]
+                except Exception:
+                    max_len = max_allowed_col_length
+
+            if max_len >= max_allowed_col_length and driver_type in auto_detect_field_type_length:
+                max_len = auto_detect_column_length(column_index, self.data)
+
+            if max_len >= max_allowed_col_length:
+                max_len = max_allowed_col_length
 
             if len(name) >= max_len:
                 max_len = len(name)
-            elif max_len > 66:
-                max_len = 66
 
             # The max_len is used by the table widget as width for the the
             # columns. Even though this is related to the view logic, we do it
@@ -252,7 +259,7 @@ def auto_detect_column_length(c_index, sample):
     `MAX_ROW_FOR_COLUMN_LENGTH_DETECTION`
     '''
     if len(sample) == 0:
-        return None
+        return max_allowed_col_length
     column = [str(r[c_index]) for r in sample]
     item = max(column, key=len)
     return len(item)

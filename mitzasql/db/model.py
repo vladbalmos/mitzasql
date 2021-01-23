@@ -26,7 +26,7 @@ import mysql.connector.errors as errors
 import mitzasql.db.schema as schema
 from mitzasql.db.schema_cache import schema_cache_instance
 
-MAX_ROWS_FOR_COLUMN_LENGTH_DETECTION = 100
+MAX_ROWS_FOR_COLUMN_LENGTH_DETECTION = 50
 
 class Model:
     SIGNAL_PRE_LOAD = 'preload'
