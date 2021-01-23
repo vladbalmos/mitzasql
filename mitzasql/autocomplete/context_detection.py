@@ -49,7 +49,23 @@ def detect_delete_next_possible_keywords(context):
 
     return []
 
-def detect_update_context(ast_node, is_child=True):
+def detect_call_context(ast_node):
+    if ast_node is None:
+        return
+
+    node_type = ast_node.type
+    node_value = ast_node.value or ''
+    node_value = node_value.lower()
+
+    if ast_node.parent and ast_node.parent.type == 'function':
+        return 'arguments'
+
+    if node_type == 'proc':
+        return 'proc'
+
+    return detect_call_context(ast_node.parent)
+
+def detect_update_context(ast_node):
     if ast_node is None:
         return
 
@@ -69,9 +85,9 @@ def detect_update_context(ast_node, is_child=True):
     if node_type in ('where', 'order'):
         return node_type
 
-    return detect_update_context(ast_node.parent, is_child=False)
+    return detect_update_context(ast_node.parent)
 
-def detect_delete_context(ast_node, is_child=True):
+def detect_delete_context(ast_node):
     if ast_node is None:
         return
 
@@ -91,9 +107,9 @@ def detect_delete_context(ast_node, is_child=True):
     if node_type in ('where', 'order'):
         return node_type
 
-    return detect_delete_context(ast_node.parent, is_child=False)
+    return detect_delete_context(ast_node.parent)
 
-def detect_select_context(ast_node, is_child=True):
+def detect_select_context(ast_node):
     if ast_node is None:
         return
 
@@ -122,5 +138,5 @@ def detect_select_context(ast_node, is_child=True):
     if node_type == 'variable':
         return 'variable'
 
-    return detect_select_context(ast_node.parent, is_child=False)
+    return detect_select_context(ast_node.parent)
 

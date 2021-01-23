@@ -19,6 +19,7 @@ def set_smart_suggestions_model(sql_model):
 def reset_suggestions_pool():
     global suggestions_pool
     suggestions_pool = {
+            'variables': [],
             'columns': [],
             'databases': [],
             'tables': [],
@@ -63,9 +64,8 @@ def filter_columns(data, no_aliases=False, filter_star_operator=False):
 
     return filtered_data
 
-def create_suggestions_from_ast():
+def create_suggestions_from_ast(ast):
     global suggestions_pool
-    reset_suggestions_pool()
 
     def node_inspector(node):
         if node.type == 'column' or node.type == 'table_reference':
@@ -218,10 +218,35 @@ def table_suggestions(database=None, return_from_pool=True):
         return suggestions_pool['tables']
     return tables
 
-def select_suggestions():
-    if last_node is None:
+def proc_suggestions(database=None):
+    if database is None:
+        if last_node.parent and last_node.parent.type == 'identifier':
+            return proc_suggestions(last_node.parent.value.replace('`', ''))
+        else:
+            database = model.database
+
+    query = '''
+        SELECT
+            SPECIFIC_NAME AS Name
+        FROM
+            INFORMATION_SCHEMA.ROUTINES
+        WHERE ROUTINE_SCHEMA = %(db_name)s
+        ORDER BY Name
+    '''
+
+    try:
+        cursor = model.connection.query(query, {
+            'db_name': database
+            })
+    except Exception as e:
         return []
 
+    data = cursor.fetchall()
+    procs = [row[0] for row in data]
+
+    return procs
+
+def select_suggestions():
     suggestions_context = detect_select_context(last_node)
 
     if suggestions_context is None:
@@ -240,9 +265,6 @@ def select_suggestions():
     return []
 
 def update_suggestions():
-    if last_node is None:
-        return []
-
     suggestions_context = detect_update_context(last_node)
 
     if suggestions_context is None:
@@ -261,9 +283,6 @@ def update_suggestions():
     return []
 
 def delete_suggestions():
-    if last_node is None:
-        return []
-
     suggestions_context = detect_delete_context(last_node)
 
     if suggestions_context is None:
@@ -281,20 +300,41 @@ def delete_suggestions():
 
     return []
 
+def call_suggestions():
+    suggestions_context = detect_call_context(last_node)
 
-def smart_suggestions(ast_, last_node_, prefix_):
+    if suggestions_context is None:
+        return []
+
+    if suggestions_context == 'proc':
+        return [proc_suggestions(), database_suggestions()]
+
+    if suggestions_context == 'arguments':
+        return [suggestions_pool['variables']]
+
+    return []
+
+def smart_suggestions(ast_list, last_node_, prefix_):
     global ast
     global last_node
     global prefix
-    ast = ast_
+
+    ast = ast_list[0]
     last_node = last_node_
     prefix = prefix_
+
+    reset_suggestions_pool()
+
+    for ast_root in ast_list:
+        create_suggestions_from_ast(ast)
 
     suggestions = []
     if isinstance(ast, (Ast.Op, Ast.Expression)):
         return []
 
-    create_suggestions_from_ast()
+    if last_node is None:
+        return []
+
 
     if isinstance(ast, Ast.Statement):
         if ast.type == 'select':
@@ -305,5 +345,8 @@ def smart_suggestions(ast_, last_node_, prefix_):
 
         if ast.type == 'delete':
             return delete_suggestions()
+
+        if ast.type == 'call':
+            return call_suggestions()
 
     return []

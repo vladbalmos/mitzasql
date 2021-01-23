@@ -77,7 +77,6 @@ class SQLAutocompleteEngine:
         ast = parse(text)
 
         if len(ast):
-            ast = ast[0]
             last_node = get_last_parsed_node()
             suggestion_candidates = smart_suggestions(ast, last_node, prefix)
         else:
