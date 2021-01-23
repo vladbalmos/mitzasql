@@ -11,7 +11,15 @@ class StatementParser(Parser):
             stmt = select_parser.run()
             self.last_node = select_parser.last_node
             if stmt is None:
-                return self.parse_stmt()
+                return self.run()
+            return stmt
+
+        if self.state.is_reserved('update'):
+            update_parser = parser_factory.create(parser_factory.UPDATE_STMT, self.state)
+            stmt = update_parser.run()
+            self.last_node = update_parser.last_node
+            if stmt is None:
+                return self.run()
             return stmt
 
 

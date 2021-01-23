@@ -12,3 +12,4 @@ build
 dist
 .vim
 docs/.jekyll-cache/*
+todo.txt

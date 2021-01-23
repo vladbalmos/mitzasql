@@ -105,12 +105,46 @@ def detect_select_next_possible_keywords(context):
         return ['having', 'order', 'limit']
 
     if context == 'having':
-        return ['order', 'limit']
+        return ['order', 'by', 'limit']
 
     if context == 'order':
         return ['limit']
 
     return []
+
+def detect_update_next_possible_keywords(context):
+    if context == 'table_references':
+        return ['set', 'where', 'by', 'order', 'limit']
+
+    if context == 'assignment_list':
+        return ['where', 'by', 'order', 'limit']
+
+    if context == 'where':
+        return ['by', 'order', 'limit']
+
+    if context == 'order':
+        return ['limit']
+
+    return []
+
+def detect_update_context(ast_node, is_child=True):
+    if ast_node is None:
+        return
+
+    node_type = ast_node.type
+    node_value = ast_node.value or ''
+    node_value = node_value.lower()
+
+    if node_type == 'assignment_list' or node_type == 'join_spec':
+        return 'column'
+
+    if node_type == 'table_references':
+        return 'table'
+
+    if node_type in ('where', 'order'):
+        return node_type
+
+    return detect_update_context(ast_node.parent, is_child=False)
 
 def detect_select_context(ast_node, is_child=True):
     if ast_node is None:
@@ -273,7 +307,6 @@ def select_suggestions():
     if last_node is None:
         return []
 
-    create_suggestions_from_ast()
     suggestions_context = detect_select_context(last_node)
 
     if suggestions_context is None:
@@ -291,6 +324,28 @@ def select_suggestions():
 
     return []
 
+def update_suggestions():
+    if last_node is None:
+        return []
+
+    suggestions_context = detect_update_context(last_node)
+
+    if suggestions_context is None:
+        return []
+
+    if suggestions_context == 'table':
+        return [table_suggestions(), database_suggestions(), detect_update_next_possible_keywords(suggestions_context)]
+
+    if suggestions_context in ('column', 'where', 'order'):
+        col_suggestions =  column_suggestions(context=suggestions_context)
+        tbl_suggestions = table_suggestions()
+        db_suggestions = database_suggestions()
+        next_possible_keywords = detect_update_next_possible_keywords(suggestions_context)
+        return [col_suggestions, tbl_suggestions, db_suggestions, next_possible_keywords]
+
+    return []
+
+
 def smart_suggestions(ast_, last_node_, prefix_):
     global ast
     global last_node
@@ -303,6 +358,13 @@ def smart_suggestions(ast_, last_node_, prefix_):
     if isinstance(ast, (Ast.Op, Ast.Expression)):
         return []
 
+    create_suggestions_from_ast()
+
     if isinstance(ast, Ast.Statement):
         if ast.type == 'select':
             return select_suggestions()
+
+        if ast.type == 'update':
+            return update_suggestions()
+
+    return []
