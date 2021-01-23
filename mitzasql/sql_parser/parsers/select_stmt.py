@@ -3,7 +3,7 @@ import mitzasql.sql_parser.parser_factory as parser_factory
 from mitzasql.sql_parser.parsers.parser import Parser
 from mitzasql.sql_parser.parsers.mixins import *
 
-SELECT_MODIFIER_KW = ('all', 'distinct', 'distinctrow',
+MODIFIER_KEYWORDS = ('all', 'distinct', 'distinctrow',
         'high_priority', 'straight_join', 'sql_small_result',
         'sql_big_result', 'sql_buffer_result', 'sql_cache',
         'sql_no_cache', 'sql_calc_found_rows')
@@ -13,14 +13,14 @@ class SelectStmtParser(Parser, DMSParserMixin, ExprParserMixin):
         super().__init__(state)
         self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
 
-    def is_select_modifier(self):
+    def is_modifier(self):
         if not self.state:
             return False
 
         if not self.state.is_keyword():
             return False
 
-        return self.state.lcase_value in SELECT_MODIFIER_KW
+        return self.state.lcase_value in MODIFIER_KEYWORDS
 
     def is_select_expr(self):
         if not self.state:
@@ -51,12 +51,12 @@ class SelectStmtParser(Parser, DMSParserMixin, ExprParserMixin):
         if not self.state.is_reserved('character'):
             return
 
-        charset = self.accept(ast.UnaryOp, self.state.value)
+        charset = self.accept(ast.Expression, self.state.value, type='character')
 
         if not self.state.is_reserved('set'):
             return charset
 
-        set = self.accept(ast.UnaryOp, self.state.value)
+        set = self.accept(ast.Expression, self.state.value, type='set')
         charset.add_child(set)
 
         if not self.state.is_literal() and not self.state.is_other():
@@ -73,7 +73,7 @@ class SelectStmtParser(Parser, DMSParserMixin, ExprParserMixin):
             if not self.state.is_reserved('by'):
                 return
 
-            by = self.accept(ast.UnaryOp, self.state.value)
+            by = self.accept(ast.Expression, self.state.value, type='by')
 
             if not self.state.is_literal:
                 return by
@@ -271,10 +271,10 @@ class SelectStmtParser(Parser, DMSParserMixin, ExprParserMixin):
     def parse_select_body(self):
         stmt = self.accept(ast.Statement, self.state.value, 'select')
 
-        if self.is_select_modifier():
+        if self.is_modifier():
             modifier = self.accept(ast.Expression, type='modifier', advance=False)
 
-            while self.state and self.is_select_modifier():
+            while self.state and self.is_modifier():
                 modifier.add_child(self.accept(ast.Expression, self.state.value))
 
             stmt.add_child(modifier)

@@ -251,11 +251,32 @@ def update_suggestions():
     if suggestions_context == 'table':
         return [table_suggestions(), database_suggestions(), detect_update_next_possible_keywords(suggestions_context)]
 
-    if suggestions_context in ('column', 'where', 'order'):
+    if suggestions_context in ('assignment_list', 'column', 'where', 'order'):
         col_suggestions =  column_suggestions(context=suggestions_context)
         tbl_suggestions = table_suggestions()
         db_suggestions = database_suggestions()
         next_possible_keywords = detect_update_next_possible_keywords(suggestions_context)
+        return [col_suggestions, tbl_suggestions, db_suggestions, next_possible_keywords]
+
+    return []
+
+def delete_suggestions():
+    if last_node is None:
+        return []
+
+    suggestions_context = detect_delete_context(last_node)
+
+    if suggestions_context is None:
+        return []
+
+    if suggestions_context == 'table' or suggestions_context == 'table_references':
+        return [table_suggestions(), database_suggestions(), detect_delete_next_possible_keywords(suggestions_context)]
+
+    if suggestions_context in ('column', 'where', 'order'):
+        col_suggestions =  column_suggestions(context=suggestions_context)
+        tbl_suggestions = table_suggestions()
+        db_suggestions = database_suggestions()
+        next_possible_keywords = detect_delete_next_possible_keywords(suggestions_context)
         return [col_suggestions, tbl_suggestions, db_suggestions, next_possible_keywords]
 
     return []
@@ -281,5 +302,8 @@ def smart_suggestions(ast_, last_node_, prefix_):
 
         if ast.type == 'update':
             return update_suggestions()
+
+        if ast.type == 'delete':
+            return delete_suggestions()
 
     return []

@@ -5,7 +5,7 @@ COL_TERMINATOR_KEYWORDS = ('from', 'where', 'group',
         'having', 'order', 'limit', 'procedure', 'for', 'into', 'lock',
         'union')
 
-TABLE_TERMINATOR_KEYWORDS = COL_TERMINATOR_KEYWORDS[1:] + ('partition',
+TABLE_TERMINATOR_KEYWORDS = COL_TERMINATOR_KEYWORDS + ('partition',
         'as', 'inner', 'cross', 'join', 'straight_join', 'on',
         'left', 'right', 'outer', 'natural', 'using', 'set',
         'use', 'index', 'key', 'ignore', 'force', 'index', 'key', 'for')
@@ -82,7 +82,7 @@ class DMSParserMixin():
         if not self.state.is_reserved('partition'):
             return
 
-        partition = self.accept(ast.UnaryOp, self.state.value)
+        partition = self.accept(ast.Expression, self.state.value, type='partition')
         partition.add_child(self.parse_expr())
         return partition
 
@@ -96,19 +96,19 @@ class DMSParserMixin():
             if not self.state.is_reserved('for'):
                 return
 
-            for_ = self.accept(ast.UnaryOp, self.state.value)
+            for_ = self.accept(ast.Expression, self.state.value, type='for')
             if self.state.is_reserved() and self.state.lcase_value in ('join', 'order', 'group'):
                 if self.state.is_reserved('join'):
                     for_.add_child(self.accept(ast.Expression, self.state.value))
                 else:
-                    expr = self.accept(ast.UnaryOp, self.state.value)
+                    expr = self.accept(ast.Expression, self.state.value, type=self.state.lcase_value)
                     if self.state.is_reserved('by'):
-                        expr.add_child(self.accept(ast.UnaryOp, self.state.value))
+                        expr.add_child(self.accept(ast.Expression, self.state.value, type='by'))
                     for_.add_child(expr)
             parent.add_child(for_)
 
         if self.state.is_reserved('use'):
-            use = self.accept(ast.UnaryOp, self.state.value)
+            use = self.accept(ast.Expression, self.state.value, type='user')
             index_hint.add_child(use)
             if self.state.is_reserved('index') or self.state.is_reserved('key'):
                 use.add_child(self.accept(ast.Expression, self.state.value))
@@ -122,11 +122,11 @@ class DMSParserMixin():
 
         expr = None
         if self.state.lcase_value in ('ignore', 'force'):
-            expr = self.accept(ast.UnaryOp, self.state.value)
+            expr = self.accept(ast.Expression, self.state.value, type=self.state.lcas)
             index_hint.add_child(expr)
 
         if self.state.lcase_value in ('index', 'key'):
-            expr_ = self.accept(ast.UnaryOp, self.state.value)
+            expr_ = self.accept(ast.Expression, self.state.value, type=self.state.lcase_value)
             if expr is not None:
                 expr.add_child(expr_)
 
@@ -287,7 +287,7 @@ class DMSParserMixin():
             return
 
         if self.state.is_reserved() and self.state.lcase_value in ('asc', 'desc'):
-            order_op = self.accept(ast.UnaryOp, self.state.value)
+            order_op = self.accept(ast.Expression, self.state.value, 'order_dir')
             order_op.add_child(expr)
             return order_op
 
@@ -303,7 +303,7 @@ class DMSParserMixin():
         if not self.state.is_reserved('by'):
             return order
 
-        by = self.accept(ast.Op, self.state.value)
+        by = self.accept(ast.Expression, self.state.value, type='by')
         order.add_child(by)
 
         while self.state:

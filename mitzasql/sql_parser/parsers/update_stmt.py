@@ -4,21 +4,21 @@ from mitzasql.sql_parser.parsers.parser import Parser
 from mitzasql.sql_parser.parsers.mixins import *
 import pudb
 
-UPDATE_MODIFIER_KW = ('low_priority', 'ignore')
+MODIFIER_KEYWORDS = ('low_priority', 'ignore')
 
 class UpdateStmtParser(Parser, DMSParserMixin, ExprParserMixin):
     def __init__(self, state):
         super().__init__(state)
         self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
 
-    def is_update_modifier(self):
+    def is_modifier(self):
         if not self.state:
             return False
 
         if not self.state.is_reserved():
             return False
 
-        return self.state.lcase_value in UPDATE_MODIFIER_KW
+        return self.state.lcase_value in MODIFIER_KEYWORDS
 
     def parse_update_stmt(self):
         if not self.state.is_reserved('update'):
@@ -26,10 +26,10 @@ class UpdateStmtParser(Parser, DMSParserMixin, ExprParserMixin):
 
         stmt = self.accept(ast.Statement, self.state.value, 'update')
 
-        if self.is_update_modifier():
+        if self.is_modifier():
             modifier = self.accept(ast.Expression, type='modifier', advance=False)
 
-            while self.state and self.is_update_modifier():
+            while self.state and self.is_modifier():
                 modifier.add_child(self.accept(ast.Expression, self.state.value))
 
             stmt.add_child(modifier)
