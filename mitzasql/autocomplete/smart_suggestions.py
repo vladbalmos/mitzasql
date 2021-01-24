@@ -90,6 +90,20 @@ def create_suggestions_from_ast(ast):
             suggestions_pool['aliases'].append({alias_value.lower().replace('`', ''): first_child.value.lower().replace('`', '')})
             return
 
+        if node.type == 'variable' and node.parent and node.parent.type == 'set':
+            if not node.has_children():
+                return
+
+            var = node.children[0]
+            if var.type == 'operator' and var.has_children():
+                var = var.children[0].value
+                if var[0] != '@':
+                    var = '@@' + var
+                add_to_pool('variables', var)
+            else:
+                add_to_pool('variable', var.value)
+            return
+
     walk_ast(ast, node_inspector)
 
 def is_alias(alias):
@@ -314,19 +328,36 @@ def call_suggestions():
 
     return []
 
+def set_suggestions():
+    suggestions_context = detect_set_context(last_node)
+
+    if suggestions_context is None:
+        return []
+
+    if suggestions_context == 'set':
+        return [['names', 'character', 'charset'], suggestions_pool['variables']]
+
+    if suggestions_context == 'variable':
+        return [suggestions_pool['variables']]
+
+    if suggestions_context == 'character':
+        return [['set']]
+
+    return []
+
 def smart_suggestions(ast_list, last_node_, prefix_):
     global ast
     global last_node
     global prefix
 
-    ast = ast_list[0]
+    ast = ast_list[-1]
     last_node = last_node_
     prefix = prefix_
 
     reset_suggestions_pool()
 
     for ast_root in ast_list:
-        create_suggestions_from_ast(ast)
+        create_suggestions_from_ast(ast_root)
 
     suggestions = []
     if isinstance(ast, (Ast.Op, Ast.Expression)):
@@ -334,7 +365,6 @@ def smart_suggestions(ast_list, last_node_, prefix_):
 
     if last_node is None:
         return []
-
 
     if isinstance(ast, Ast.Statement):
         if ast.type == 'select':
@@ -348,5 +378,8 @@ def smart_suggestions(ast_list, last_node_, prefix_):
 
         if ast.type == 'call':
             return call_suggestions()
+
+        if ast.type == 'set':
+            return set_suggestions()
 
     return []

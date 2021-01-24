@@ -5,3 +5,4 @@ from mitzasql.sql_parser.parsers.update_stmt import UpdateStmtParser
 from mitzasql.sql_parser.parsers.delete_stmt import DeleteStmtParser
 from mitzasql.sql_parser.parsers.do_stmt import DoStmtParser
 from mitzasql.sql_parser.parsers.call_stmt import CallStmtParser
+from mitzasql.sql_parser.parsers.set_stmt import SetStmtParser

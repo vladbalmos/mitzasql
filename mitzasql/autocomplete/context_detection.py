@@ -57,7 +57,7 @@ def detect_call_context(ast_node):
     node_value = ast_node.value or ''
     node_value = node_value.lower()
 
-    if ast_node.parent and ast_node.parent.type == 'function':
+    if node_type == 'function':
         return 'arguments'
 
     if node_type == 'proc':
@@ -140,3 +140,21 @@ def detect_select_context(ast_node):
 
     return detect_select_context(ast_node.parent)
 
+def detect_set_context(ast_node):
+    if ast_node is None:
+        return
+
+    node_type = ast_node.type
+    node_value = ast_node.value or ''
+    node_value = node_value.lower()
+
+    if node_type == 'set' and ast_node.parent is None:
+        return 'set'
+
+    if node_type == 'character':
+        return 'character'
+
+    if node_type == 'variable':
+        return 'variable'
+
+    return detect_set_context(ast_node.parent)

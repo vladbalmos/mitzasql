@@ -18,9 +18,6 @@ class CallStmtParser(Parser, ExprParserMixin):
         if not self.state or self.state.is_semicolon():
             return stmt
 
-        if not (self.state.lcase_value.isalnum() and not self.state.lcase_value.isnumeric()):
-            return stmt
-
         proc = self.accept(ast.Expression, type='proc', advance=False)
         expr = self.parse_expr()
         if expr:

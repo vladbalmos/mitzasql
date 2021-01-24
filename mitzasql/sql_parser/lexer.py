@@ -1,6 +1,7 @@
 import string
 import mitzasql.sql_parser.tokens as Token
 import mitzasql.sql_parser.keywords as keywords
+import pudb
 
 class Lexer():
 
@@ -499,8 +500,7 @@ class Lexer():
             if char == '"' or char == "'":
                 result = self.parse_string()
                 if not result:
-                    self.pos -= len(var)
-                    return False
+                    break
 
                 var += result[1]
                 break
@@ -508,25 +508,24 @@ class Lexer():
             if char == '`':
                 result = self.parse_quoted_identifier()
                 if not result:
-                    self.pos -= len(var)
-                    return False
+                    break
 
                 var += result[1]
                 break
 
             result = self.parse_unquoted_identifier()
             if not result:
-                self.pos -= len(var)
-                return False
+                break
 
             var += result[1]
+
+            if self._next_char(increment=0) == '.':
+                var += '.'
+                self.pos += 1
+                continue
             break
 
         if not len(var):
-            return False
-
-        if len(var) < 2:
-            self.pos -= len(var)
             return False
 
         return self._make_token(Token.Variable, var)

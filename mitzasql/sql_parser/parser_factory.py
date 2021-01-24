@@ -6,6 +6,7 @@ UPDATE_STMT = parsers.UpdateStmtParser
 DELETE_STMT = parsers.DeleteStmtParser
 DO_STMT = parsers.DoStmtParser
 CALL_STMT = parsers.CallStmtParser
+SET_STMT = parsers.SetStmtParser
 EXPR = parsers.ExpressionParser
 
 def create(cls, state):

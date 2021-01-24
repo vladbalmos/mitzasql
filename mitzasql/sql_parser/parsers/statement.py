@@ -17,6 +17,8 @@ class StatementParser(Parser):
             parser = parser_factory.create(parser_factory.DO_STMT, self.state)
         elif self.state.is_reserved('call'):
             parser = parser_factory.create(parser_factory.CALL_STMT, self.state)
+        elif self.state.is_reserved('set'):
+            parser = parser_factory.create(parser_factory.SET_STMT, self.state)
 
         if parser:
             stmt = parser.run()

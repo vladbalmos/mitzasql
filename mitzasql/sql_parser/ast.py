@@ -57,6 +57,7 @@ valid_expression_operators = [
 valid_boolean_primary_operators = [
     'is',
     '=',
+    ':=',
     '<=>',
     '>=',
     '>',

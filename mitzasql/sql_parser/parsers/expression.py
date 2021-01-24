@@ -291,6 +291,8 @@ class ExpressionParser(Parser):
             self.state.next()
             select_stmt_parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
             subquery = select_stmt_parser.run()
+            if subquery is not None:
+                self.last_node = select_stmt_parser.last_node
 
             if self.state.is_closed_paren():
                 self.state.next()
@@ -352,7 +354,7 @@ class ExpressionParser(Parser):
             if tvalue == 'collate':
                 op = self.accept(ast.Op, tvalue)
                 op.add_child(expr)
-                if not self.state.is_other():
+                if not (self.state.is_other() or self.state.is_literal()):
                     return op
                 op.add_child(self.accept(ast.Expression, self.state.value, 'collation'))
                 return op
