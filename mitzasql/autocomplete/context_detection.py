@@ -87,6 +87,28 @@ def detect_update_context(ast_node):
 
     return detect_update_context(ast_node.parent)
 
+def detect_insert_context(ast_node):
+    if ast_node is None:
+        return
+
+    node_type = ast_node.type
+    node_value = ast_node.value or ''
+    node_value = node_value.lower()
+
+    if node_type == 'assignment_list':
+        return node_type
+
+    if node_type == 'into':
+        return 'table'
+
+    if node_type == 'columns':
+        return 'column'
+
+    if node_type == 'update':
+        return 'column'
+
+    return detect_insert_context(ast_node.parent)
+
 def detect_delete_context(ast_node):
     if ast_node is None:
         return

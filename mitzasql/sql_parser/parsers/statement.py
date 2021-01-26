@@ -9,6 +9,8 @@ class StatementParser(Parser):
         parser = None
         if self.state.is_reserved('select') or self.state.is_open_paren():
             parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
+        elif self.state.is_reserved('insert'):
+            parser = parser_factory.create(parser_factory.INSERT_STMT, self.state)
         elif self.state.is_reserved('update'):
             parser = parser_factory.create(parser_factory.UPDATE_STMT, self.state)
         elif self.state.is_reserved('delete'):

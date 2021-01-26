@@ -49,15 +49,17 @@ class UpdateStmtParser(Parser, DMSParserMixin, ExprParserMixin):
         if self.state.is_reserved('set'):
             set = self.accept(ast.Expression, self.state.value, type='assignment_list')
 
-            while self.state:
+            while self.state and not self.state.is_semicolon():
                 if self.state.is_reserved('where') \
                         or self.state.is_reserved('order') \
                         or self.state.is_reserved('by') \
                         or self.state.is_reserved('limit'):
                             break
                 expr = self.parse_expr()
-                if expr:
-                    set.add_child(expr)
+                set.add_child(expr)
+
+                if self.state.is_comma():
+                    self.state.next()
             stmt.add_child(set)
 
         if self.state.is_reserved('where'):

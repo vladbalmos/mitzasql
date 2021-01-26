@@ -80,9 +80,10 @@ def create_suggestions_from_ast(ast):
                 add_to_pool('tables', first_child.value)
                 add_to_pool('columns', first_child.children[0].value)
             else:
-                add_to_pool(pool_key, first_child.value)
+                if first_child.type != 'select':
+                    add_to_pool(pool_key, first_child.value)
 
-            alias = node.get_child('alias')
+            alias = node.get_first_child('alias')
             if alias is None or not alias.has_children():
                 return
             add_to_pool(pool_key, alias.children[0].value)
@@ -105,6 +106,17 @@ def create_suggestions_from_ast(ast):
             return
 
     walk_ast(ast, node_inspector)
+
+def get_table_for_insert():
+    into = ast.get_child('into')
+    if into is None or not into.has_children():
+        return
+
+    table_ref = into.children[0]
+    if table_ref is None or not table_ref.has_children():
+        return
+
+    return table_ref.children[0].value
 
 def is_alias(alias):
     for item in suggestions_pool['aliases']:
@@ -162,7 +174,7 @@ def table_columns_suggestions(table_name, db_name=None, return_from_pool=True):
     return columns
 
 
-def column_suggestions(context='column'):
+def column_suggestions(context='column', table_name=None):
     no_aliases = True if context == 'where' else False
     filter_star_operator = False
 
@@ -296,6 +308,24 @@ def update_suggestions():
 
     return []
 
+def insert_suggestions():
+    suggestions_context = detect_insert_context(last_node)
+
+    if suggestions_context is None:
+        return []
+
+    if suggestions_context == 'table':
+        return [table_suggestions(), database_suggestions()]
+
+    if suggestions_context in ('assignment_list', 'column'):
+        table = get_table_for_insert()
+        col_suggestions =  []
+        if table is not None:
+            col_suggestions = filter_columns(table_columns_suggestions(table), no_aliases=True, filter_star_operator=True)
+        return [col_suggestions]
+
+    return []
+
 def delete_suggestions():
     suggestions_context = detect_delete_context(last_node)
 
@@ -349,6 +379,7 @@ ast_handlers = {
     'select': select_suggestions,
     'update': update_suggestions,
     'delete': delete_suggestions,
+    'insert': insert_suggestions,
     'call': call_suggestions,
     'set': set_suggestions
 }

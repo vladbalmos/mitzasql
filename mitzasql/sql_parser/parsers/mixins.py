@@ -8,7 +8,8 @@ COL_TERMINATOR_KEYWORDS = ('from', 'where', 'group',
 TABLE_TERMINATOR_KEYWORDS = COL_TERMINATOR_KEYWORDS + ('partition',
         'as', 'inner', 'cross', 'join', 'straight_join', 'on',
         'left', 'right', 'outer', 'natural', 'using', 'set',
-        'use', 'index', 'key', 'ignore', 'force', 'index', 'key', 'for')
+        'use', 'index', 'key', 'ignore', 'force', 'index', 'key', 'for',
+        'values', 'value', 'duplicate', 'update', 'select')
 
 class ExprParserMixin():
     def parse_expr(self):
@@ -273,6 +274,9 @@ class DMSParserMixin():
                     table_factor.add_child(join_expr)
 
         return table_factor
+
+    def parse_assignment_list(self):
+        pass
 
     def parse_where(self):
         if not self.state.is_reserved('where'):
