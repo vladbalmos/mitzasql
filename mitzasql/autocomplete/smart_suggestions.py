@@ -380,6 +380,7 @@ ast_handlers = {
     'update': update_suggestions,
     'delete': delete_suggestions,
     'insert': insert_suggestions,
+    'replace': insert_suggestions,
     'call': call_suggestions,
     'set': set_suggestions
 }

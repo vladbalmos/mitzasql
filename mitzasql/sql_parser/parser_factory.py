@@ -4,6 +4,7 @@ STMT = parsers.StatementParser
 SELECT_STMT = parsers.SelectStmtParser
 UPDATE_STMT = parsers.UpdateStmtParser
 INSERT_STMT = parsers.InsertStmtParser
+REPLACE_STMT = parsers.ReplaceStmtParser
 DELETE_STMT = parsers.DeleteStmtParser
 DO_STMT = parsers.DoStmtParser
 CALL_STMT = parsers.CallStmtParser

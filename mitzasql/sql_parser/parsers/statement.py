@@ -11,6 +11,8 @@ class StatementParser(Parser):
             parser = parser_factory.create(parser_factory.SELECT_STMT, self.state)
         elif self.state.is_reserved('insert'):
             parser = parser_factory.create(parser_factory.INSERT_STMT, self.state)
+        elif self.state.is_reserved('replace'):
+            parser = parser_factory.create(parser_factory.REPLACE_STMT, self.state)
         elif self.state.is_reserved('update'):
             parser = parser_factory.create(parser_factory.UPDATE_STMT, self.state)
         elif self.state.is_reserved('delete'):

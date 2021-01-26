@@ -4,9 +4,9 @@ from mitzasql.sql_parser.parsers.parser import Parser
 from mitzasql.sql_parser.parsers.mixins import *
 import pudb
 
-MODIFIER_KEYWORDS = ('low_priority', 'high_priority', 'ignore', 'delayed')
+MODIFIER_KEYWORDS = ('low_priority', 'delayed')
 
-class InsertStmtParser(Parser, DMSParserMixin, ExprParserMixin):
+class ReplaceStmtParser(Parser, DMSParserMixin, ExprParserMixin):
     def __init__(self, state):
         super().__init__(state)
         self.expr_parser = parser_factory.create(parser_factory.EXPR, state)
@@ -31,11 +31,11 @@ class InsertStmtParser(Parser, DMSParserMixin, ExprParserMixin):
 
         return values
 
-    def parse_insert_stmt(self):
-        if not self.state.is_reserved('insert'):
+    def parse_replace_stmt(self):
+        if not self.state.is_reserved('replace'):
             return
 
-        stmt = self.accept(ast.Statement, self.state.value, 'insert')
+        stmt = self.accept(ast.Statement, self.state.value, 'replace')
 
         if self.is_modifier():
             modifier = self.accept(ast.Expression, type='modifier', advance=False)
@@ -77,29 +77,7 @@ class InsertStmtParser(Parser, DMSParserMixin, ExprParserMixin):
         elif self.state.lcase_value == 'value' or self.state.lcase_value == 'values':
             stmt.add_child(self.parse_values())
 
-        if self.state.is_reserved('on'):
-            on = self.accept(ast.Expression, self.state.value, type='on')
-            if self.state.is_keyword('duplicate'):
-                duplicate = self.accept(ast.Expression, self.state.value, type='duplicate')
-                on.add_child(duplicate)
-
-                if self.state.is_reserved('key'):
-                    key = self.accept(ast.Expression, self.state.value, type='key')
-                    duplicate.add_child(key)
-
-                    if self.state.is_reserved('update'):
-                        update = self.accept(ast.Expression, self.state.value, type='update')
-                        key.add_child(update)
-
-                        while self.state and not self.state.is_semicolon():
-                            expr = self.parse_expr()
-                            update.add_child(expr)
-                            if self.state.is_comma():
-                                self.state.next()
-
-            stmt.add_child(on)
-
         return stmt
 
     def run(self):
-        return self.parse_insert_stmt()
+        return self.parse_replace_stmt()
