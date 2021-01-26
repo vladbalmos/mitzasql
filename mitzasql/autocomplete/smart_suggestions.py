@@ -345,6 +345,33 @@ def set_suggestions():
 
     return []
 
+ast_handlers = {
+    'select': select_suggestions,
+    'update': update_suggestions,
+    'delete': delete_suggestions,
+    'call': call_suggestions,
+    'set': set_suggestions
+}
+
+def get_ast_handler():
+    def get_statement_parent(node):
+        if node is None:
+            return
+
+        if isinstance(node, Ast.Statement):
+            return node
+
+        return get_statement_parent(node.parent)
+
+    parent_statement = get_statement_parent(last_node)
+    if parent_statement is None:
+        return
+
+    try:
+        return ast_handlers[parent_statement.type]
+    except:
+        return
+
 def smart_suggestions(ast_list, last_node_, prefix_):
     global ast
     global last_node
@@ -354,32 +381,20 @@ def smart_suggestions(ast_list, last_node_, prefix_):
     last_node = last_node_
     prefix = prefix_
 
+    if last_node is None:
+        return []
+
+    if isinstance(ast, (Ast.Op, Ast.Expression)):
+        return []
+
     reset_suggestions_pool()
 
     for ast_root in ast_list:
         create_suggestions_from_ast(ast_root)
 
     suggestions = []
-    if isinstance(ast, (Ast.Op, Ast.Expression)):
+    ast_handler = get_ast_handler()
+    if ast_handler is None:
         return []
 
-    if last_node is None:
-        return []
-
-    if isinstance(ast, Ast.Statement):
-        if ast.type == 'select':
-            return select_suggestions()
-
-        if ast.type == 'update':
-            return update_suggestions()
-
-        if ast.type == 'delete':
-            return delete_suggestions()
-
-        if ast.type == 'call':
-            return call_suggestions()
-
-        if ast.type == 'set':
-            return set_suggestions()
-
-    return []
+    return ast_handler()

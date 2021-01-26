@@ -5,20 +5,21 @@ import pytest
 import pudb
 
 def test(sakila_connection):
+    pass
     # this query crashes progam when pasting it in the query window
     # raw_sql = '''
     # set @vlad = '1', @razvan = (select id from actor);                                                                                                                     │
     # call film_in_stock(
     # '''
 
-    raw_sql = '''
-    set @vlad = '1', @razvan = (select actor
-    '''
+    # raw_sql = '''
+    # set @var = (select actor
+    # '''
 
-    model = TableModel(sakila_connection, 'address')
-    engine = SQLAutocompleteEngine(model)
+    # model = TableModel(sakila_connection, 'address')
+    # engine = SQLAutocompleteEngine(model)
 
-    suggestions = engine.get_suggestions(raw_sql, len(raw_sql))
-    print('\n')
-    print(suggestions)
+    # suggestions = engine.get_suggestions(raw_sql, len(raw_sql))
+    # print('\n')
+    # print(suggestions)
 

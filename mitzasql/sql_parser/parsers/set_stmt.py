@@ -15,11 +15,11 @@ class SetStmtParser(Parser, ExprParserMixin):
             prepend_to_var = '@@' + self.state.value + '.'
             self.state.next()
 
+        var = self.accept(ast.Expression, type='variable', advance=False)
         expr = self.parse_expr()
         if expr is None:
             return
 
-        var = self.accept(ast.Expression, type='variable', advance=False)
         if expr.type == 'operator' and expr.has_children():
             expr.children[0].value = prepend_to_var + expr.children[0].value
 
