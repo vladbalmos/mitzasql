@@ -21,7 +21,7 @@
 import os
 import logging
 
-from mitzasql import constants as const
+from . import constants as const
 
 log_dir = os.path.dirname(const.DEFAULT_LOG_PATH)
 

@@ -20,23 +20,23 @@
 
 import urwid
 
-from mitzasql.state_machine import StateMachine
-from mitzasql.db.connection import Connection
-from mitzasql.db.model import (DBTablesModel, TriggerModel, ProcedureModel, TableInfoModel, ViewInfoModel)
-from mitzasql.ui.screens.screen import Screen
-from mitzasql.ui.widgets.db_view import DBView
-from mitzasql.ui.widgets.db_tables_view import DBTablesView
-from mitzasql.ui.widgets.table_view import TableView
-from mitzasql.ui.widgets.query_view import QueryView
-from mitzasql.ui.widgets.query_log_widget import QueryLogWidget
-from mitzasql.ui.widgets.session_popup_launcher import SessionPopupLauncher
-from mitzasql.ui.widgets.trigger_widget import TriggerWidget
-from mitzasql.ui.widgets.procedure_widget import ProcedureWidget
-from mitzasql.ui.widgets.row_widget import RowWidget
-from mitzasql.ui.widgets.view_info_widget import ViewInfoWidget
-from mitzasql.ui.widgets.table_info_widget import TableInfoWidget
-from mitzasql.ui.widgets.table_changer_widget import TableChangerWidget
-from mitzasql.ui.widgets.help_widget import HelpWidget
+from ....state_machine import StateMachine
+from ....db.connection import Connection
+from ....db.model import (DBTablesModel, TriggerModel, ProcedureModel, TableInfoModel, ViewInfoModel)
+from ..screen import Screen
+from ...widgets.db_view import DBView
+from ...widgets.db_tables_view import DBTablesView
+from ...widgets.table_view import TableView
+from ...widgets.query_view import QueryView
+from ...widgets.query_log_widget import QueryLogWidget
+from ...widgets.session_popup_launcher import SessionPopupLauncher
+from ...widgets.trigger_widget import TriggerWidget
+from ...widgets.procedure_widget import ProcedureWidget
+from ...widgets.row_widget import RowWidget
+from ...widgets.view_info_widget import ViewInfoWidget
+from ...widgets.table_info_widget import TableInfoWidget
+from ...widgets.table_changer_widget import TableChangerWidget
+from ...widgets.help_widget import HelpWidget
 from .widgets_factory import WidgetsFactory
 from . import states
 

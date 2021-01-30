@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Switch to relative imports for consistency
+- Improve test scripts to allow testing against only selected versions of mysql and python. Add `help` option
+
+### Added
+- Smart autocomplete for common statements
 
 ## [1.3.0]
 

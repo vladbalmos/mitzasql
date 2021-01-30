@@ -69,10 +69,9 @@
 #   | case_expr
 #   | interval_expr
 
-import pudb
-import mitzasql.sql_parser.ast as ast
-import mitzasql.sql_parser.parser_factory as parser_factory
-from mitzasql.sql_parser.parsers.parser import Parser
+from .. import ast
+from .. import parser_factory
+from .parser import Parser
 
 class ExpressionParser(Parser):
 

@@ -20,9 +20,9 @@
 
 import urwid
 
-from mitzasql.ui.screens.session_select.session_select import SessionSelect
-from mitzasql.ui.screens.session.session import Session
-import mitzasql.constants as const
+from .. import constants as const
+from .screens.session_select.session_select import SessionSelect
+from .screens.session.session import Session
 
 class Builder:
     """Screens builder

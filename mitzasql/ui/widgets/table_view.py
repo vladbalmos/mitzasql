@@ -20,11 +20,10 @@
 
 from collections import deque
 import urwid
-
-from mitzasql.ui.widgets.base_db_view import BaseDBView
-from mitzasql.ui.widgets.mysql_table import MysqlTable
-from mitzasql.table_filter_parser import Parser
-from mitzasql.logger import logger
+from .base_db_view import BaseDBView
+from .mysql_table import MysqlTable
+from ...table_filter_parser import Parser
+from ...logger import logger
 
 from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, CommandError)
 

@@ -20,7 +20,7 @@
 
 import urwid
 
-from mitzasql.ui.widgets.info_widget import InfoWidget
+from .info_widget import InfoWidget
 
 class TriggerWidget(InfoWidget):
     def __init__(self, model):

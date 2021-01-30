@@ -20,7 +20,7 @@
 
 import urwid
 
-import mitzasql.ui.utils as utils
+from .. import utils
 
 class List(urwid.ListBox):
     """Custom list which emits a `selected` signal if an item is selected"""

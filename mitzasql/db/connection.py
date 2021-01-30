@@ -25,7 +25,7 @@ import urwid
 import mysql.connector
 from mysql.connector import (errorcode, errors)
 
-from mitzasql.logger import (LoggerMixin, logger)
+from ..logger import (LoggerMixin, logger)
 
 class Connection(LoggerMixin):
     SIGNAL_EXCEPTION = 'exception'

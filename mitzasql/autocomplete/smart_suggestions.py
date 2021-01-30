@@ -4,7 +4,6 @@ from mitzasql.db.model import *
 import mitzasql.sql_parser.ast as Ast
 import mitzasql.sql_parser.tokens as Token
 from mitzasql.autocomplete.context_detection import *
-import pudb
 
 model = None
 ast = None

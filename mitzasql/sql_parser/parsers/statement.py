@@ -1,5 +1,5 @@
-import mitzasql.sql_parser.parser_factory as parser_factory
-from mitzasql.sql_parser.parsers.parser import Parser
+from .. import parser_factory
+from .parser import Parser
 
 class StatementParser(Parser):
     def __init__(self, state):

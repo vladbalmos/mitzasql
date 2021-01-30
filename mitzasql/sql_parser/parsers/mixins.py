@@ -1,5 +1,5 @@
-import mitzasql.sql_parser.ast as ast
-import mitzasql.sql_parser.parser_factory as parser_factory
+from .. import ast
+from .. import parser_factory
 
 COL_TERMINATOR_KEYWORDS = ('from', 'where', 'group',
         'having', 'order', 'limit', 'procedure', 'for', 'into', 'lock',

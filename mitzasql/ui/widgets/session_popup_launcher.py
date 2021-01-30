@@ -20,10 +20,10 @@
 
 import urwid
 
-from mitzasql.ui import main_loop as shared_main_loop
-from mitzasql.ui.widgets.error_dialog import ErrorDialog
-from mitzasql.ui.widgets.info_dialog import InfoDialog
-from mitzasql.ui.widgets.quit_dialog import QuitDialog
+from .. import main_loop as shared_main_loop
+from .error_dialog import ErrorDialog
+from .info_dialog import InfoDialog
+from .quit_dialog import QuitDialog
 
 class SessionPopupLauncher(urwid.PopUpLauncher):
     DEFAULT_WR = 60

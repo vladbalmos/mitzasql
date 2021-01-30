@@ -1,4 +1,4 @@
-import mitzasql.sql_parser.parsers as parsers
+from . import parsers
 
 STMT = parsers.StatementParser
 SELECT_STMT = parsers.SelectStmtParser

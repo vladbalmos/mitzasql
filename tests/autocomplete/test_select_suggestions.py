@@ -2,7 +2,6 @@ from ..db.connection_fixture import sakila_connection
 from mitzasql.db.model import TableModel
 from mitzasql.autocomplete.engine import SQLAutocompleteEngine
 import pytest
-import pudb
 
 def test_columns_in_current_table_suggestions(sakila_connection):
     raw_sql = '''

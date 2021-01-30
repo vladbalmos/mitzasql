@@ -20,8 +20,8 @@
 
 import urwid
 
-from mitzasql.ui.widgets.emacs_edit import EmacsEdit
-from mitzasql.ui.widgets.list import List
+from .emacs_edit import EmacsEdit
+from .list import List
 
 class TableChangerWidget(urwid.Frame):
     SIGNAL_ESCAPE = 'escape'

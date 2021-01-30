@@ -1,8 +1,7 @@
-import pudb
-from mitzasql.sql_parser.lexer import Lexer
-from mitzasql.sql_parser.state import State
+from .lexer import Lexer
+from .state import State
+from . import parser_factory
 from mitzasql.utils import dfs
-import mitzasql.sql_parser.parser_factory as parser_factory
 
 last_parsed_node = None
 

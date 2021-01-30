@@ -20,7 +20,7 @@
 
 import urwid
 
-from mitzasql.ui.utils import orig_w
+from ..utils import orig_w
 from .action_bar_pile_container import ActionBarPileContainer
 from .emacs_edit import EmacsEdit
 from .emacs_intedit import EmacsIntEdit

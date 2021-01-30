@@ -21,9 +21,8 @@
 import urwid
 
 from .emacs_edit import EmacsEdit
-from mitzasql.ui.syntax_highlight import highlight
-from mitzasql.logger import logger
-import pudb
+from ..syntax_highlight import highlight
+from ...logger import logger
 
 class QueryEditor(EmacsEdit):
     SIGNAL_SHOW_SUGGESTIONS = 'show_suggestions'

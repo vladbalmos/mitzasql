@@ -20,9 +20,9 @@
 
 import urwid
 
-from mitzasql.ui.widgets.base_db_view import BaseDBView
-from mitzasql.ui.widgets.table import Table
-from mitzasql.ui.widgets.cmd_proc import (BaseCmdProcessor, SearchCmdProcessor)
+from .base_db_view import BaseDBView
+from .table import Table
+from .cmd_proc import (BaseCmdProcessor, SearchCmdProcessor)
 
 class CommandProcessor(BaseCmdProcessor, SearchCmdProcessor):
     def __init__(self, dbview):

@@ -21,7 +21,7 @@
 import configparser
 import os
 
-import mitzasql.constants as const
+from . import constants as const
 
 class SessionsRegistry:
     """

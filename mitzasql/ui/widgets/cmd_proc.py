@@ -20,8 +20,8 @@
 
 import urwid
 
-from mitzasql.history import History
-from mitzasql.db.schema_cache import schema_cache_instance
+from ...history import History
+from ...db.schema_cache import schema_cache_instance
 
 class CommandError(Exception):
     pass

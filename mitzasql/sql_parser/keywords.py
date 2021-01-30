@@ -1,5 +1,5 @@
 import sys
-import mitzasql.sql_parser.tokens as Token
+from . import tokens as Token
 
 symbol_operators = [
     '->>',

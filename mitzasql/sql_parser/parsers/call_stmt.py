@@ -1,8 +1,7 @@
-import mitzasql.sql_parser.ast as ast
-import mitzasql.sql_parser.parser_factory as parser_factory
-from mitzasql.sql_parser.parsers.parser import Parser
-from mitzasql.sql_parser.parsers.mixins import *
-import pudb
+from .. import ast
+from .. import parser_factory
+from .parser import Parser
+from .mixins import *
 
 class CallStmtParser(Parser, ExprParserMixin):
     def __init__(self, state):

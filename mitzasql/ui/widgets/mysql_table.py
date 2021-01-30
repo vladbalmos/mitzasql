@@ -19,10 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import urwid
-
 from .table import Table
-
-from mitzasql.db.model import TableModel as MysqlTableModel
+from ...db.model import TableModel as MysqlTableModel
 
 class MysqlTable(Table):
     def __init__(self, model):

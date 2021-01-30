@@ -21,9 +21,8 @@
 import bisect
 import itertools
 from pygments.lexers import _mysql_builtins
-from mitzasql.sql_parser.parser import *
-from mitzasql.autocomplete.smart_suggestions import *
-import pudb
+from ..sql_parser.parser import (parse, get_last_parsed_node)
+from .smart_suggestions import (smart_suggestions, set_smart_suggestions_model)
 
 word_separators = [' ', '\t', '\n', '.', ';', ',', '"', "'", '`', '#', '(',
                    ')', '[', ']', '/', '=', '<', '>', '\\', '|', '+', '-', '%', '*']

@@ -20,10 +20,10 @@
 
 import urwid
 
-from mitzasql.ui.screens.screen import Screen
-from mitzasql.ui.widgets.saved_sessions_list import SavedSessionsList
-from mitzasql.ui.widgets.edit_session_form import EditSessionForm
-from mitzasql.ui.widgets.create_new_session_dialog import CreateNewSessionDialog
+from ..screen import Screen
+from ...widgets.saved_sessions_list import SavedSessionsList
+from ...widgets.edit_session_form import EditSessionForm
+from ...widgets.create_new_session_dialog import CreateNewSessionDialog
 
 class SessionSelect(Screen):
     """The session select UI screen

@@ -19,11 +19,11 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import sys
-from mitzasql.sessions_registry import SessionsRegistry
-from mitzasql.logger import LoggerMixin
-from mitzasql.ui import ui
-from mitzasql.db.connection import Connection
-import mitzasql.constants as const
+from .sessions_registry import SessionsRegistry
+from .logger import LoggerMixin
+from .ui import ui
+from .db.connection import Connection
+from . import constants as const
 
 class App(LoggerMixin):
     """Main application class

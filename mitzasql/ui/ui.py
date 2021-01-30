@@ -26,10 +26,10 @@ import threading
 import urwid
 import re
 
-from mitzasql.ui import theme
-from mitzasql.ui import main_loop as shared_main_loop
-from mitzasql.ui.builder import Builder
-from mitzasql.logger import logger
+from . import theme
+from . import main_loop as shared_main_loop
+from .builder import Builder
+from ..logger import logger
 
 top_most_widget = None
 palette = theme.get_palette()

@@ -20,7 +20,7 @@
 
 import urwid
 
-import mitzasql.ui.utils as utils
+from .. import utils
 
 class InfoWidget(urwid.ListBox):
     SIGNAL_ESCAPE = 'escape'

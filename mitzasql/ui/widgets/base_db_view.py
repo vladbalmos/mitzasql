@@ -21,11 +21,11 @@
 import urwid
 import time
 
-import mitzasql.ui.utils as utils
-from mitzasql.history import History
-from mitzasql.db.model import (TableModel, QueryModel)
-from mitzasql.db.schema_cache import schema_cache_instance
-from mitzasql.autocomplete.engine import SQLAutocompleteEngine
+from .. import utils
+from ...history import History
+from ...db.model import (TableModel, QueryModel)
+from ...db.schema_cache import schema_cache_instance
+from ...autocomplete.engine import SQLAutocompleteEngine
 from .db_view_footer import DBViewFooter
 from .query_widget import QueryWidget
 

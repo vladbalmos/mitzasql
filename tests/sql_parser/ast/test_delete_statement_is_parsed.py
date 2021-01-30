@@ -1,4 +1,3 @@
-import pudb
 import pytest
 from mitzasql.sql_parser.parser import parse
 from mitzasql.utils import dfs

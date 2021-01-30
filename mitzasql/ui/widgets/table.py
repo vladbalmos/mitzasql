@@ -24,8 +24,8 @@ import urwid
 import time
 import sys
 
-from mitzasql.ui import utils
-from mitzasql.logger import logger
+from .. import utils
+from ...logger import logger
 
 class InputProcessor():
     '''

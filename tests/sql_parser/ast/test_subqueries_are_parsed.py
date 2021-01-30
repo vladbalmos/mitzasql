@@ -1,4 +1,3 @@
-import pudb
 import pytest
 from mitzasql.sql_parser.parser import parse, get_last_parsed_node
 from mitzasql.utils import dfs

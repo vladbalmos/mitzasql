@@ -22,11 +22,11 @@ import threading
 
 import urwid
 
-from mitzasql.logger import logger
-from mitzasql.ui import main_loop as shared_main_loop
-import mitzasql.ui.utils as utils
-from mitzasql.ui.widgets.action_bar import ActionBar
-from mitzasql.ui.widgets.command_edit import CommandEdit
+from ...logger import logger
+from .. import main_loop as shared_main_loop
+from .. import utils
+from .action_bar import ActionBar
+from .command_edit import CommandEdit
 
 class DBViewFooter(urwid.WidgetPlaceholder):
     SIGNAL_EXIT_COMMAND_MODE = 'exit_command_mode'

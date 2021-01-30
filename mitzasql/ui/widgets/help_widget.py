@@ -21,7 +21,7 @@
 import os
 import urwid
 
-from mitzasql.ui.widgets.info_widget import InfoWidget
+from .info_widget import InfoWidget
 
 class HelpWidget(InfoWidget):
 

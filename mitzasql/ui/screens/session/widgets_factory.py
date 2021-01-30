@@ -20,11 +20,11 @@
 
 from mitzasql.db.model import (DatabasesModel, DBTablesModel, TableModel, QueryModel)
 
-from mitzasql.ui.screens.base_widgets_factory import BaseWidgetsFactory
-from mitzasql.ui.widgets.db_view import DBView
-from mitzasql.ui.widgets.db_tables_view import DBTablesView
-from mitzasql.ui.widgets.table_view import TableView
-from mitzasql.ui.widgets.query_view import QueryView
+from ..base_widgets_factory import BaseWidgetsFactory
+from ...widgets.db_view import DBView
+from ...widgets.db_tables_view import DBTablesView
+from ...widgets.table_view import TableView
+from ...widgets.query_view import QueryView
 
 class WidgetsFactory(BaseWidgetsFactory):
 

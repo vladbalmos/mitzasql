@@ -17,8 +17,8 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from mitzasql.state_machine import StateMachine
-from mitzasql.logger import logger
+from .state_machine import StateMachine
+from . import logger
 
 # initial state: parse_char
 #   if char is ' or '

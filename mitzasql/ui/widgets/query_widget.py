@@ -21,8 +21,8 @@
 import urwid
 
 from .query_editor import QueryEditor
-from mitzasql.logger import logger
-from mitzasql.ui import utils
+from ...logger import logger
+from .. import utils
 
 class SuggestionsWidget(urwid.Columns):
     def __init__(self):

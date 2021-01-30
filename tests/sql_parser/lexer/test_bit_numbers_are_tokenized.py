@@ -1,6 +1,5 @@
 import pytest
 import mitzasql.sql_parser.tokens as Token
-import pudb
 from mitzasql.sql_parser.lexer import Lexer
 from mitzasql.utils import token_is_parsed
 

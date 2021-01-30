@@ -1,7 +1,6 @@
-import pudb
 from collections import deque
-import mitzasql.sql_parser.ast as ast
-import mitzasql.sql_parser.tokens as Token
+from . import ast
+from . import tokens as Token
 
 class State:
     def __init__(self, tokens, future=False, prev_state_lookahead=None):

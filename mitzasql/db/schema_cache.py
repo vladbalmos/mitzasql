@@ -4,7 +4,7 @@ import json
 import hashlib
 import pickle
 
-import mitzasql.constants as constants
+from .. import constants
 
 class SchemaCache:
     """

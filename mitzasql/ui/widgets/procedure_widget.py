@@ -19,8 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import urwid
-
-from mitzasql.ui.widgets.info_widget import InfoWidget
+from .info_widget import InfoWidget
 
 class ProcedureWidget(InfoWidget):
     def __init__(self, model):
