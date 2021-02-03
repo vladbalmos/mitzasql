@@ -17,7 +17,7 @@ Supported MySQL versions:
 * mysql-connector-python v8
 * appdirs v1.4
 
-## Instalation ##
+## Install ##
 
     pip3 install --user mitzasql
 
@@ -203,9 +203,15 @@ The user interface supports the following methods for performing actions:
         </tr>
         <tr>
             <td>tab</td>
-            <td>Autocomplete command / argument</td>
+            <td>Start autocomplete / select next suggested keyword</td>
             <td>yes</td>
-            <td>all contexts which support commands</td>
+            <td>all contexts which support commands, query editor</td>
+        </tr>
+        <tr>
+            <td>shift tab</td>
+            <td>Select previous suggested keyword during autocomplete</td>
+            <td>yes</td>
+            <td>all contexts which support commands, query editor</td>
         </tr>
         <tr>
             <td>ctrl o</td>
@@ -457,8 +463,27 @@ Pressing `F2` will open the SQL query editor.
             <td>esc</td>
             <td>Close the editor</td>
         </tr>
+        <tr>
+            <td>tab</td>
+            <td>Start autocomplete / select next suggested keyword</td>
+        </tr>
+        <tr>
+            <td>shift tab</td>
+            <td>Select previous suggested keyword during autocomplete</td>
+        </tr>
     </tbody>
 </table>
+
+The autocomplete feature will suggest keywords and schema object names depending on the SQL statement. Schema object name suggestions work only for the main data manipulation statements:
+
+- SELECT
+- UPDATE
+- INSERT
+- REPLACE
+- DELETE
+- CALL
+
+For other types of statements the autocomplete system falls back to <em>dumb</em> suggestions (keywords which match the begining of a word).
 
 ## Text inputs
 All the text inputs support basic Emacs keyboard shortcuts.

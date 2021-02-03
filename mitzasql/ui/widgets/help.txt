@@ -50,7 +50,11 @@ n / p              | Go to next or previous search      | yes           | search
 -------------------------------------------------------------------------------------------------------------
 /                  | Enter search mode                  | yes           | server view, database view
 -------------------------------------------------------------------------------------------------------------
-tab                | Autocomplete command / argument    | yes           | all contexts which support commands
+tab                | Start autocomplete / select next   | yes           | all contexts which support commands
+                   | suggested keyword                  |               | query editor                       
+-------------------------------------------------------------------------------------------------------------
+shift tab          | Select previous suggested keyword  | yes           | all contexts which support commands
+                   | during autocomplete                |               | query editor                       
 -------------------------------------------------------------------------------------------------------------
 ctrl o             | Open the "change table" popup      |               | database table
 -------------------------------------------------------------------------------------------------------------
@@ -160,6 +164,33 @@ Command                           | Action                                   | S
 Query Editor
 ============
 Pressing `F2` will open the SQL query editor.
+
+Key(s)                            | Action
+=============================================================================================================
+f9                                | Execute query
+-------------------------------------------------------------------------------------------------------------
+ctrl f9                           | Clear editor
+-------------------------------------------------------------------------------------------------------------
+ctrl p / n                        | Go back / forward in the query history
+-------------------------------------------------------------------------------------------------------------
+ctrl shift up / down              | Resize the editor
+-------------------------------------------------------------------------------------------------------------
+esc                               | Close the editor
+-------------------------------------------------------------------------------------------------------------
+tab                               | Start autocomplete / select next suggested keyword
+-------------------------------------------------------------------------------------------------------------
+shift tab                         | Select previous suggested keyword during autocomplete
+
+The autocomplete feature will suggest keywords and schema object names depending on the SQL statement. Schema object name suggestions work only for the main data manipulation statements:
+
+- SELECT
+- UPDATE
+- INSERT
+- REPLACE
+- DELETE
+- CALL
+
+For other types of statements the autocomplete system falls back to dumb suggestions (keywords which match the begining of a word).
 
 Text inputs
 ===========

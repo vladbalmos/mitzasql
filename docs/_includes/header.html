@@ -3,7 +3,7 @@
   <div class="wrapper">
     {%- assign default_paths = site.pages | map: "path" -%}
     {%- assign page_paths = site.header_pages | default: default_paths -%}
-    <a class="site-title" rel="author" href="{{ "/" | relative_url }}">{{ site.title | escape }} <sup>v1</sup></a>
+    <a class="site-title" rel="author" href="{{ "/" | relative_url }}">{{ site.title | escape }} <sup><strong>v1.4</strong></sup></a>
 
     {%- if page_paths -%}
       <nav class="site-nav">
@@ -23,6 +23,7 @@
             <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
             {%- endif -%}
           {%- endfor -%}
+          <a class="page-link" href="{% link help.md %}#install">Install</a>
           <a class="page-link" href="https://github.com/vladbalmos/mitzasql">Github</a>
         </div>
       </nav>

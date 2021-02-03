@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Switch to relative imports for consistency
 - Improve test scripts to allow testing against only selected versions of mysql and python. Add `help` option
+- Improve columns sizing during rendering
 
 ### Added
 - Smart autocomplete for common statements

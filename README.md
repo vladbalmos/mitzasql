@@ -9,7 +9,7 @@ MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an e
 * View rows in a table or sql view:
 * Easily sort table data
 * Filter table data using VIM-like commands (`:like`, `:gt`, `:lt`, `:in`...)
-* SQL Query editor with syntax highlighting
+* SQL Query editor with syntax highlighting and **smart autocomplete**
 * VIM style keyboard shortcuts
 * VIM style commands with autocomplete support
 * Macros support
@@ -46,12 +46,12 @@ Loading large datasets will slow down the rendering. By default, when opening a 
 # Development
 ## Dependencies
 * tox
-* Docker
-* docker-compose
+* Docker (optional)
+* docker-compose (optional)
 
 Docker is only required for running the integration tests, testing during feature development can be done with tox alone (see below).
 
-## Run the development version
+## Running the development version
 
     # If your currently installed Python version != 3.6 use TOXENV to specify it
     tox -e dev
