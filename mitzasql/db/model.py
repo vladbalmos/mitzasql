@@ -252,6 +252,7 @@ class TableModel(MysqlModel):
     '''Model for a database table/view'''
     def __init__(self, connection, table_name):
         self.table_name = table_name
+        self._database = connection.database
         self.schema_error = None
 
         try:
@@ -277,6 +278,14 @@ class TableModel(MysqlModel):
 
         self.loaded_rowcount = len(self.data)
         self.rowcount = self._count_rows()
+
+    @property
+    def database(self):
+        return self._database
+
+    @database.setter
+    def database(self, db):
+        self._database = db
 
     def _fetch_data(self):
         result = super()._fetch_data()

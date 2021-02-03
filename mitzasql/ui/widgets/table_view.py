@@ -113,11 +113,12 @@ class TableView(BaseDBView):
         self._connect_table_signals()
 
     def refresh(self, table, connection, **kwargs):
-        if table == self._model.table_name:
+        if table == self._model.table_name and self._model.database == connection.database:
             if 'force_refresh' in kwargs and kwargs['force_refresh'] == True:
                 self._model.reload()
             return
 
+        self._model.database = connection.database
         self._model.table_name = table
         self._model.reload()
         self._set_cmd_args_suggestions()
