@@ -70,6 +70,9 @@ class SuggestionsWidget(urwid.Columns):
         self.contents.clear()
 
 class QueryWidget(urwid.AttrMap):
+    SIGNAL_LOADING_SUGGESTIONS = 'loading_suggestions'
+    SIGNAL_LOADED_SUGGESTIONS = 'loaded_suggestions'
+
     def __init__(self, autocomplete_engine=None):
         editor = QueryEditor(autocomplete_engine)
         container = urwid.Filler(urwid.AttrMap(editor, ''), valign='top')
@@ -81,15 +84,22 @@ class QueryWidget(urwid.AttrMap):
         line_box = urwid.LineBox(frame, title=title,
                 title_align='right')
 
+        urwid.connect_signal(editor, editor.SIGNAL_LOADING_SUGGESTIONS, self._loading_suggestions)
         urwid.connect_signal(editor, editor.SIGNAL_SHOW_SUGGESTIONS, self._show_suggestions)
         urwid.connect_signal(editor, editor.SIGNAL_HIDE_SUGGESTIONS, self._hide_suggestions)
 
         super().__init__(line_box, 'linebox')
+        urwid.register_signal(self.__class__, [self.SIGNAL_LOADING_SUGGESTIONS, self.SIGNAL_LOADED_SUGGESTIONS])
+
+    def _loading_suggestions(self, emitter):
+        urwid.emit_signal(self, self.SIGNAL_LOADING_SUGGESTIONS, self)
 
     def _show_suggestions(self, emitter, suggestions, index=-1):
+        urwid.emit_signal(self, self.SIGNAL_LOADED_SUGGESTIONS, self)
         self._suggestions_widget.populate(suggestions, index)
 
     def _hide_suggestions(self, emitter):
+        urwid.emit_signal(self, self.SIGNAL_LOADED_SUGGESTIONS, self)
         self._suggestions_widget.clear()
 
     @property

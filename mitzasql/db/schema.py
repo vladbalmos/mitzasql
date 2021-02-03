@@ -225,6 +225,9 @@ class TableSchema(QuerySchema):
             column_name, default, nullable, _type, char_max_len, num_precision, \
                     num_scale, charset, collation, key, extra = row
 
+            if isinstance(_type, bytes):
+                _type = _type.decode('utf-8')
+
             if nullable == 'YES':
                 nullable = True
             else:

@@ -25,6 +25,7 @@ from ..syntax_highlight import highlight
 from ...logger import logger
 
 class QueryEditor(EmacsEdit):
+    SIGNAL_LOADING_SUGGESTIONS = 'loading_suggestions'
     SIGNAL_SHOW_SUGGESTIONS = 'show_suggestions'
     SIGNAL_HIDE_SUGGESTIONS = 'hide_suggestions'
 
@@ -34,8 +35,7 @@ class QueryEditor(EmacsEdit):
         self._suggestion_index = -1
         self._last_autocomplete_text_pos = None
         self._start_autocomplete_markers = [' ', '\t', '.', '(', '`', '*']
-        urwid.register_signal(self.__class__, [self.SIGNAL_SHOW_SUGGESTIONS,
-            self.SIGNAL_HIDE_SUGGESTIONS])
+        urwid.register_signal(self.__class__, [self.SIGNAL_LOADING_SUGGESTIONS, self.SIGNAL_SHOW_SUGGESTIONS, self.SIGNAL_HIDE_SUGGESTIONS])
 
     def _should_autocomplete(self, key):
         if key != 'tab' and key != 'shift tab':
@@ -67,6 +67,7 @@ class QueryEditor(EmacsEdit):
             self._last_autocomplete_text_pos = self.edit_pos
             self._suggestion_index = -1
 
+        urwid.emit_signal(self, self.SIGNAL_LOADING_SUGGESTIONS, self)
         suggestions = self._autocomplete_engine.get_suggestions(self.edit_text, self._last_autocomplete_text_pos)
         if not suggestions:
             return

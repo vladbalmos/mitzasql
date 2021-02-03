@@ -11,7 +11,7 @@ database = 'sakila'
 
 def test_model_fetches_data(connection):
     model = DBTablesModel(connection, database)
-    assert len(model) == 35
+    assert len(model) >= 35
     assert 'Name' in [c['name'] for c in model.columns]
 
     table_names = []

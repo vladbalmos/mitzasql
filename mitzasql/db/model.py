@@ -268,6 +268,13 @@ class TableModel(MysqlModel):
         self._where = None
         super().__init__(connection)
 
+
+        self.loaded_rowcount = 0
+        self.rowcount = 0
+
+        if self.last_error:
+            return
+
         self.loaded_rowcount = len(self.data)
         self.rowcount = self._count_rows()
 
@@ -397,9 +404,9 @@ class TableModel(MysqlModel):
         select_columns = []
         for column, info in self._table_schema:
             if self._table_schema.column_is_text(info['type']) and info['max_len'] is not None and info['max_len'] > 256:
-                column = 'LEFT(`{0}`, 256) as {1}'.format(column, column)
+                column = 'LEFT(`{0}`, 256) as `{1}`'.format(column, column)
             elif self._table_schema.column_is_spatial(info['type']):
-                column = 'ST_AsText(`{0}`) as {1}'.format(column, column)
+                column = 'ST_AsText(`{0}`) as `{1}`'.format(column, column)
             else:
                 column = '`{0}`'.format(column)
             select_columns.append(column)

@@ -177,6 +177,8 @@ class BaseDBView(urwid.Frame):
 
         self._table = table
         self._query_editor = QueryWidget(autocomplete_engine=self._sql_autocomplete_engine)
+        urwid.connect_signal(self._query_editor, self._query_editor.SIGNAL_LOADING_SUGGESTIONS, self.toggle_loading_status, user_args=[True])
+        urwid.connect_signal(self._query_editor, self._query_editor.SIGNAL_LOADED_SUGGESTIONS, self.toggle_loading_status, user_args=[False])
 
         pile = urwid.Pile([('weight', BaseDBView.TABLE_HEIGHT, table), ('weight', 0,
             self._query_editor)])

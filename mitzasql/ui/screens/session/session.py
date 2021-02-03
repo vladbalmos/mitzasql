@@ -40,6 +40,17 @@ from ...widgets.help_widget import HelpWidget
 from .widgets_factory import WidgetsFactory
 from . import states
 
+def show_loading_decorator(method):
+    def wrapper(self, *args, **kwargs):
+        if not self.focused_widget:
+            method(self, *args, **kwargs)
+
+        prev_widget = self.focused_widget
+        prev_widget.toggle_loading_status(True)
+        method(self, *args, **kwargs)
+        prev_widget.toggle_loading_status(False)
+    return wrapper
+
 class Session(Screen):
     def __init__(self, connection):
         super().__init__()
@@ -109,6 +120,7 @@ class Session(Screen):
             return
         self._state_machine.change_state('database_selected', self, db_name)
 
+    @show_loading_decorator
     def show_databases(self, *args, **kwargs):
         self.focused_widget = self._widgets_factory.create('databases_view',
                 self._connection, **kwargs)
@@ -118,6 +130,7 @@ class Session(Screen):
         self._last_primary_view = self.focused_widget
         self.focused_widget.set_model_error_handler(self.handle_model_error)
 
+    @show_loading_decorator
     def show_db_tables(self, emitter, database=None, **kwargs):
         if database is None:
             database = self._last_database
@@ -161,6 +174,7 @@ class Session(Screen):
         urwid.connect_signal(self.focused_widget, self.focused_widget.SIGNAL_ACTION_SELECT_TABLE, on_select)
         self.focused_widget.select_handler_bound = True
 
+    @show_loading_decorator
     def show_table(self, emitter, table, **kwargs):
         self.focused_widget = self._widgets_factory.create('table_view', table, self._connection, **kwargs)
         self.view.original_widget = self.focused_widget
