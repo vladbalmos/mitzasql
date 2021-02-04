@@ -53,17 +53,21 @@ for version in $mysql_services; do
 done
 
 echo 'All done! Running tests...'
+EXIT_CODE=0
 
-{
-    for py in $python_versions; do
-        for my in $mysql_services; do
-            echo "$py - $my"
-            service_name="python${py/py/}"
-            docker-compose -f $FILE run --rm -e DB_HOST='tcp://'$my $service_name tox -- -x || exit 1
-        done
+for py in $python_versions; do
+    for my in $mysql_services; do
+        echo "================================================================="
+        echo "Running tests on: $py - $my"
+        echo "================================================================="
+        service_name="python${py/py/}"
+        docker-compose -f $FILE run --rm -e DB_HOST='tcp://'$my $service_name tox -- -x
+        EXIT_CODE=$?
+        if [ $EXIT_CODE != 0 ]; then
+            break
+        fi
     done
-} > tests.log 2>&1
-
-cat tests.log
+done
 
 docker-compose -f $FILE stop
+exit $EXIT_CODE

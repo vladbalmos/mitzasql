@@ -110,13 +110,14 @@ def test_model_properly_escapes_alias(sakila_connection):
     create_table_sql = '''
 CREATE TABLE IF NOT EXISTS `table_with_space_in_column_names` (
 counter INT NULL,
-`column varchar` VARCHAR (1024) NULL DEFAULT "{0}",
-`column text` TEXT NULL DEFAULT ("{0}")
+`column varchar` VARCHAR (1024) NULL,
+`column text` TEXT NULL
 )
-    '''.format(long_str)
+    '''
 
     sakila_connection.query(create_table_sql)
-    sakila_connection.query('REPLACE INTO table_with_space_in_column_names (counter) VALUES (1)')
+    sakila_connection.query('''REPLACE INTO table_with_space_in_column_names
+            (counter, `column varchar`, `column text`) VALUES (1, "{0}", "{1}" )'''.format(long_str, long_str))
 
     model = TableModel(sakila_connection, 'table_with_space_in_column_names')
     assert model.last_error is None
