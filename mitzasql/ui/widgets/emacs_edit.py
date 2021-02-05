@@ -24,9 +24,9 @@ from .emacs_keys_mixin import EmacsKeysMixin
 
 class EmacsEdit(urwid.Edit, EmacsKeysMixin):
     def __init__(self, edit_text='', allow_tab=False, mask=None, caption='',
-            multiline=False, read_only=False):
+            multiline=False, read_only=False, wrap='clip'):
         urwid.Edit.__init__(self, edit_text=edit_text, caption=caption,
-                multiline=multiline, allow_tab=allow_tab, mask=mask, wrap='clip')
+                multiline=multiline, allow_tab=allow_tab, mask=mask, wrap=wrap)
         self.read_only = read_only
 
     def selectable(self):

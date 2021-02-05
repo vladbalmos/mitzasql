@@ -30,7 +30,7 @@ class QueryEditor(EmacsEdit):
     SIGNAL_HIDE_SUGGESTIONS = 'hide_suggestions'
 
     def __init__(self, autocomplete_engine):
-        super().__init__(multiline=True, allow_tab=True)
+        super().__init__(multiline=True, allow_tab=True, wrap='space')
         self._autocomplete_engine = autocomplete_engine
         self._suggestion_index = -1
         self._last_autocomplete_text_pos = None
