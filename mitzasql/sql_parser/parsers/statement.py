@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 from .. import parser_factory
 from .parser import Parser
 

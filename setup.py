@@ -56,5 +56,8 @@ setuptools.setup(
             'pygments ==2.7.2',
             'sqlparse ==0.4.1'
         ],
+        extras_require={
+            'clipboard': ['pyperclip ==1.8.1']
+        },
         scripts=['bin/mitzasql']
 )

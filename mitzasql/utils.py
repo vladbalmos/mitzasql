@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 def token_is_parsed(needle, haystack):
     expected_ttype, expected_value, *rest = needle
     for item in haystack:

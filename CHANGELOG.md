@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Smart autocomplete for common statements
 - Add "Loading..." status when switching views
+- Add system clipboard (ctrl c/ctrl v) support to query editor (optional dependency: pyperclip)
 
 ### Fixed
 - Fix a bug where a column containing spaces in its name breaks the table screen view

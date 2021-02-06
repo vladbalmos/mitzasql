@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 from .statement import StatementParser
 from .select_stmt import SelectStmtParser
 from .expression import ExpressionParser

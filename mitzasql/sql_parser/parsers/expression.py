@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 # Expressions parser for the following grammar:
 # https://dev.mysql.com/doc/refman/8.0/en/expressions.html
 #

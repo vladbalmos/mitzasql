@@ -1,3 +1,7 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 from collections import deque
 from . import ast
 from . import tokens as Token

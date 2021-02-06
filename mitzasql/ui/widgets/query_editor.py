@@ -1,28 +1,13 @@
-# Copyright (c) 2019 Vlad Balmos <vladbalmos@yahoo.com>
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
 # Author: Vlad Balmos <vladbalmos@yahoo.com>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
-# the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-# the Software, and to permit persons to whom the Software is furnished to do so,
-# subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# See LICENSE file
 
 import urwid
 
 from .emacs_edit import EmacsEdit
 from ..syntax_highlight import highlight
 from ...logger import logger
+from .. import clipboard
 
 class QueryEditor(EmacsEdit):
     SIGNAL_LOADING_SUGGESTIONS = 'loading_suggestions'
@@ -120,11 +105,33 @@ class QueryEditor(EmacsEdit):
 
         return self._suggestion_index
 
+    def _copy_text(self):
+        clipboard.copy(self.edit_text)
+
+    def _paste_text(self):
+        pasted_text = clipboard.paste()
+        if not pasted_text:
+            return
+
+        text = self.edit_text[0:self.edit_pos]
+        text += pasted_text
+        text += self.edit_text[self.edit_pos:]
+        self.set_edit_text(text)
+        self.edit_pos += len(pasted_text)
+
     def keypress(self, size, key):
         if self._should_autocomplete(key):
             direction = self._autocomplete_direction(key)
             self._autocomplete(direction)
             return None
+
+        if key == 'ctrl c':
+            self._copy_text()
+            return
+
+        if key == 'ctrl v':
+            self._paste_text()
+            return
 
         self._last_autocomplete_text_pos = None
         self._suggestions_found = False
@@ -135,7 +142,7 @@ class QueryEditor(EmacsEdit):
         (maxcol,) = size
         self._shift_view_to_cursor = bool(focus)
 
-        text = highlight(self._edit_text)
+        text = highlight(self.edit_text)
         if not len(text):
             text = u''
 

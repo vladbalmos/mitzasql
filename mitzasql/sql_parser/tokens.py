@@ -1,18 +1,22 @@
+# Copyright (c) 2021 Vlad Balmos <vladbalmos@yahoo.com>
+# Author: Vlad Balmos <vladbalmos@yahoo.com>
+# See LICENSE file
+
 # This tokens implementation is heavily based on the python-sqlparse.tokens
 # module https://github.com/andialbrecht/sqlparse which in turn was based
 # on the pygment's token system
 # See the sqlparse-LICENSE and sqlparse-AUTHORS files.
 #
 # Original python-sqlparse copyright notice:
-# Copyright (C) 2009-2020 the sqlparse authors and contributors
-# <see sqlparse-authoris file>
-#
-# This module is part of python-sqlparse and is released under
-# the BSD License: https://opensource.org/licenses/BSD-3-Clause
-#
-# The Token implementation is based on pygment's token system written
-# by Georg Brandl.
-# http://pygments.org/
+## Copyright (C) 2009-2020 the sqlparse authors and contributors
+## <see sqlparse-authoris file>
+##
+## This module is part of python-sqlparse and is released under
+## the BSD License: https://opensource.org/licenses/BSD-3-Clause
+##
+## The Token implementation is based on pygment's token system written
+## by Georg Brandl.
+## http://pygments.org/
 
 class _TokenType(tuple):
     parent = None
