@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix a bug where a column containing spaces in its name breaks the table screen view
 - Fix a bug related to caching a table view (same table name in different databases)
+- Fix a bug the lead to a crash when pasting text larger than the in the query editor widget
 
 ## [1.3.0]
 
