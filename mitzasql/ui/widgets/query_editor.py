@@ -33,6 +33,7 @@ class QueryEditor(EmacsEdit):
         super().__init__(multiline=True, allow_tab=True, wrap='space')
         self._autocomplete_engine = autocomplete_engine
         self._suggestion_index = -1
+        self._suggestions_found = False
         self._last_autocomplete_text_pos = None
         self._start_autocomplete_markers = [' ', '\t', '.', '(', '`', '*']
         urwid.register_signal(self.__class__, [self.SIGNAL_LOADING_SUGGESTIONS, self.SIGNAL_SHOW_SUGGESTIONS, self.SIGNAL_HIDE_SUGGESTIONS])
@@ -43,6 +44,9 @@ class QueryEditor(EmacsEdit):
 
         if self.edit_pos == 0:
             return False
+
+        if self._suggestions_found:
+            return True
 
         prev_char = self.edit_text[self.edit_pos - 1]
 
@@ -70,9 +74,11 @@ class QueryEditor(EmacsEdit):
         urwid.emit_signal(self, self.SIGNAL_LOADING_SUGGESTIONS, self)
         suggestions = self._autocomplete_engine.get_suggestions(self.edit_text, self._last_autocomplete_text_pos)
         if not suggestions:
+            self._suggestions_found = False
             return
 
         suggestions, prefix = suggestions
+        self._suggestions_found = bool(len(suggestions))
 
         try:
             index = self._get_suggestion_index(direction, len(suggestions))
@@ -121,6 +127,7 @@ class QueryEditor(EmacsEdit):
             return None
 
         self._last_autocomplete_text_pos = None
+        self._suggestions_found = False
         urwid.emit_signal(self, self.SIGNAL_HIDE_SUGGESTIONS, self)
         return super().keypress(size, key)
 
