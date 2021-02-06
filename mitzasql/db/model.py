@@ -440,31 +440,39 @@ class QueryModel(MysqlModel):
         self.has_rows = False
         super().__init__(connection)
 
-    def _query_db(self):
-        cursor = self.execute_query(self.query)
-        if cursor is not None:
-            self.has_rows = cursor.with_rows
-        return cursor
+    def execute_query(self, query, params=None):
+        try:
+            cursors = self._con.query(query, params, multi=True)
+            self.last_error = None
+            return cursors
+        except errors.Error as e:
+            self.last_error = e
+            urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
 
     def _fetch_data(self):
-        cursor = self._query_db()
-        if cursor is None:
-            self.data = []
-            self._columns = []
-            self.rowcount = 0
-            self.affected_rows = 0
-            return cursor is not None
+        cursors = self.execute_query(self.query)
 
-        if cursor.with_rows:
-            self.data = cursor.fetchall()
-            self._columns = self._schema(cursor).columns
-            self.rowcount = cursor.rowcount
-            self.affected_rows = 0
-        else:
+        try:
+            for cursor in cursors:
+                if cursor.with_rows:
+                    self.data = cursor.fetchall()
+                    self._columns = self._schema(cursor).columns
+                    self.rowcount = cursor.rowcount
+                    self.affected_rows = 0
+                    self.has_rows = cursor.with_rows
+                else:
+                    self.data = []
+                    self._columns = []
+                    self.rowcount = 0
+                    self.affected_rows = cursor.rowcount
+        except errors.Error as e:
+            self.last_error = e
+            urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
             self.data = []
             self._columns = []
             self.rowcount = 0
-            self.affected_rows = cursor.rowcount
+            self.affected_rows = 0
+            return False
 
         return True
 

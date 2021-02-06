@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switch to relative imports for consistency
 - Improve test scripts to allow testing against only selected versions of mysql and python. Add `help` option
 - Improve columns sizing during rendering
+- Allow multiple statements to be executed in the query editor. This will allow statements like this to work:
+    SET @a = (SELECT ...)
+    SELECT @a
 
 ### Added
 - Smart autocomplete for common statements

@@ -123,7 +123,7 @@ class Connection(LoggerMixin):
     def dict_cursor(self):
         return self.con.cursor(buffered=True, dictionary=True)
 
-    def query(self, query, params=None, dictionary=False):
+    def query(self, query, params=None, dictionary=False, multi=False):
         start = time.time()
         self.log_debug('Query: %s. Params: %s', str(query), str(params))
         try:
@@ -131,13 +131,17 @@ class Connection(LoggerMixin):
                 cursor = self.cursor
             else:
                 cursor = self.dict_cursor
-            cursor.execute(query, params=params)
+            result = cursor.execute(query, params=params, multi=multi)
+
+            if multi == True:
+                return result
+
             return cursor
         except errors.OperationalError as e:
             # Retry connection if exception is "MySQL Connection not available"
             self.log_exception('Query exception: %s', e)
             if self._retry_connection():
-                return self.query(query, params=params, dictionary=dictionary)
+                return self.query(query, params=params, dictionary=dictionary, multi=multi)
             raise e
         except errors.Error as e:
             self.log_exception('Query exception: %s', e)
