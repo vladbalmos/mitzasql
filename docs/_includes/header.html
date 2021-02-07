@@ -23,7 +23,7 @@
             <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
             {%- endif -%}
           {%- endfor -%}
-          <a class="page-link" href="{% link {{ baseurl }}help.md %}#install">Install</a>
+          <a class="page-link" href="{{ base_url }}{% link help.md %}#install">Install</a>
           <a class="page-link" href="https://github.com/vladbalmos/mitzasql">Github</a>
         </div>
       </nav>
