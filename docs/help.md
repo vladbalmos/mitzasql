@@ -499,7 +499,10 @@ The autocomplete feature will suggest keywords and schema object names depending
 - DELETE
 - CALL
 
-For other types of statements the autocomplete system falls back to <em>dumb</em> suggestions (keywords which match the begining of a word).
+For other types of statements the autocomplete system falls back to <em>dumb</em> suggestions (keywords which match the beginning of a word).
+
+## Clipboard support
+Clipboard support is an optional feature implemented in the Query Editor with the help of the [pyperclip](https://github.com/asweigart/pyperclip) module. This feature speeds up considerably pasting large SQL statements in the query window. Without it you can use your terminal's copy/paste feature but you will notice a slow down in case you are pasting a large SQL statement - this issue is caused by the syntax highlighting implementation.
 
 ## Clipboard support
 Clipboard support is an optional feature implemented in the Query Editor with the help of the [pyperclip](https://github.com/asweigart/pyperclip) module. This feature speeds up considerably pasting large SQL statements in the query window. Without it you can use your terminal's copy/paste feature but you will notice a slow down in case you are pasting a large SQL statement - this issue is related to the way syntax highlighting works.
