@@ -197,7 +197,7 @@ The autocomplete feature will suggest keywords and schema object names depending
 - DELETE
 - CALL
 
-For other types of statements the autocomplete system falls back to dumb suggestions (keywords which match the begining of a word).
+For other types of statements the autocomplete system falls back to dumb suggestions (keywords which match the beginning of a word).
 
 Clipboard support
 =================
