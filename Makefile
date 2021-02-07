@@ -12,7 +12,7 @@ publish: build
 
 install-test-package:
 	pip3 install --upgrade --user --index-url https://test.pypi.org/simple \
-		--extra-index-url https://pypi.python.org/simple mitzasql
+		--extra-index-url https://pypi.python.org/simple mitzasql[clipboard]
 
 install-website-deps:
 	cd docs && bundle

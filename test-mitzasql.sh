@@ -67,6 +67,10 @@ for py in $python_versions; do
             break
         fi
     done
+
+    if [ $EXIT_CODE != 0 ]; then
+        break
+    fi
 done
 
 docker-compose -f $FILE stop

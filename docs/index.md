@@ -17,7 +17,7 @@ MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an e
 * View rows in a table or sql view:
 * Easily sort table data
 * Filter table data using VIM-like commands (`:like`, `:gt`, `:lt`, `:in`...)
-* SQL Query editor with syntax highlighting and <strong>smart autocomplete</strong>
+* SQL Query editor with syntax highlighting, <strong>smart autocomplete</strong> and clipboard support (optional dependency needs to be installed)
 * VIM style keyboard shortcuts
 * VIM style commands with autocomplete support
 * Macros support

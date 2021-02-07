@@ -2,6 +2,8 @@
 # Author: Vlad Balmos <vladbalmos@yahoo.com>
 # See LICENSE file
 
+# Namespace for different type of AST nodes
+
 simple_expr_unary_operators = ['+', '-', '~', '!']
 
 operator_precedance = {

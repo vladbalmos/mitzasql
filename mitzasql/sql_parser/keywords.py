@@ -5,6 +5,8 @@
 import sys
 from . import tokens as Token
 
+# Map MySQL keywords and operators to token types
+
 symbol_operators = [
     '->>',
     '<=>',

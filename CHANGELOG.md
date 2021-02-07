@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.4.0]
 ### Changed
 - Switch to relative imports for consistency
 - Improve test scripts to allow testing against only selected versions of mysql and python. Add `help` option
@@ -12,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow multiple statements to be executed in the query editor. Eg:
     SET @a = (SELECT ...)
     SELECT @a
+- Ctrl-C has been re-assigned to copy text from the query editor
 
 ### Added
 - Smart autocomplete for common statements

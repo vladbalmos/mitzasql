@@ -2,6 +2,9 @@
 # Author: Vlad Balmos <vladbalmos@yahoo.com>
 # See LICENSE file
 
+# Helper functions for determining the closest context which can
+# yield autocomplete suggestions
+
 def detect_select_next_possible_keywords(context):
     if context == 'column':
         return ['from']

@@ -60,6 +60,10 @@ ctrl o             | Open the "change table" popup      |               | databa
 -------------------------------------------------------------------------------------------------------------
 ctrl shift up /    | Resize the query editor            |               | query editor
            down    |                                    |               |
+-------------------------------------------------------------------------------------------------------------
+ctrl c / v         | Copy and paste to/from the system  |               | query editor
+                   | clipboard (only if the pyperclip   |               |
+                   | module is installed)               |               |
 
 
 Actions keys are equivalent to regular buttons found in a conventional user interface. To perform an action press a specific key highlighted with a different color than the rest of the text.
@@ -175,6 +179,9 @@ ctrl p / n                        | Go back / forward in the query history
 -------------------------------------------------------------------------------------------------------------
 ctrl shift up / down              | Resize the editor
 -------------------------------------------------------------------------------------------------------------
+ctrl c / v                        | Copy and paste to/from the system clipboard (only if the pyperclip
+                                  | module is installed)
+-------------------------------------------------------------------------------------------------------------
 esc                               | Close the editor
 -------------------------------------------------------------------------------------------------------------
 tab                               | Start autocomplete / select next suggested keyword
@@ -191,6 +198,10 @@ The autocomplete feature will suggest keywords and schema object names depending
 - CALL
 
 For other types of statements the autocomplete system falls back to dumb suggestions (keywords which match the begining of a word).
+
+Clipboard support
+=================
+Clipboard support is an optional feature implemented in the Query Editor with the help of the pyperclip module. This feature speeds up considerably pasting large SQL statements in the query window. Without it you can use your terminal's copy/paste feature but you will notice a slow down in case you are pasting a large SQL statement - this issue is related to the way syntax highlighting works.
 
 Text inputs
 ===========
