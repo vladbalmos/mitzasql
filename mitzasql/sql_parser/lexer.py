@@ -7,6 +7,10 @@ from . import tokens as Token
 from . import keywords
 
 class Lexer():
+    '''
+    SQL String tokenizer.
+    Parses a string one char at a time
+    '''
 
     def __init__(self, sql):
         self.raw_str = sql

@@ -9,7 +9,7 @@ MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an e
 * View rows in a table or sql view:
 * Easily sort table data
 * Filter table data using VIM-like commands (`:like`, `:gt`, `:lt`, `:in`...)
-* SQL Query editor with syntax highlighting and **smart autocomplete**
+* SQL Query editor with syntax highlighting, **smart autocomplete** and clipboard support (optional dependency needs to be installed)
 * VIM style keyboard shortcuts
 * VIM style commands with autocomplete support
 * Macros support
@@ -42,6 +42,12 @@ Loading large datasets will slow down the rendering. By default, when opening a 
 # Installation
 
     pip3 install mitzasql
+
+If you require clipboard support you need to install the extra dependency:
+
+    pip3 install mitzasql[clipboard]
+
+This will install the [pyperclip](https://github.com/asweigart/pyperclip) module. Keep in mind that **pyperclip** requires `xclip`/`xsel` to be installed on Linux, or the `gtk`/`qt` python modules.
 
 # Development
 ## Dependencies

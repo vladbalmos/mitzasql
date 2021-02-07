@@ -7,6 +7,11 @@ from . import ast
 from . import tokens as Token
 
 class State:
+    '''
+    Models the current parser state.
+    Also contains helper methods for lookahead and for determining
+    current and future node types
+    '''
     def __init__(self, tokens, future=False, prev_state_lookahead=None):
         self._tokens = tokens
         self.lookahead_tokens = deque()

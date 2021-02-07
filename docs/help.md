@@ -23,6 +23,13 @@ Supported MySQL versions:
 
 *On systems which have a default Python 3 installation replace `pip3` with `pip`.*
 
+If you require <strong>clipboard support</strong> you need to install the extra dependency:
+
+    pip3 install --user mitzasql[clipboard]
+
+This will install the [pyperclip](https://github.com/asweigart/pyperclip) module. Keep in mind that **pyperclip** requires `xclip`/`xsel` to be installed on Linux, or the `gtk`/`qt` python modules.
+
+
 `MitzaSQL` creates by default the following files and folders in your home directory:
 - $HOME/.config/mitzasql/sessions.ini
 - $HOME/.cache/mitzasql/log/mitzasql.log
@@ -221,6 +228,11 @@ The user interface supports the following methods for performing actions:
         <tr>
             <td>ctrl shift up / down</td>
             <td colspan="2">Resize the query editor</td>
+            <td>query editor</td>
+        </tr>
+        <tr>
+            <td>ctrl c / v</td>
+            <td colspan="2">Copy and paste to/from the system clipboard (only if the <a href="https://github.com/asweigart/pyperclip" target="_blank">pyperclip</a> module is installed )</td>
             <td>query editor</td>
         </tr>
     </tbody>
@@ -460,6 +472,10 @@ Pressing `F2` will open the SQL query editor.
             <td>Resize the editor</td>
         </tr>
         <tr>
+            <td>ctrl c / v</td>
+            <td>Copy and paste to/from the system clipboard (only if the <a href="https://github.com/asweigart/pyperclip" target="_blank">pyperclip</a> module is installed )</td>
+        </tr>
+        <tr>
             <td>esc</td>
             <td>Close the editor</td>
         </tr>
@@ -484,6 +500,9 @@ The autocomplete feature will suggest keywords and schema object names depending
 - CALL
 
 For other types of statements the autocomplete system falls back to <em>dumb</em> suggestions (keywords which match the begining of a word).
+
+## Clipboard support
+Clipboard support is an optional feature implemented in the Query Editor with the help of the [pyperclip](https://github.com/asweigart/pyperclip) module. This feature speeds up considerably pasting large SQL statements in the query window. Without it you can use your terminal's copy/paste feature but you will notice a slow down in case you are pasting a large SQL statement - this issue is related to the way syntax highlighting works.
 
 ## Text inputs
 All the text inputs support basic Emacs keyboard shortcuts.

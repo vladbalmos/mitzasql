@@ -25,12 +25,16 @@ for kw in mysql_keywords:
 
 
 class SQLAutocompleteEngine:
+    '''
+    Uses the sql_parser module to generate ASTs from a SQL string
+    and determine possible suggestions. If that fails, fall back to
+    "dumb" suggestions (reserved keywords)
+    '''
     def __init__(self, model):
         self._model = model
         self._last_search = None
         self._cached_suggestions = []
         self._cached_prefix = None
-
 
     def _get_keyword_prefix(self, text):
         pos = len(text)

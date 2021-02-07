@@ -436,28 +436,30 @@ class QueryModel(MysqlModel):
     def _fetch_data(self):
         cursors = self.execute_query(self.query)
 
-        try:
-            for cursor in cursors:
-                if cursor.with_rows:
-                    self.data = cursor.fetchall()
-                    self._columns = self._schema(cursor).columns
-                    self.rowcount = cursor.rowcount
-                    self.affected_rows = 0
-                    self.has_rows = cursor.with_rows
-                else:
-                    self.data = []
-                    self._columns = []
-                    self.rowcount = 0
-                    self.affected_rows = cursor.rowcount
-        except errors.Error as e:
-            self.last_error = e
-            urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
+        if cursors:
+            try:
+                for cursor in cursors:
+                    if cursor.with_rows:
+                        self.data = cursor.fetchall()
+                        self._columns = self._schema(cursor).columns
+                        self.rowcount = cursor.rowcount
+                        self.affected_rows = 0
+                        self.has_rows = cursor.with_rows
+                    else:
+                        self.data = []
+                        self._columns = []
+                        self.rowcount = 0
+                        self.affected_rows = cursor.rowcount
+            except errors.Error as e:
+                self.last_error = e
+                urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
+
+        if self.last_error:
             self.data = []
             self._columns = []
             self.rowcount = 0
             self.affected_rows = 0
             return False
-
         return True
 
 class TriggerModel:
