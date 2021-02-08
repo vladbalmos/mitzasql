@@ -59,6 +59,8 @@ class Connection(LoggerMixin):
         con_data = self._connection_data
         if self.database:
             con_data['database'] = self.database
+        elif 'database' in con_data:
+            del con_data['database']
         con = self.__class__(con_data, self.session_name)
         return con
 

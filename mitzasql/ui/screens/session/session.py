@@ -106,6 +106,7 @@ class Session(Screen):
 
     @show_loading_decorator
     def show_databases(self, *args, **kwargs):
+        self._connection.database = None
         self.focused_widget = self._widgets_factory.create('databases_view',
                 self._connection, **kwargs)
         self._bind_help_handler(self.focused_widget)
@@ -231,7 +232,7 @@ class Session(Screen):
             self.view.show_loading_dialog()
 
         self.focused_widget = self._widgets_factory.create('query_view', query,
-                self._connection.fresh)
+                self._connection.fresh, cache=False)
 
         self._bind_help_handler(self.focused_widget)
         self._bind_log_handler(self.focused_widget)
