@@ -94,3 +94,4 @@ See `test-mitzasql.sh` for more info.
 
 ### UI testing
 See `test-mitzasql-ui.sh` for more info.
+
