@@ -5,7 +5,7 @@
 layout: home
 ---
 
-[![Build Status](https://travis-ci.org/vladbalmos/mitzasql.svg?branch=master)](https://travis-ci.org/vladbalmos/mitzasql)
+[![Build Status](https://travis-ci.com/vladbalmos/mitzasql.svg?branch=master)](https://travis-ci.com/github/vladbalmos/mitzasql)
 
 ## About
 
