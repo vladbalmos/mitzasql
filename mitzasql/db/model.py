@@ -353,6 +353,9 @@ class TableModel(MysqlModel):
         self._where = where
         self.reload(reset_limit=True, reset_order=False, reset_where=False)
 
+    def clear_filter(self):
+        self._where = None
+
     def load_more(self, count):
         offset = self.loaded_rowcount
         limit = count + 100 # Load 100 more rows in advance
