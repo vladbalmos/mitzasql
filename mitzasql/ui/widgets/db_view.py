@@ -42,7 +42,7 @@ class DBView(BaseDBView):
         urwid.emit_signal(self, self.SIGNAL_ACTION_SELECT_DB, self, database)
 
     def refresh(self, connection, **kwargs):
-        if 'force_refresh' in kwargs and kwargs['force_refresh'] == True:
+        if 'force_refresh' in kwargs and kwargs['force_refresh'] == True or self._model.last_error:
             self._model.reload()
 
     def search_db(self, db, pos=0, reverse=False):

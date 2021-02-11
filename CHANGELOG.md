@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2]
+### Fixed
+- Fix #90 (Invalid filter value breaks table view screen)
+
 ## [1.4.1]
 ### Fixed
 - Fix connection database name caching issue

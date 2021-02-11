@@ -98,7 +98,7 @@ class TableView(BaseDBView):
 
     def refresh(self, table, connection, **kwargs):
         if table == self._model.table_name and self._model.database == connection.database:
-            if 'force_refresh' in kwargs and kwargs['force_refresh'] == True:
+            if 'force_refresh' in kwargs and kwargs['force_refresh'] == True or self._model.last_error:
                 self._model.reload()
             return
 
@@ -240,6 +240,8 @@ class TableView(BaseDBView):
             where = "{0} NOT BETWEEN '{1}' AND '{2}'".format(column, values[0], values[1])
 
         self._model.filter(where)
+        if self._model.last_error:
+            self._model.clear_filter()
 
     def keypress(self, size, key):
         if key == 'ctrl o':
