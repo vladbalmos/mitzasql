@@ -181,6 +181,7 @@ class TableView(BaseDBView):
 
         arguments = deque(args)
         column = arguments.popleft()
+
         if column not in [c['name'] for c in self._model.columns]:
             raise CommandError(u'Column not found!')
 
@@ -199,17 +200,17 @@ class TableView(BaseDBView):
         elif op == 'nempty':
             where = '`{0}` != \'\''.format(column)
         elif op == 'eq':
-            where = '`{0}` = {1}'.format(column, filter_val)
+            where = '`{0}` = {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'neq':
-            where = '`{0}` != {1}'.format(column, filter_val)
+            where = '`{0}` != {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'lt':
-            where = '`{0}` < {1}'.format(column, filter_val)
+            where = '`{0}` < {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'lte':
-            where = '`{0}` <= {1}'.format(column, filter_val)
+            where = '`{0}` <= {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'gt':
-            where = '`{0}` > {1}'.format(column, filter_val)
+            where = '`{0}` > {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'gte':
-            where = '`{0}` >= {1}'.format(column, filter_val)
+            where = '`{0}` >= {1}'.format(column, self._escape_filter_value(filter_val, column))
         elif op == 'like':
             where = '`{0}` LIKE "{1}"'.format(column, filter_val)
         elif op == 'nlike':
@@ -229,19 +230,34 @@ class TableView(BaseDBView):
             values = p.parse()
             if len(values) != 2:
                 raise CommandError("Filter requires 2 values")
+
             values = list(map(lambda v: v.replace("'", "\\'"), values))
-            where = "{0} BETWEEN '{1}' AND '{2}'".format(column, values[0], values[1])
+            where = "`{0}` BETWEEN '{1}' AND '{2}'".format(column, values[0], values[1])
         elif op == 'nbetween':
             p = Parser(filter_val)
             values = p.parse()
             if len(values) != 2:
                 raise CommandError("Filter requires 2 values")
             values = list(map(lambda v: v.replace("'", "\\'"), values))
-            where = "{0} NOT BETWEEN '{1}' AND '{2}'".format(column, values[0], values[1])
+            where = "`{0}` NOT BETWEEN '{1}' AND '{2}'".format(column, values[0], values[1])
 
         self._model.filter(where)
         if self._model.last_error:
             self._model.clear_filter()
+
+    def _escape_filter_value(self, value, column):
+        for c in self._model.columns:
+            if column != c['name']:
+                continue
+
+            if c['is_text'] or c['is_temporal']:
+                value = value.replace("'", "\\'")
+                logger.info(value)
+                return "'{0}'".format(value)
+
+            return value;
+
+        return value
 
     def keypress(self, size, key):
         if key == 'ctrl o':

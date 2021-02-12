@@ -11,6 +11,14 @@ filters = [
         'count': 1
         },
         {
+        'filter': ['eq', 'district', 'Northern Cape'],
+        'count': 1
+        },
+        {
+        'filter': ['eq', 'last_update', '2014-09-25 22:30:27'],
+        'count': 3
+        },
+        {
         'filter': ['neq', 'address_id', '1'],
         'count': 602
         },

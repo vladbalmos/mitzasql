@@ -306,7 +306,7 @@ To exit command mode press `esc`.
         </tbody>
     </table>
 
-The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted (`'value'`).
+The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. ~~As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted (`'value'`)~~. Starting with version **1.4.3** string and temporal values are automatically quoted for all commands except **between** and **nbetween**.
 <table>
     <thead>
         <tr>
@@ -325,7 +325,7 @@ The following commands are available only when browsing a MySQL table or view an
                 </code>
                 <br />
 
-                Will find the row with id 100. <strong>If the column is of type <em>string</em> make sure you quote the value</strong>
+                Will find the row with id 100. <strong>As of v1.4.3 values involving string/temporal columns will be quoted automatically</strong>
             </td>
             <td>column = value</td>
         </tr>
