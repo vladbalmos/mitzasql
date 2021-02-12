@@ -100,15 +100,15 @@ Command                           | Action                                   | C
                                   | this command will remove all cache files.|
 -------------------------------------------------------------------------------------------------------------
 
-The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. As such **it is important to appropriately quote the value** for the filter in order to avoid SQL syntax errors, using the same `eq` command on a string column will result in an SQL error if the value is not quoted ('value').
+The following commands are available only when browsing a MySQL table or view and they act as shortcuts to writing full SQL queries for filtering data. For example, using the command `:eq id 100` is equivalent to writing `SELECT * FROM [current table] WHERE id = 100`. String and temporal values are automatically quoted for all commands except "between" and "nbetween".
 
 Command                           | Action                                   | SQL WHERE clause
 =============================================================================================================
 :eq [column] [value]              | Find row where [column] equals [value].  | column = value
                                   | Example: :eq id 100                      |
-                                  | Will find the row with id 100. If the    |
-                                  | column is of type **string** make sure   |
-                                  | you quote the value.
+                                  | Will find the row with id 100. String    |
+                                  | and temporal values are automatically    |
+                                  | quoted.                                  |
 -------------------------------------------------------------------------------------------------------------
 :neq [column] [value]             | Find row where [column] doesn't equals   | column != value
                                   | [value]                                  |
