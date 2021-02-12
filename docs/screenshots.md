@@ -5,7 +5,7 @@ permalink: /screenshots/
 ---
 Demo  
 
-[![asciicast](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl.svg)](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl)
+[![asciicast](https://asciinema.org/a/390872.svg)](https://asciinema.org/a/390872)
 
 Sessions list  
 ![Sessions list]({{ "/assets/screenshots/sessions-list.jpg" | relative_url }} "Sessions list")

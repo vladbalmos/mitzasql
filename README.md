@@ -17,7 +17,7 @@ MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an e
 MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL) and is licensed under [MIT](https://opensource.org/licenses/MIT). The lexer's tokens implementation used by the auto complete system was taken from the [python-sqlparse](https://github.com/andialbrecht/sqlparse) project.
 
 ### Demo
-[![asciicast](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl.svg)](https://asciinema.org/a/fbbwVEIdL9f8UbQFtPAw2NsCl)
+[![asciicast](https://asciinema.org/a/390872.svg)](https://asciinema.org/a/390872)
 
 # Website
 [https://vladbalmos.github.io/mitzasql](https://vladbalmos.github.io/mitzasql)
