@@ -156,4 +156,5 @@ def start_loop(macro_file=None):
         old_signal_keys = main_loop.screen.tty_signal_keys(intr='undefined')
         main_loop.run()
     finally:
-        main_loop.screen.tty_signal_keys(*old_signal_keys)
+        if old_signal_keys:
+            main_loop.screen.tty_signal_keys(*old_signal_keys)

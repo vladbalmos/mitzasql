@@ -14,6 +14,6 @@ mutable = {
         }
 
 def refresh():
-    if os.getenv('TEST_MODE') == '1':
+    if os.getenv('TEST_MODE') == '1' or not mutable['loop']:
         return
     mutable['loop'].draw_screen()
