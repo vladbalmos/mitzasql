@@ -53,7 +53,7 @@ def create_new_session(args, error_callback):
     App.run(session_name=session_name)
 
 if __name__  == '__main__':
-    if not sys.stdin.isatty() or sys.stdout.isatty():
+    if not sys.stdin.isatty() or not sys.stdout.isatty():
         print("Invalid stdin/stdout tty",
                 file=sys.stderr)
         sys.exit(1)
