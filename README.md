@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/vladbalmos/mitzasql.svg?branch=master)](https://travis-ci.com/github/vladbalmos/mitzasql)
+[![PyPI version](https://badge.fury.io/py/mitzasql.svg)](https://badge.fury.io/py/mitzasql) [![Build Status](https://travis-ci.com/vladbalmos/mitzasql.svg?branch=master)](https://travis-ci.com/github/vladbalmos/mitzasql) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 
 # About
 MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an easy-to-use console alternative to GUI clients. It is not meant to be a full-fledged GUI client, it only provides a read-only view of the database, though you can manipulate the data by using raw SQL queries. Some of the main features are:
