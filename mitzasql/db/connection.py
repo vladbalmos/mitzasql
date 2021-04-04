@@ -4,6 +4,7 @@
 
 import time
 from datetime import datetime
+import copy
 
 import urwid
 import mysql.connector
@@ -56,7 +57,7 @@ class Connection(LoggerMixin):
 
     @property
     def fresh(self):
-        con_data = self._connection_data
+        con_data = copy.deepcopy(self._connection_data)
         if self.database:
             con_data['database'] = self.database
         elif 'database' in con_data:
@@ -138,9 +139,9 @@ class Connection(LoggerMixin):
             Connection.QUERY_LOG.append((datetime.now(), query, params, duration))
 
     def change_db(self, name):
+        self.database = name
         query = 'USE `{0}`'.format(name);
         self.query(query);
-        self.database = name
 
     def is_fatal_error(self, error):
         if isinstance(error, errors.OperationalError):

@@ -453,7 +453,7 @@ class QueryModel(MysqlModel):
                         self._columns = []
                         self.rowcount = 0
                         self.affected_rows = cursor.rowcount
-            except errors.Error as e:
+            except Exception as e:
                 self.last_error = e
                 urwid.emit_signal(self, self.SIGNAL_ERROR, self, e)
 

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4]
+### Changed
+- Bump kramdown to 2.3.1 in /docs
+- Bump pygments to 2.7.4
+
+### Fixed
+- Fix crash (#95)
+- Fix database change error caused by accidentally mutating the original connection data when running custom query
+- Fix crash when running executing invalid SQL in multi query
+- Remove duplicate "Clipboard support" section in user manual
+- Fix crash when viewing stored procedure without parameters
+
 ## [1.4.3]
 ### Changed
 - Auto quote filter command parameters based on the column type. https://github.com/vladbalmos/mitzasql/issues/94
