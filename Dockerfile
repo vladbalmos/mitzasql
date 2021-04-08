@@ -15,6 +15,7 @@ COPY README.md README.md
 COPY requirements.txt requirements.txt
 COPY setup.py setup.py
 COPY tox.ini tox.ini
+RUN chown -R mitzasql:mitzasql *
 ARG TOXENV
 USER mitzasql
 RUN tox -e $TOXENV --notest

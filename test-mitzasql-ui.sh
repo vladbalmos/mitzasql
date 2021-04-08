@@ -59,10 +59,10 @@ for py in $python_versions; do
     for my in $mysql_services; do
         echo "$py - $my"
         service_name="python${py/py/}"
-        docker-compose -f $FILE run --rm -e DB_HOST='tcp://'$my $service_name \
+        docker-compose -f $FILE run --rm -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" -e DB_HOST='tcp://'$my $service_name \
             bash -c "source .tox/$py/bin/activate && \
             cd tests/macros && \
-            ./run.py" || exit 1
+            coverage run run.py && coveralls" || exit 1
     done
 done
 
