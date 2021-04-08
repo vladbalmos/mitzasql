@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   mysql:
-    image: mysql:$MYSQL_DEFAULT_DEV_VERSION
+    image: $MYSQL_DEFAULT_DEV_VERSION
     expose:
       - 3306
     ports:

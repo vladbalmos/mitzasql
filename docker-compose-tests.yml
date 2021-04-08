@@ -64,6 +64,70 @@ services:
       start_period: 30s
     networks:
       - mitzasql-test-network
+  # MariaDB servers
+  mysql103:
+    image: mariadb:10.3
+    expose:
+      - 3306
+    ports:
+      - "$MYSQL103_PORT:3306"
+    environment:
+      - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
+      - "MYSQL_USER=user"
+      - "MYSQL_PASSWORD=password"
+    volumes:
+      - ./tests/db_fixtures/57-58:/docker-entrypoint-initdb.d
+    command: --wait-timeout=2
+    healthcheck:
+      test: mysqladmin -h 127.0.0.1 ping
+      interval: 10s
+      timeout: 5m
+      retries: 10
+      start_period: 30s
+    networks:
+      - mitzasql-test-network
+  mysql104:
+    image: mariadb:10.4
+    expose:
+      - 3306
+    ports:
+      - "$MYSQL104_PORT:3306"
+    environment:
+      - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
+      - "MYSQL_USER=user"
+      - "MYSQL_PASSWORD=password"
+    volumes:
+      - ./tests/db_fixtures/57-58:/docker-entrypoint-initdb.d
+    command: --wait-timeout=2
+    healthcheck:
+      test: mysqladmin -h 127.0.0.1 ping
+      interval: 10s
+      timeout: 5m
+      retries: 10
+      start_period: 30s
+    networks:
+      - mitzasql-test-network
+  mysql105:
+    image: mariadb:10.5
+    expose:
+      - 3306
+    ports:
+      - "$MYSQL105_PORT:3306"
+    environment:
+      - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
+      - "MYSQL_USER=user"
+      - "MYSQL_PASSWORD=password"
+    volumes:
+      - ./tests/db_fixtures/57-58:/docker-entrypoint-initdb.d
+    command: --wait-timeout=2
+    healthcheck:
+      test: mysqladmin -h 127.0.0.1 ping
+      interval: 10s
+      timeout: 5m
+      retries: 10
+      start_period: 30s
+    networks:
+      - mitzasql-test-network
   # Python versions
   python36:
     build:
@@ -80,6 +144,9 @@ services:
       - mysql56
       - mysql57
       - mysql8
+      - mysql103
+      - mysql104
+      - mysql105
     networks:
       - mitzasql-test-network
   python37:
@@ -97,6 +164,9 @@ services:
       - mysql56
       - mysql57
       - mysql8
+      - mysql103
+      - mysql104
+      - mysql105
     networks:
       - mitzasql-test-network
   python38:
@@ -114,6 +184,9 @@ services:
       - mysql56
       - mysql57
       - mysql8
+      - mysql103
+      - mysql104
+      - mysql105
     networks:
       - mitzasql-test-network
   python39:
@@ -131,6 +204,9 @@ services:
       - mysql56
       - mysql57
       - mysql8
+      - mysql103
+      - mysql104
+      - mysql105
     networks:
       - mitzasql-test-network
 
