@@ -61,7 +61,7 @@ for py in $python_versions; do
         echo "Running tests on: $py - $my"
         echo "================================================================="
         service_name="python${py/py/}"
-        docker-compose -f $FILE run --rm -e DB_HOST='tcp://'$my $service_name tox -- -x
+        docker-compose -f $FILE run --rm -e TRAVIS="$TRAVIS" -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" -e TRAVIS_BRANCH="$TRAVIS_BRANCH" -e DB_HOST='tcp://'$my $service_name tox -- --cov=mitzasql -x
         EXIT_CODE=$?
         if [ $EXIT_CODE != 0 ]; then
             break
