@@ -15,7 +15,7 @@ MitzaSQL is a free Python3 TUI MySQL client for Linux which aims to provide an e
 * VIM style commands with autocomplete support
 * Macros support
 
-MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL) and is licensed under [MIT](https://opensource.org/licenses/MIT). The lexer's tokens implementation used by the auto complete system was taken from the [python-sqlparse](https://github.com/andialbrecht/sqlparse) project.
+MitzaSQL is heavily inspired by [HeidiSQL](https://github.com/HeidiSQL/HeidiSQL) and is licensed under [MIT](https://opensource.org/licenses/MIT). The lexer's tokens implementation uses code from [python-sqlparse](https://github.com/andialbrecht/sqlparse) project.
 
 ### Demo
 [![asciicast](https://asciinema.org/a/390872.svg)](https://asciinema.org/a/390872)
