@@ -53,7 +53,7 @@ setuptools.setup(
             'urwid ==2.1.2',
             'mysql-connector-python ==8.0.22',
             'appdirs ==1.4.4',
-            'pygments ==2.7.4'
+            'pygments ==2.15.0'
         ],
         extras_require={
             'clipboard': ['pyperclip ==1.8.1']
