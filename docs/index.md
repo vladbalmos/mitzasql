@@ -52,3 +52,6 @@ Please report any bugs here: [https://github.com/vladbalmos/mitzasql/issues](htt
 
 ## Author
 <a href="https://github.com/vladbalmos"><span class="icon icon--github">{% include icon-github.svg %}</span><span class="username">Vlad Balmos</span></a>
+
+## Other projects
+[Pico W HID remote controller](https://github.com/vladbalmos/pico-hid-remote)
