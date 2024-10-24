@@ -51,7 +51,7 @@ setuptools.setup(
         ],
         install_requires=[
             'urwid ==2.1.2',
-            'mysql-connector-python ==8.0.22',
+            'mysql-connector-python ==9.1.0',
             'appdirs ==1.4.4',
             'pygments ==2.15.0'
         ],
